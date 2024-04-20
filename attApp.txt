@@ -1,0 +1,79 @@
+login Comprador 
+	- nome
+	- senha
+
+login Fornecedor 
+	- nome
+	- senha
+
+cadastro Comprador
+	- nome
+	- apelido
+	- telefone (whatsap)
+
+cadastro Fornecedor
+	- nome fornecedor
+	- nome estabelecimento
+	- apelido
+	- telefone (whatsap)
+	- endereço
+		- rua	
+		- numero
+		- bairro
+		- cidade
+		- pais
+		- CEP
+
+- comprador
+mostrar lista de todos os fornecedores
+	- nome fornecedor
+	- nome estabelecimento
+	funcinalidades
+		- adicionar a lista propria para solicitar ao fornecedor a qual quer 
+		se associar
+
+
+- fornecedor
+lista de todos os compradores que solicitaram associação
+	- cada um tera opção de....
+		- recusar
+		- detalhes
+		- aprovar
+	- opção de aprovar todos
+
+
+- menssagem
+ - ???
+
+
+Banco de dados 
+
+comprador 
+atributos
+	- nome
+	- senha
+	- apelido
+	- telefone
+
+fornecedor
+atributos
+	- nome
+	- senha
+	- apelido
+	- telefone
+	- endereço
+	- rua 
+	- numero
+	- bairro
+	- cidade
+	- país
+	- CEP	
+
+
+
+
+
+
+
+
+		
