@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
-import { ShopkeeperController } from "../../controller/ShopkeeperController";
+import { FornecedorController } from "../../controller/FornecedorController";
 
 module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) {
     router.get("/", async(req: FastifyRequest, res: FastifyReply) => {
@@ -7,6 +7,6 @@ module.exports = async function routers(router: FastifyInstance, options: Fastif
     })
 
     router.post("/register", async(req: FastifyRequest, res: FastifyReply) => {
-        return await new ShopkeeperController().register(req, res);
+        return await new FornecedorController().register(req, res);
     })
 }

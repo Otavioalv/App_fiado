@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 
-const shopkeeper = require("./routers/shopkeeperRouter");
+const fornecedor = require("./routers/FornecedorRouter");
 
 export async function routers(fastify: FastifyInstance, options: FastifyPluginOptions) {
-    fastify.register(shopkeeper, {prefix: "/shopkeeper"});
+    fastify.register(fornecedor, {prefix: "/fornecedor"});
 }

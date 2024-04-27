@@ -1,14 +1,14 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ShopkeeperModel } from "../models/ShopkeeperModel";
-import { shopkeeperInterface } from "../interfaces/shopkeeperInterface";
+import { FornecedorModel } from "../models/FornecedorModel";
+import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 
 
-class ShopkeeperController {
-    private shopkeeperModel:ShopkeeperModel = new ShopkeeperModel();
+class FornecedorController {
+    private fornecedorModel:FornecedorModel = new FornecedorModel();
 
     async register(req: FastifyRequest, res: FastifyReply) {
         try {            
-            const datasRegister: shopkeeperInterface = req.body as shopkeeperInterface;
+            const datasRegister: fornecedorInterface = req.body as fornecedorInterface;
 
             // verificar se o CEP existe
             // verificar se country existe 
@@ -18,7 +18,7 @@ class ShopkeeperController {
             // remover espaços de inicio e fim do nome 
             
 
-            const result = this.shopkeeperModel.register(datasRegister);
+            const result = this.fornecedorModel.register(datasRegister);
             
 
             res.send({message: "registe", list: result});
@@ -31,4 +31,4 @@ class ShopkeeperController {
     }
 }
 
-export { ShopkeeperController };
+export { FornecedorController };
