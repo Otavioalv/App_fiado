@@ -1,9 +1,9 @@
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 
 class FornecedorModel {
-    async register(datasRegister: fornecedorInterface) { 
+    public async register(datasRegister: fornecedorInterface) { 
         try {
-            console.log(datasRegister);
+            console.log("teste");
             
             return ["Teste deu certo"];
         } catch {
