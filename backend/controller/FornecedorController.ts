@@ -21,8 +21,6 @@ class FornecedorController{
             datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
 
 
-            // verificar se o CEP existe
-            // verificar se city existe e se existe no country
             // verificar senha, remover espaços em branco e verificar se e segura
             // verificar se existe mais de um espaço no nome
             
