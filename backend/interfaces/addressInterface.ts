@@ -1,6 +1,8 @@
 export interface addressInterface {
-    uf: string;
-    numeroImovel: number;
     logradouro: string;
-    cep: string;
+    bairro: string;
+    uf: string;
+    cep: string
+    complemento: string;
+    numeroImovel?: number;
 }

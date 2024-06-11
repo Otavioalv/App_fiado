@@ -20,7 +20,7 @@ async function start() {
 
     try {
         await app.listen({port: PORT, host: HOST}, () => {
-            console.log(`API rodando na url >>> ${HOST}:${PORT}\n`);
+            console.log(`API rodando na url >>> http://${HOST}:${PORT}\n`);
         })
     } catch {
         process.exit(1);
