@@ -20,17 +20,19 @@ class FornecedorController{
             datasRegister.cep = datasRegister.cep.trim();
             datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
 
+            Object.entries(datasRegister).map((value, key) => {
+                console.log(value, key);
+            });
+
+
 
             // verificar senha, remover espaços em branco e verificar se e segura
             // verificar se existe mais de um espaço no nome
             
-            console.log(datasRegister);
             const result = await this.fornecedorModel.register(datasRegister);
 
             res.send(successResponse("Ussuario registrado com sucesso", result));
         } catch(err) {
-            console.error("Erro ao registrar fornecedor: ", err);
-            
             res.status(500).send(errorResponse("Erro Interno no servidor"));
         }
     }

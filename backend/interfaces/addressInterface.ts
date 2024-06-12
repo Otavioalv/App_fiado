@@ -3,6 +3,6 @@ export interface addressInterface {
     bairro: string;
     uf: string;
     cep: string
-    complemento: string;
+    complemento?: string;
     numeroImovel?: number;
 }

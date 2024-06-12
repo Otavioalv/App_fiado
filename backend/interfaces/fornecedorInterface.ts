@@ -1,10 +1,6 @@
-import { addressInterface } from "./addressInterface";
+import { userInterface } from "./userInterface";
 
-export interface fornecedorInterface extends addressInterface{
+export interface fornecedorInterface extends userInterface{
     id_fornecedor?: number;
-    nome: string;
-    senha: string;
-    apelido: string;
-    telefone: string;
-    nomeEstabelecimento: string;
+    nomeEstabelecimento:string;
 }
