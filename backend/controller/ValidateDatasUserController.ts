@@ -12,17 +12,15 @@ interface cepInterface {
 class ValidateDatasUserController  {
     private validateDatasUserModel: ValidateDatasUserModel = new ValidateDatasUserModel();
 
-    public async validateDatas(req: FastifyRequest, res: FastifyReply) {
+    public async validateDatas(datasRegister: fornecedorInterface): Promise<Record<string, string[]>[]>{
         try {
-            const datasRegister: fornecedorInterface = req.body as fornecedorInterface;
+            const messages: Record<string, string[]>[] = [];
 
             datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
-
             datasRegister.nome = datasRegister.nome.trim();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = datasRegister.telefone.trim();
-
             datasRegister.logradouro = datasRegister.logradouro.trim();
             datasRegister.bairro = datasRegister.bairro.trim();
             datasRegister.uf = datasRegister.uf.trim();
@@ -37,45 +35,90 @@ class ValidateDatasUserController  {
                 !datasRegister.bairro || 
                 !datasRegister.cep || 
                 !datasRegister.uf) {
-                    console.log("preencha os campos obrigatorios");
+                    const objMenssage = {
+                        all: ["preencha os campos obrigatorios"]
+                    };
+    
+                    messages.push(objMenssage);
             } 
 
-            if(!validator.isLength(datasRegister.nomeEstabelecimento, { min: 3})) {
-                console.log("nome do estabelecimento deve conter mais de 5 caracteres");
+            if(!validator.isLength(datasRegister.nomeEstabelecimento, { min: 3})) {        
+                const objMenssage = {
+                    nomeEstabelecimento: ["nome do estabelecimento deve conter mais de 5 caracteres"]
+                };
+
+                messages.push(objMenssage);
             }
 
-            if(!validator.isLength(datasRegister.nome, {min: 5})) {
-                console.log("Nome do ussuario deve ter mais de 5 caracteres");
+            if(!validator.isLength(datasRegister.nome, {min: 5}) || /\s\s/.test(datasRegister.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.nome)) {
+                const objMenssage = {
+                    nome: ["Nome do ussuario invalido"]
+                };
+
+                messages.push(objMenssage);
             }
 
-            if(!validator.isLength(datasRegister.senha, {min: 8})) {
-                console.log("Senha tem q tem mais de 8 caracteres");
+            if(
+                !validator.isLength(datasRegister.senha, {min: 8}) || 
+                /\s/.test(datasRegister.senha) || 
+                /[a-z]/.test(datasRegister.senha) ||
+                /[@|-|_]/ || 
+                /[0-9]/
+            ) {
+                const arrMenssage:string[] = [];
+                arrMenssage.push("Senha invalida");
+
+                const objMenssage = {
+                    senha: arrMenssage
+                };
+
+                messages.push(objMenssage);
             }
             
             if(!validator.isMobilePhone(datasRegister.telefone, 'pt-BR')) {
-                console.log("Numero telefone invalido");
+                const objMenssage = {
+                    telefone: ["Numero telefone invalido"]
+                };
+
+                messages.push(objMenssage);
             }
             
             if(!validator.isLength(datasRegister.logradouro, {min: 2})) {
-                console.log("Logradouro deve tem mais de 2 caracteres");
+                const objMenssage = {
+                    logradouro: ["Logradouro deve conter mais de 2 caracteres"]
+                };
+
+                messages.push(objMenssage);
             }
             
             if(!validator.isLength(datasRegister.bairro, {min: 2})) {
-                console.log("Bairro deve ter mais de 2 caracteres");
+                const objMenssage = {
+                    bairro: ["Bairro deve ter mais de 2 caracteres"]
+                };
+
+                messages.push(objMenssage);
             }
             
             if(!validator.isLength(datasRegister.cep, {max: 8, min: 8})) {
-                console.log("CEP deve conter exatamente 8 caracteres");
+                const objMenssage = {
+                    cep: ["CEP deve conter exatamente 8 caracteres"]
+                };
+
+                messages.push(objMenssage);
             }
             
             if(!validator.isLength(datasRegister.uf, {max: 2, min: 2})) {
-                console.log("Uf deve conter exatamente 2 caracteres");
-            }
-                        
-            res.send(successResponse("Ussuario registrado com sucesso", "result"));
+                const objMenssage = {
+                    uf: ["Uf deve conter exatamente 2 caracteres"]
+                };
 
+                messages.push(objMenssage);
+            }
+
+            return messages
         } catch(err) {
-            res.status(500).send(errorResponse("Erro Interno no servidor"));
+            console.log(err);
+            throw new Error("Erro ao validar dados");
         }
     }
 
