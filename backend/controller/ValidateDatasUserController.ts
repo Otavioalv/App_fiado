@@ -58,20 +58,21 @@ class ValidateDatasUserController  {
                 messages.push(objMenssage);
             }
 
-            if(
-                !validator.isLength(datasRegister.senha, {min: 8}) || 
-                /\s/.test(datasRegister.senha) || 
-                /[a-z]/.test(datasRegister.senha) ||
-                /[@|-|_]/ || 
-                /[0-9]/
+            const senhaValidada = await this.validarSenha(datasRegister.senha);
+            if(senhaValidada.senha.length) {
+                messages.push(senhaValidada);
+            }
+
+            if(datasRegister.apelido && 
+                    (
+                        !validator.isLength(datasRegister.apelido, {min: 1}) || 
+                        /\s\s/.test(datasRegister.apelido) || 
+                        !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.apelido)
+                    )
             ) {
-                const arrMenssage:string[] = [];
-                arrMenssage.push("Senha invalida");
-
                 const objMenssage = {
-                    senha: arrMenssage
-                };
-
+                    apelido: ["Apelido invalido"]
+                }
                 messages.push(objMenssage);
             }
             
@@ -150,6 +151,35 @@ class ValidateDatasUserController  {
             res.status(500).send(errorResponse(errorMenssage));
         }
     }
+
+    private async validarSenha(senha: string): Promise<Record<string, string[]>>{
+        const arrMenssage:string[] = [];
+
+        if(!validator.isLength(senha, {min: 8}))
+            arrMenssage.push("Senha deve conter mais de 8 caracteres");
+
+        if(/\s/.test(senha))
+            arrMenssage.push("Senha não deve conter espaços");
+
+        if(!/[a-z]/.test(senha))
+            arrMenssage.push("Senha deve conter letras");
+
+        if(!/[[@\-_]/.test(senha))
+            arrMenssage.push("Senha deve conter pelo menos um desses caracteres especiais (@, -, _)");
+
+        if(!/[0-9]/.test(senha))
+            arrMenssage.push("Senha deve conter pelo menos um numero");
+
+        if(/[\u00C0-\u00FF]/.test(senha))
+            arrMenssage.push("Senha não deve conter letras acentuadas");
+  
+
+        const messages: Record<string, string[]> = {
+            senha: arrMenssage
+        };
+
+       return messages;
+    }       
 }
 
 export {ValidateDatasUserController};
