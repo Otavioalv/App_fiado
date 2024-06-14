@@ -118,7 +118,6 @@ class ValidateDatasUserController  {
 
             return messages
         } catch(err) {
-            console.log(err);
             throw new Error("Erro ao validar dados");
         }
     }
@@ -143,20 +142,15 @@ class ValidateDatasUserController  {
             res.send(successResponse("CEP validado com sucesso", result));
             
         } catch(err){
-            var errorMenssage = "Erro interno no servidor";
-            
-            if(err instanceof Error)
-                errorMenssage = `${errorMenssage}: ${err.message}`;
-
-            res.status(500).send(errorResponse(errorMenssage));
+            res.status(500).send(errorResponse("Erro interno no servidor", err));
         }
     }
 
     private async validarSenha(senha: string): Promise<Record<string, string[]>>{
         const arrMenssage:string[] = [];
 
-        if(!validator.isLength(senha, {min: 8}))
-            arrMenssage.push("Senha deve conter mais de 8 caracteres");
+        if(!validator.isLength(senha, {min: 8, max: 15}))
+            arrMenssage.push("Senha deve conter no minimo 8 e no maximo 15 caracteres");
 
         if(/\s/.test(senha))
             arrMenssage.push("Senha não deve conter espaços");

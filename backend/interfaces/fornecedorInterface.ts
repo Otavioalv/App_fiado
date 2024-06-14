@@ -4,3 +4,4 @@ export interface fornecedorInterface extends userInterface{
     id_fornecedor?: number;
     nomeEstabelecimento:string;
 }
+

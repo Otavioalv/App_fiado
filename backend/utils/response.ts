@@ -1,3 +1,5 @@
+import { FastifyReply } from "fastify";
+
 interface ApiResponseInterface<T> {
     status: 'sucess'| 'error';
     message: string;
@@ -15,7 +17,7 @@ const successResponse = <T>(message: string, data?: T): ApiResponseInterface<T> 
 const errorResponse = (message: string, errors?: any):ApiResponseInterface<null> => ({
     status: "error",
     message, 
-    errors,
+    errors: errors instanceof Error ? errors.message : errors,
 });
 
 export {ApiResponseInterface, successResponse, errorResponse};
