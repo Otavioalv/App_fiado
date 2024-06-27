@@ -1,8 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { hash } from 'bcrypt';
+import validator from 'validator';
+
 import { errorResponse, successResponse } from "../utils/response";
 import { ValidateDatasUserModel } from "../models/ValidateDatasUserModel";
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
-import validator from 'validator';
 
 interface cepInterface {
     cep: string;
@@ -11,6 +13,7 @@ interface cepInterface {
 
 class ValidateDatasUserController  {
     private validateDatasUserModel: ValidateDatasUserModel = new ValidateDatasUserModel();
+    private saltRound: number = 10; 
 
     public async validateDatas(datasRegister: fornecedorInterface): Promise<Record<string, string[]>[]>{
         try {
@@ -143,6 +146,15 @@ class ValidateDatasUserController  {
             
         } catch(err){
             res.status(500).send(errorResponse("Erro interno no servidor", err));
+        }
+    }
+
+    public async hashPassword(password: string): Promise<string>{
+        try{
+            const hashedPass:string = await hash(password, this.saltRound);
+            return hashedPass;
+        } catch(e) {
+            throw new Error("Erro ao criar hash da senha. Porfavor, tente mais tarde");
         }
     }
 

@@ -18,10 +18,14 @@ class FornecedorController{
                 return;
             }
 
-            if(await this.fornecedorModel.userExists(datasRegister.telefone)) {
+            if(await this.fornecedorModel.userExists(datasRegister.nome)) {
                 res.status(400).send(errorResponse("Usuario já existe. Realize o login"));
                 return;
             }
+
+            console.log(datasRegister);
+            datasRegister.senha = await this.validateDatasUserController.hashPassword(datasRegister.senha);
+            console.log(datasRegister);
 
             const result = await this.fornecedorModel.register(datasRegister);
             res.send(successResponse("Ussuario registrado com sucesso", result));

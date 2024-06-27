@@ -62,11 +62,11 @@ class FornecedorModel {
         }
     }
 
-    public async userExists(telefone: string):Promise<boolean>{
+    public async userExists(nome: string):Promise<boolean>{
         const client = await connection.connect();  
         try {
-            const SQL = `SELECT 1 FROM fornecedor WHERE telefone = $1`;
-            const result = await client.query(SQL, [telefone]);
+            const SQL = `SELECT 1 FROM fornecedor WHERE nome = $1`;
+            const result = await client.query(SQL, [nome]);
 
             return result.rows.length > 0;
         } catch(e) {
