@@ -1,10 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { hash } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import validator from 'validator';
 
 import { errorResponse, successResponse } from "../utils/response";
 import { ValidateDatasUserModel } from "../models/ValidateDatasUserModel";
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
+import { loginInterface } from "../interfaces/loginInterface";
 
 interface cepInterface {
     cep: string;
@@ -15,7 +16,7 @@ class ValidateDatasUserController  {
     private validateDatasUserModel: ValidateDatasUserModel = new ValidateDatasUserModel();
     private saltRound: number = 10; 
 
-    public async validateDatas(datasRegister: fornecedorInterface): Promise<Record<string, string[]>[]>{
+    public async validateDatas(datasRegister: fornecedorInterface):Promise<Record<string, string[]>[]>{
         try {
             const messages: Record<string, string[]>[] = [];
 
@@ -28,6 +29,7 @@ class ValidateDatasUserController  {
             datasRegister.bairro = datasRegister.bairro.trim();
             datasRegister.uf = datasRegister.uf.trim();
             datasRegister.cep = datasRegister.cep.trim();
+            datasRegister.complemento = datasRegister.complemento?.trim();
 
             if(
                 !datasRegister.nomeEstabelecimento || 
@@ -119,10 +121,54 @@ class ValidateDatasUserController  {
                 messages.push(objMenssage);
             }
 
+            if(datasRegister.complemento && 
+                (
+                    !validator.isLength(datasRegister.complemento, {min: 1}) ||
+                    /\s\s/.test(datasRegister.complemento)
+                )
+            ) {
+                const objMenssage = {
+                    complemento: ["Complemento invalido"]
+                }
+                messages.push(objMenssage);
+            }
+
+            if(typeof datasRegister.numeroImovel != "number"){
+                const objMenssage = {
+                    numeroImovel: ["numero do imovel invalido"]
+                }
+
+                messages.push(objMenssage);
+            }
+
+
             return messages
         } catch(err) {
             throw new Error("Erro ao validar dados");
         }
+    }
+
+    public async validateLogin(datasLogin: loginInterface): Promise<Record<string, string[]>[]>{
+        const messages: Record<string, string[]>[] = [];
+
+        datasLogin.nome = datasLogin.nome.trim();
+        datasLogin.senha = datasLogin.senha.trim();
+
+        if(!validator.isLength(datasLogin.nome, {min: 5}) || /\s\s/.test(datasLogin.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasLogin.nome)) {
+            const objMenssage = {
+                nome: ["Nome do ussuario invalido"]
+            };
+
+            messages.push(objMenssage);
+        }
+
+        const senhaValidada = await this.validarSenha(datasLogin.senha);
+        if(senhaValidada.senha.length) {
+            messages.push(senhaValidada);
+        }
+
+        return messages;
+        
     }
 
     public async validateAdressCep(req: FastifyRequest, res: FastifyReply) {
@@ -142,7 +188,7 @@ class ValidateDatasUserController  {
             }
     
             const result = await this.validateDatasUserModel.validateAdressCep(obj.cep);
-            res.send(successResponse("CEP validado com sucesso", result));
+            res.status(200).send(successResponse("CEP validado com sucesso", result));
             
         } catch(err){
             res.status(500).send(errorResponse("Erro interno no servidor", err));
@@ -155,6 +201,15 @@ class ValidateDatasUserController  {
             return hashedPass;
         } catch(e) {
             throw new Error("Erro ao criar hash da senha. Porfavor, tente mais tarde");
+        }
+    }
+
+    public async verifyPassword(hashedPassword: string, password: string): Promise<boolean>{
+        try {
+            const match = await compare(password, hashedPassword);
+            return match;
+        } catch(e) {
+            throw new Error("Erro ao verificar a senha");
         }
     }
 
@@ -186,6 +241,8 @@ class ValidateDatasUserController  {
 
        return messages;
     }       
+
+
 }
 
 export {ValidateDatasUserController};

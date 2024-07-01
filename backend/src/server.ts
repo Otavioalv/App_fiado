@@ -7,7 +7,7 @@ const app = Fastify({logger: false});
 app.setErrorHandler((err, req, res) => {
     res.code(404).send({
         message: err.message, // Alterar pra uma resposta normalizada
-        test: 'Deu ERRO AQUI'
+        test: 'Deu ERRO AQUI' // alterar para a resposta normalizada
     });
 });
 

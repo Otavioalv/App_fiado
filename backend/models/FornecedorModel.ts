@@ -1,10 +1,10 @@
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import connection from "../database/connection";
+import { loginInterface } from "../interfaces/loginInterface";
 
 class FornecedorModel {
     public async register(datasRegister: fornecedorInterface) { 
         const client = await connection.connect();
-
 
         try {
             const SQL = `
@@ -52,8 +52,6 @@ class FornecedorModel {
             ];
 
             await client.query(SQL, VALUES);
-
-            return ["Teste deu certo Model"];
         } catch(e){
             console.error(e);
             throw new Error("Erro ao salvar usuario no banco de dados");
@@ -72,6 +70,24 @@ class FornecedorModel {
         } catch(e) {
             console.log(e);
             throw new Error("Erro ao verificar se usuario existe");
+        } finally {
+            client.release();
+        }
+    }
+
+    public async getPasswordUsingUser(datasLogin: loginInterface): Promise<string>{
+        const client = await connection.connect();
+        try {
+            const SQL = `SELECT senha from fornecedor WHERE nome = $1`;
+            const result = await client.query(SQL, [datasLogin.nome]);
+            const hashedPass:string = result.rows[0]?.senha;
+
+            return hashedPass;   
+        } catch (e) {
+            console.log(e);
+            throw new Error("Houve um erro interno ao verificar senha");
+        } finally {
+            client.release()
         }
     }
 }
