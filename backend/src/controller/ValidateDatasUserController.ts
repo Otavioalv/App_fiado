@@ -1,11 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { compare, hash } from 'bcrypt';
+import {sign} from 'jsonwebtoken';
 import validator from 'validator';
 
-import { errorResponse, successResponse } from "../utils/response";
+
 import { ValidateDatasUserModel } from "../models/ValidateDatasUserModel";
+import { errorResponse, successResponse } from "../utils/response";
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import { loginInterface } from "../interfaces/loginInterface";
+import { payloadInterface } from "../interfaces/payloadInterface";
+import { authJwt } from "../config";
 
 interface cepInterface {
     cep: string;
@@ -210,6 +214,15 @@ class ValidateDatasUserController  {
             return match;
         } catch(e) {
             throw new Error("Erro ao verificar a senha");
+        }
+    }
+
+    public async generateTokenUser(payload: payloadInterface):Promise<string> {
+        try {
+            const token = sign(payload, authJwt.secret);
+            return token;   
+        } catch (e) {
+            throw new Error("Erro ao gerar token");
         }
     }
 

@@ -4,6 +4,9 @@ import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import { errorResponse, successResponse } from "../utils/response";
 import { ValidateDatasUserController } from "./ValidateDatasUserController";
 import { loginInterface } from "../interfaces/loginInterface";
+import { authJwt } from "../config";
+import { payloadInterface } from "../interfaces/payloadInterface";
+
 
 class FornecedorController{
     private fornecedorModel:FornecedorModel = new FornecedorModel();
@@ -27,10 +30,12 @@ class FornecedorController{
             datasRegister.senha = await this.validateDatasUserController.hashPassword(datasRegister.senha);
 
             const result = await this.fornecedorModel.register(datasRegister);
+
             res.status(200).send(successResponse("Ussuario registrado com sucesso", result));
             return;
         } catch(err) {
             res.status(500).send(errorResponse("Erro Interno no servidor", err));
+            return
         }
     }
 
@@ -56,10 +61,27 @@ class FornecedorController{
                 return;
             }
 
-            res.status(200).send(successResponse("Login realizado com sucesso"));
+            const token:string = await this.generateToken(datasLogin);
+
+            res.status(200).send(successResponse("Login realizado com sucesso", {token}));
+            return
         } catch(err) {
             res.status(500).send(errorResponse("Erro interno no servidor", err));
+            return
         }
+    }
+
+    private async generateToken(user: loginInterface):Promise<string>{
+        const fornecedor = await this.fornecedorModel.findByUsername(user.nome);
+        
+        const payload: payloadInterface =  { 
+            id: fornecedor.id_fornecedor ?? 0,
+            nome: fornecedor.nome
+        }
+
+        const token:string = await this.validateDatasUserController.generateTokenUser(payload);
+
+        return token;
     }
 }
 

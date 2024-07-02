@@ -7,7 +7,6 @@ interface ApiResponseInterface<T> {
     errors?: any
 }
 
-
 const successResponse = <T>(message: string, data?: T): ApiResponseInterface<T> => ({
     status: "sucess",
     message,

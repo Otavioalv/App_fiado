@@ -1,12 +1,13 @@
 import { release } from 'os';
 import {Pool} from 'pg';
+import { databaseConfig } from '../config';
 
 const connection = new Pool( {
-    user: "postgres",
-    password: "123456", 
-    host: "127.0.0.1",
-    port:  5432, 
-    database: "appfiado",
+    user: databaseConfig.user,
+    password: databaseConfig.password, 
+    host: databaseConfig.host,
+    port:  databaseConfig.port, 
+    database: databaseConfig.database,
 })
 
 connection.connect((err, client) => {

@@ -75,6 +75,20 @@ class FornecedorModel {
         }
     }
 
+    public async findByUsername(username: string): Promise<fornecedorInterface>{
+        const client = await connection.connect();
+        try {
+            const SQL = `SELECT nome, senha, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, id_fornecedor, complemento, bairro from fornecedor WHERE nome = $1`;
+            const result:fornecedorInterface = (await client.query(SQL, [username])).rows[0];
+            
+            return result;
+        } catch (e) {
+            throw new Error("Houve um erro ao encontrar ussuario");
+        } finally {
+            client.release();
+        }
+    }
+
     public async getPasswordUsingUser(datasLogin: loginInterface): Promise<string>{
         const client = await connection.connect();
         try {
@@ -82,7 +96,7 @@ class FornecedorModel {
             const result = await client.query(SQL, [datasLogin.nome]);
             const hashedPass:string = result.rows[0]?.senha;
 
-            return hashedPass;   
+            return hashedPass;
         } catch (e) {
             console.log(e);
             throw new Error("Houve um erro interno ao verificar senha");

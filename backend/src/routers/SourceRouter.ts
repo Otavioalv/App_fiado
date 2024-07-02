@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
-import { ValidateDatasUserController } from "../../controller/ValidateDatasUserController";
+import { ValidateDatasUserController } from "../controller/ValidateDatasUserController";
 
 
 module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) {

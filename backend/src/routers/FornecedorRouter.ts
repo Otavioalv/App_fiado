@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
-import { FornecedorController } from "../../controller/FornecedorController";
+import { FornecedorController } from "../controller/FornecedorController";
 
 module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) {
     router.get("/", async(req: FastifyRequest, res: FastifyReply) => {
