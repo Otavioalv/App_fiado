@@ -3,9 +3,9 @@ import connection from "../database/connection";
 import { loginInterface } from "../interfaces/loginInterface";
 
 class FornecedorModel {
+
     public async register(datasRegister: fornecedorInterface) { 
         const client = await connection.connect();
-
         try {
             const SQL = `
                 INSERT INTO 
