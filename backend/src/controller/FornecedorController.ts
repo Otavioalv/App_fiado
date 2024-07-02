@@ -4,7 +4,6 @@ import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import { errorResponse, successResponse } from "../utils/response";
 import { ValidateDatasUserController } from "./ValidateDatasUserController";
 import { loginInterface } from "../interfaces/loginInterface";
-import { authJwt } from "../config";
 import { payloadInterface } from "../interfaces/payloadInterface";
 
 
