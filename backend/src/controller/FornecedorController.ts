@@ -5,6 +5,8 @@ import { errorResponse, successResponse } from "../utils/response";
 import { ValidateDatasUserController } from "./ValidateDatasUserController";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
+import { productInterface } from "../interfaces/productInterface";
+import {z} from 'zod';
 
 
 class FornecedorController{
@@ -67,6 +69,28 @@ class FornecedorController{
         } catch(err) {
             res.status(500).send(errorResponse("Erro interno no servidor", err));
             return
+        }
+    }
+
+    public async addProducts(req: FastifyRequest, res: FastifyReply) {        
+        try {
+            const productSchema = z.object({
+                nome: z.string().min(1, "Nome e obrigatorio"),
+                preco: z.number().positive("Insira um valor valido"),
+                disponivel: z.boolean()
+            })
+            const productArraySchema = z.array(productSchema);
+
+
+            const datasProduct = productArraySchema.parse(req.body);
+
+
+            res.status(201).send(successResponse("Produtos adicionados"));
+        } catch (e) {
+            if(e instanceof z.ZodError) {
+                res.status(400).send(errorResponse("Parametros invalidos", e.errors));
+            }
+            res.status(500).send(errorResponse("Erro interno no servidor"));
         }
     }
 
