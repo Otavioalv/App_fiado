@@ -89,6 +89,18 @@ class FornecedorModel {
         }
     }
 
+    public async findUserById(id: number): Promise<fornecedorInterface>{ 
+        const client = await connection.connect();
+        try {
+            const SQL = `SELECT nome, senha, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, id_fornecedor, complemento, bairro FROM fornecedor WHERE id_fornecedor = $1`;
+            const result:fornecedorInterface = (await client.query(SQL, [id])).rows[0];
+            
+            return result;
+        } catch(e) {
+            throw new Error("Erro ao encontrar usuario");
+        }
+    }
+
     public async getPasswordUsingUser(datasLogin: loginInterface): Promise<string>{
         const client = await connection.connect();
         try {

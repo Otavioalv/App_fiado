@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
 import { FornecedorController } from "../controller/FornecedorController";
+import { authenticatedRouteOptions } from "../utils/authenticate";
 
 module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) {
     router.get("/", async(req: FastifyRequest, res: FastifyReply) => {
@@ -13,4 +14,8 @@ module.exports = async function routers(router: FastifyInstance, options: Fastif
     router.post('/login', async(req: FastifyRequest, res: FastifyReply) => {
         return await new FornecedorController().login(req, res);
     });
+
+    router.post('/autenticado', authenticatedRouteOptions, () => {
+        console.log("Autorizado");
+    }) 
 }

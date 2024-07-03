@@ -1,15 +1,17 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { compare, hash } from 'bcrypt';
-import {sign} from 'jsonwebtoken';
+import {JsonWebTokenError, TokenExpiredError, sign, verify} from 'jsonwebtoken';
 import validator from 'validator';
 
 
 import { ValidateDatasUserModel } from "../models/ValidateDatasUserModel";
+import { FornecedorModel } from "../models/FornecedorModel";
 import { errorResponse, successResponse } from "../utils/response";
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 import { authJwt } from "../config";
+
 
 interface cepInterface {
     cep: string;
@@ -153,26 +155,29 @@ class ValidateDatasUserController  {
     }
 
     public async validateLogin(datasLogin: loginInterface): Promise<Record<string, string[]>[]>{
-        const messages: Record<string, string[]>[] = [];
+        try {
+            const messages: Record<string, string[]>[] = [];
 
-        datasLogin.nome = datasLogin.nome.trim();
-        datasLogin.senha = datasLogin.senha.trim();
+            datasLogin.nome = datasLogin.nome.trim();
+            datasLogin.senha = datasLogin.senha.trim();
 
-        if(!validator.isLength(datasLogin.nome, {min: 5}) || /\s\s/.test(datasLogin.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasLogin.nome)) {
-            const objMenssage = {
-                nome: ["Nome do ussuario invalido"]
-            };
+            if(!validator.isLength(datasLogin.nome, {min: 5}) || /\s\s/.test(datasLogin.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasLogin.nome)) {
+                const objMenssage = {
+                    nome: ["Nome do ussuario invalido"]
+                };
 
-            messages.push(objMenssage);
+                messages.push(objMenssage);
+            }
+
+            const senhaValidada = await this.validarSenha(datasLogin.senha);
+            if(senhaValidada.senha.length) {
+                messages.push(senhaValidada);
+            }
+
+            return messages;
+        } catch(e) {
+            throw new Error("Erro ao validar dados");
         }
-
-        const senhaValidada = await this.validarSenha(datasLogin.senha);
-        if(senhaValidada.senha.length) {
-            messages.push(senhaValidada);
-        }
-
-        return messages;
-        
     }
 
     public async validateAdressCep(req: FastifyRequest, res: FastifyReply) {
@@ -219,11 +224,39 @@ class ValidateDatasUserController  {
 
     public async generateTokenUser(payload: payloadInterface):Promise<string> {
         try {
-            const token = sign(payload, authJwt.secret);
+            const token = sign(payload, authJwt.secret, /* {'expiresIn': '2s'} */); // expires in temporario
             return token;   
         } catch (e) {
             throw new Error("Erro ao gerar token");
         }
+    }
+
+    public async verifyToken(token: string): Promise<boolean>{
+        try{
+            if(token.startsWith("Bearer ")) {
+                token = token.slice(7, token.length);
+            }
+
+            const decodedToken:payloadInterface = verify(token, authJwt.secret) as payloadInterface;
+
+            if(decodedToken.usuario == "fornecedor"){
+                const fornecedor = await new FornecedorModel().findUserById(decodedToken.id);
+                if(!fornecedor)     
+                    throw new Error("Ussuario não encontrado");
+            }
+            
+            return true;
+        
+        } catch(e) {
+            if(e instanceof TokenExpiredError) {
+                throw new Error("token de Login expirado. Realize o login novamente");
+            } else if(e instanceof JsonWebTokenError) {
+                throw new Error("Token de login inválido");
+            } else {
+                throw new Error("Falha na autenticação do token");
+            }
+        }
+
     }
 
     private async validarSenha(senha: string): Promise<Record<string, string[]>>{
@@ -254,8 +287,6 @@ class ValidateDatasUserController  {
 
        return messages;
     }       
-
-    
 }
 
 export {ValidateDatasUserController};

@@ -20,6 +20,6 @@ export const databaseConfig: databaseConfigInterface = {
     port: parseInt(String(process.env.PORT))
 }
 
-export const authJwt = {
+export const authJwt:authJwtInterface = {
     secret: String(process.env.JWT_SECRET)
 }

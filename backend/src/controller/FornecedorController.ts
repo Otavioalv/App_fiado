@@ -75,7 +75,8 @@ class FornecedorController{
         
         const payload: payloadInterface =  { 
             id: fornecedor.id_fornecedor ?? 0,
-            nome: fornecedor.nome
+            nome: fornecedor.nome,
+            usuario: "fornecedor"
         }
 
         const token:string = await this.validateDatasUserController.generateTokenUser(payload);
