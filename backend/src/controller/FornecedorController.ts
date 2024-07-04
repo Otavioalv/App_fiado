@@ -7,6 +7,10 @@ import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 import { productInterface } from "../interfaces/productInterface";
 import {z} from 'zod';
+import { removeAccents } from "../utils/removeAccents";
+import { verify } from "jsonwebtoken";
+
+import { generateToken } from "../utils/tokenUtils";
 
 
 class FornecedorController{
@@ -17,7 +21,7 @@ class FornecedorController{
         try {            
             const datasRegister: fornecedorInterface = req.body as fornecedorInterface;
             const message = await this.validateDatasUserController.validateDatas(datasRegister);
-
+            
             if(message.length) {
                 res.status(400).send(errorResponse("dados invalidos", message));
                 return;
@@ -50,6 +54,7 @@ class FornecedorController{
                 return;
             }
 
+            datasLogin.nome = (await removeAccents(datasLogin.nome.trim())).toLowerCase();
             if(!await this.fornecedorModel.userExists(datasLogin.nome)) {
                 res.status(404).send(errorResponse("Ussuario não existe"));
                 return;
@@ -74,21 +79,23 @@ class FornecedorController{
 
     public async addProducts(req: FastifyRequest, res: FastifyReply) {        
         try {
+            const token: string = req.headers.authorization as string;
+            
             const productSchema = z.object({
                 nome: z.string().min(1, "Nome e obrigatorio"),
                 preco: z.number().positive("Insira um valor valido"),
-                disponivel: z.boolean()
+                disponivel: z.boolean(),
             })
             const productArraySchema = z.array(productSchema);
 
-
-            const datasProduct = productArraySchema.parse(req.body);
-
+            const datasProduct:productInterface[] = productArraySchema.parse(req.body);
+                        
+            this.fornecedorModel.addProducts(datasProduct);
 
             res.status(201).send(successResponse("Produtos adicionados"));
         } catch (e) {
             if(e instanceof z.ZodError) {
-                res.status(400).send(errorResponse("Parametros invalidos", e.errors));
+                res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
             }
             res.status(500).send(errorResponse("Erro interno no servidor"));
         }
@@ -103,7 +110,7 @@ class FornecedorController{
             usuario: "fornecedor"
         }
 
-        const token:string = await this.validateDatasUserController.generateTokenUser(payload);
+        const token:string = await generateToken(payload);
 
         return token;
     }

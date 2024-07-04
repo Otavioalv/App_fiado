@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { compare, hash } from 'bcrypt';
-import {JsonWebTokenError, TokenExpiredError, sign, verify} from 'jsonwebtoken';
 import validator from 'validator';
 
 
@@ -11,6 +10,8 @@ import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 import { authJwt } from "../config";
+import { removeAccents } from "../utils/removeAccents";
+import { getPayloadFromToken } from "../utils/tokenUtils";
 
 
 interface cepInterface {
@@ -27,7 +28,7 @@ class ValidateDatasUserController  {
             const messages: Record<string, string[]>[] = [];
 
             datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
-            datasRegister.nome = datasRegister.nome.trim();
+            datasRegister.nome = (await removeAccents(datasRegister.nome.trim())).toLocaleLowerCase();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = datasRegister.telefone.trim();
@@ -60,8 +61,8 @@ class ValidateDatasUserController  {
 
                 messages.push(objMenssage);
             }
-
-            if(!validator.isLength(datasRegister.nome, {min: 5}) || /\s\s/.test(datasRegister.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.nome)) {
+            
+            if(!validator.isLength(datasRegister.nome, {min: 4}) || /\s\s/.test(datasRegister.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.nome)) {
                 const objMenssage = {
                     nome: ["Nome do ussuario invalido"]
                 };
@@ -147,7 +148,6 @@ class ValidateDatasUserController  {
                 messages.push(objMenssage);
             }
 
-
             return messages
         } catch(err) {
             throw new Error("Erro ao validar dados");
@@ -222,22 +222,13 @@ class ValidateDatasUserController  {
         }
     }
 
-    public async generateTokenUser(payload: payloadInterface):Promise<string> {
-        try {
-            const token = sign(payload, authJwt.secret, /* {'expiresIn': '2s'} */); // expires in temporario
-            return token;   
-        } catch (e) {
-            throw new Error("Erro ao gerar token");
-        }
-    }
-
-    public async verifyToken(token: string): Promise<boolean>{
+    public async verifyFromToken(token: string): Promise<boolean>{
         try{
             if(token.startsWith("Bearer ")) {
                 token = token.slice(7, token.length);
             }
 
-            const decodedToken:payloadInterface = verify(token, authJwt.secret) as payloadInterface;
+            const decodedToken:payloadInterface = await getPayloadFromToken(token);
 
             if(decodedToken.usuario == "fornecedor"){
                 const fornecedor = await new FornecedorModel().findUserById(decodedToken.id);
@@ -248,13 +239,7 @@ class ValidateDatasUserController  {
             return true;
         
         } catch(e) {
-            if(e instanceof TokenExpiredError) {
-                throw new Error("token de Login expirado. Realize o login novamente");
-            } else if(e instanceof JsonWebTokenError) {
-                throw new Error("Token de login inválido");
-            } else {
-                throw new Error("Falha na autenticação do token");
-            }
+            throw e;
         }
 
     }
@@ -286,9 +271,7 @@ class ValidateDatasUserController  {
         };
 
        return messages;
-    }  
-    
-    
+    }     
 }
 
 export {ValidateDatasUserController};

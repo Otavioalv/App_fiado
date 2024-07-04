@@ -1,6 +1,7 @@
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import connection from "../database/connection";
 import { loginInterface } from "../interfaces/loginInterface";
+import { productInterface } from "../interfaces/productInterface";
 
 class FornecedorModel {
 
@@ -114,6 +115,30 @@ class FornecedorModel {
             throw new Error("Houve um erro interno ao verificar senha");
         } finally {
             client.release()
+        }
+    }
+
+    public async addProducts(products: productInterface[]) {
+        const client = await connection.connect();
+        try {
+            const numColsProds = 3;
+
+            // Construção da query multipla 
+            const sqlValues = products.map((_, index) => 
+                `($${index * numColsProds + 1}, $${index * numColsProds + 2}, $${index * numColsProds + 3})`
+            ).join(', ');
+            
+            const SQL = `INSERT INTO produto (nome, preco, disponivel) VALUES ${sqlValues};`
+            const values = products.flatMap(product => [product.nome, product.preco, product.disponivel]);
+
+            await client.query('BEGIN');
+            await client.query(SQL, values);
+            await client.query('COMMIT');
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw new Error("Erro ao adicionar produtos");
+        } finally {
+            client.release();
         }
     }
 }

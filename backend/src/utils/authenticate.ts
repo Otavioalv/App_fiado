@@ -9,11 +9,11 @@ export const authenticatedRouteOptions = {
             const token = req.headers.authorization;
 
             if(!token) {
-                res.status(401).send(errorResponse("Token de autenticação não fornecido"));
+                throw new Error("Token de autenticação não fornecido");
                 return; 
             }
 
-            await validateDatasUser.verifyToken(token);
+            await validateDatasUser.verifyFromToken(token);
             
         } catch (e) {
             res.status(401).send(errorResponse("Você não tem autorização para acessar esse conteudo", e));
