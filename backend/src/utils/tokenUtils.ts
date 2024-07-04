@@ -11,8 +11,12 @@ export const generateToken = async (payload: payloadInterface):Promise<string> =
     }
 }
 
-export const getPayloadFromToken = async(token: string) => {
+export const getPayloadFromToken = async(token: string): Promise<payloadInterface>=> {
     try {
+        if(token.startsWith("Bearer ")) {
+            token = token.slice(7, token.length);
+        }
+
         const decodedToken:payloadInterface = verify(token, authJwt.secret) as payloadInterface;
 
         return decodedToken;

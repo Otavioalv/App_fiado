@@ -9,7 +9,7 @@ import { errorResponse, successResponse } from "../utils/response";
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
-import { authJwt } from "../config";
+import { saltRoundPassword } from "../config";
 import { removeAccents } from "../utils/removeAccents";
 import { getPayloadFromToken } from "../utils/tokenUtils";
 
@@ -21,7 +21,6 @@ interface cepInterface {
 
 class ValidateDatasUserController  {
     private validateDatasUserModel: ValidateDatasUserModel = new ValidateDatasUserModel();
-    private saltRound: number = 10; 
 
     public async validateDatas(datasRegister: fornecedorInterface):Promise<Record<string, string[]>[]>{
         try {
@@ -206,7 +205,7 @@ class ValidateDatasUserController  {
 
     public async hashPassword(password: string): Promise<string>{
         try{
-            const hashedPass:string = await hash(password, this.saltRound);
+            const hashedPass:string = await hash(password, saltRoundPassword);
             return hashedPass;
         } catch(e) {
             throw new Error("Erro ao criar hash da senha. Porfavor, tente mais tarde");
@@ -224,10 +223,6 @@ class ValidateDatasUserController  {
 
     public async verifyFromToken(token: string): Promise<boolean>{
         try{
-            if(token.startsWith("Bearer ")) {
-                token = token.slice(7, token.length);
-            }
-
             const decodedToken:payloadInterface = await getPayloadFromToken(token);
 
             if(decodedToken.usuario == "fornecedor"){

@@ -23,3 +23,5 @@ export const databaseConfig: databaseConfigInterface = {
 export const authJwt:authJwtInterface = {
     secret: String(process.env.JWT_SECRET)
 }
+
+export const saltRoundPassword = parseInt(String(process.env.SALTS_ROUNDS_PASSWORD));

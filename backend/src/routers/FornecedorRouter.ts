@@ -15,7 +15,7 @@ module.exports = async function routers(router: FastifyInstance, options: Fastif
         return await new FornecedorController().login(req, res);
     });
 
-    router.post('/add-product', authenticatedRouteOptions, async (req: FastifyRequest, res: FastifyReply) => {
+    router.post('/product/add', authenticatedRouteOptions, async (req: FastifyRequest, res: FastifyReply) => {
         return await new FornecedorController().addProducts(req, res);
     });
 }

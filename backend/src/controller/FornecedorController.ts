@@ -8,9 +8,8 @@ import { payloadInterface } from "../interfaces/payloadInterface";
 import { productInterface } from "../interfaces/productInterface";
 import {z} from 'zod';
 import { removeAccents } from "../utils/removeAccents";
-import { verify } from "jsonwebtoken";
 
-import { generateToken } from "../utils/tokenUtils";
+import { generateToken, getPayloadFromToken } from "../utils/tokenUtils";
 
 
 class FornecedorController{
@@ -75,12 +74,14 @@ class FornecedorController{
             res.status(500).send(errorResponse("Erro interno no servidor", err));
             return
         }
-    }
+    }   
 
     public async addProducts(req: FastifyRequest, res: FastifyReply) {        
         try {
             const token: string = req.headers.authorization as string;
-            
+            const decodedToken: payloadInterface = await getPayloadFromToken(token);
+            const id_fornecedor: number = decodedToken.id;
+
             const productSchema = z.object({
                 nome: z.string().min(1, "Nome e obrigatorio"),
                 preco: z.number().positive("Insira um valor valido"),
@@ -90,29 +91,33 @@ class FornecedorController{
 
             const datasProduct:productInterface[] = productArraySchema.parse(req.body);
                         
-            this.fornecedorModel.addProducts(datasProduct);
+            await this.fornecedorModel.addProducts(datasProduct, id_fornecedor);
 
             res.status(201).send(successResponse("Produtos adicionados"));
         } catch (e) {
             if(e instanceof z.ZodError) {
                 res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
             }
-            res.status(500).send(errorResponse("Erro interno no servidor"));
+            res.status(500).send(errorResponse("Erro interno no servidor", e));
         }
     }
 
     private async generateToken(user: loginInterface):Promise<string>{
-        const fornecedor = await this.fornecedorModel.findByUsername(user.nome);
+        try{
+            const fornecedor = await this.fornecedorModel.findByUsername(user.nome);
         
-        const payload: payloadInterface =  { 
-            id: fornecedor.id_fornecedor ?? 0,
-            nome: fornecedor.nome,
-            usuario: "fornecedor"
+            const payload: payloadInterface =  { 
+                id: fornecedor.id_fornecedor ?? 0,
+                nome: fornecedor.nome,
+                usuario: "fornecedor"
+            }
+
+            const token:string = await generateToken(payload);
+
+            return token;
+        } catch(e) {
+            throw e;
         }
-
-        const token:string = await generateToken(payload);
-
-        return token;
     }
 }
 
