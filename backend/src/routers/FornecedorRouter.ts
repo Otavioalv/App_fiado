@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
 import { FornecedorController } from "../controller/FornecedorController";
 import { authenticatedRouteOptions } from "../utils/authenticate";
+import { ProdutoController } from "../controller/ProdutoController";
 
 module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) {
     router.get("/", async(req: FastifyRequest, res: FastifyReply) => {
@@ -16,6 +17,10 @@ module.exports = async function routers(router: FastifyInstance, options: Fastif
     });
 
     router.post('/product/add', authenticatedRouteOptions, async (req: FastifyRequest, res: FastifyReply) => {
-        return await new FornecedorController().addProducts(req, res);
+        return await new ProdutoController().addProducts(req, res);
+    });
+
+    router.post('/product/list', authenticatedRouteOptions, async (req: FastifyRequest, res: FastifyReply) => {
+        return await new ProdutoController().listProducts(req, res);
     });
 }

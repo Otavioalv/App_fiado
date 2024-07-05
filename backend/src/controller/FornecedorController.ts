@@ -76,32 +76,6 @@ class FornecedorController{
         }
     }   
 
-    public async addProducts(req: FastifyRequest, res: FastifyReply) {        
-        try {
-            const token: string = req.headers.authorization as string;
-            const decodedToken: payloadInterface = await getPayloadFromToken(token);
-            const id_fornecedor: number = decodedToken.id;
-
-            const productSchema = z.object({
-                nome: z.string().min(1, "Nome e obrigatorio"),
-                preco: z.number().positive("Insira um valor valido"),
-                disponivel: z.boolean(),
-            })
-            const productArraySchema = z.array(productSchema);
-
-            const datasProduct:productInterface[] = productArraySchema.parse(req.body);
-                        
-            await this.fornecedorModel.addProducts(datasProduct, id_fornecedor);
-
-            res.status(201).send(successResponse("Produtos adicionados"));
-        } catch (e) {
-            if(e instanceof z.ZodError) {
-                res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
-            }
-            res.status(500).send(errorResponse("Erro interno no servidor", e));
-        }
-    }
-
     private async generateToken(user: loginInterface):Promise<string>{
         try{
             const fornecedor = await this.fornecedorModel.findByUsername(user.nome);
