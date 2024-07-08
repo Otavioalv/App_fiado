@@ -24,7 +24,7 @@ class ProdutoController {
             })
             const productArraySchema = z.array(productSchema);
 
-            const datasProduct:productInterface[] = productArraySchema.parse(req.body);
+            const datasProduct:productInterface[] = productArraySchema.parse(await req.body);
                         
             await this.produtoModel.addProducts(datasProduct, id_fornecedor);
 
@@ -32,6 +32,7 @@ class ProdutoController {
         } catch (e) {
             if(e instanceof z.ZodError) {
                 res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
+                return;
             }
             res.status(500).send(errorResponse("Erro interno no servidor", e));
         }
@@ -39,11 +40,14 @@ class ProdutoController {
 
     public async listProducts(req: FastifyRequest, res: FastifyReply) {
         try {
-            const {id_fornecedor} = req.body as fornecedorInterface;
+            const {id_fornecedor} = await await req.body as fornecedorInterface;
             
             if(!id_fornecedor || typeof id_fornecedor != "number" || id_fornecedor < 0) {
                res.status(404).send(errorResponse("Parametros invalidos"));
+               return;
             }
+
+            await this.produtoModel.listProducts(id_fornecedor);
 
             res.status(200).send(successResponse("Produtos listados com sucesso"));
 

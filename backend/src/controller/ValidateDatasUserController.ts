@@ -27,7 +27,7 @@ class ValidateDatasUserController  {
             const messages: Record<string, string[]>[] = [];
 
             datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
-            datasRegister.nome = (await removeAccents(datasRegister.nome.trim())).toLocaleLowerCase();
+            datasRegister.nome = datasRegister.nome.trim().toUpperCase();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = datasRegister.telefone.trim();
@@ -61,13 +61,19 @@ class ValidateDatasUserController  {
                 messages.push(objMenssage);
             }
             
-            if(!validator.isLength(datasRegister.nome, {min: 4}) || /\s\s/.test(datasRegister.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.nome)) {
+            if(
+                !validator.isLength(datasRegister.nome, {min: 4}) || 
+                /\s\s/.test(datasRegister.nome) || 
+                !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.nome) ||
+                /[0-9]/.test(datasRegister.nome)
+            ) {
                 const objMenssage = {
                     nome: ["Nome do ussuario invalido"]
                 };
 
                 messages.push(objMenssage);
             }
+            datasRegister.nome = await removeAccents(datasRegister.nome);
 
             const senhaValidada = await this.validarSenha(datasRegister.senha);
             if(senhaValidada.senha.length) {
@@ -181,7 +187,7 @@ class ValidateDatasUserController  {
 
     public async validateAdressCep(req: FastifyRequest, res: FastifyReply) {
         try {
-            var obj = req.body as cepInterface;
+            var obj = await req.body as cepInterface;
 
             if(!obj.cep){
                 res.status(400).send(errorResponse("CEP vazio"));

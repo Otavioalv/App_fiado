@@ -18,7 +18,7 @@ class FornecedorController{
 
     public async register(req: FastifyRequest, res: FastifyReply) {
         try {            
-            const datasRegister: fornecedorInterface = req.body as fornecedorInterface;
+            const datasRegister: fornecedorInterface = await req.body as fornecedorInterface;
             const message = await this.validateDatasUserController.validateDatas(datasRegister);
             
             if(message.length) {
@@ -45,7 +45,7 @@ class FornecedorController{
 
     public async login(req: FastifyRequest, res: FastifyReply) {
         try {
-            const datasLogin: loginInterface = req.body as loginInterface;
+            const datasLogin: loginInterface = await req.body as loginInterface;
             const message = await this.validateDatasUserController.validateLogin(datasLogin);
 
             if(message.length){
