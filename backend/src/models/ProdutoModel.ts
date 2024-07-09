@@ -35,7 +35,7 @@ class ProdutoModel  {
         }
     }
 
-    public async listProducts(id_fornecedor: number) {
+    public async listProducts(id_fornecedor: number): Promise<productInterface[]>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
@@ -46,12 +46,26 @@ class ProdutoModel  {
                 WHERE fk_id_fornecedor = $1
             `;
 
-            const result = (await client.query(SQL, [id_fornecedor])).rows as productInterface[];
+            const listProducts = (await client.query(SQL, [id_fornecedor])).rows as productInterface[];
 
-            return result;
+            return listProducts;
         } catch (e) {
             console.log(e);
             throw new Error("Erro ao listar produtos");
+        } finally {
+            client?.release();
+        }
+    }
+
+    public async updateProtucts(products: productInterface[], id_fornecedor: number) {
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+            const numColsProds = 4;
+
+        } catch (e) {
+            await client?.query("ROLLBACK");
+            throw new Error("Erro ao atualizar produto");
         } finally {
             client?.release();
         }

@@ -13,19 +13,9 @@ class ProdutoController {
 
     public async addProducts(req: FastifyRequest, res: FastifyReply) {        
         try {
-            const token: string = req.headers.authorization as string;
-            const decodedToken: payloadInterface = await getPayloadFromToken(token);
-            const id_fornecedor: number = decodedToken.id;
-
-            const productSchema = z.object({
-                nome: z.string().min(1, "Nome e obrigatorio"),
-                preco: z.number().nonnegative("Insira um valor valido"),
-                quantidade: z.number().nonnegative("Insira um valor valido")
-            })
-            const productArraySchema = z.array(productSchema);
-
-            const datasProduct:productInterface[] = productArraySchema.parse(await req.body);
-                        
+            const id_fornecedor: number = await this.getIdFornecedorFromToken(req);
+            const datasProduct: productInterface[] = await this.productShemaValidate(req);
+            
             await this.produtoModel.addProducts(datasProduct, id_fornecedor);
 
             res.status(201).send(successResponse("Produtos adicionados"));
@@ -47,12 +37,56 @@ class ProdutoController {
                return;
             }
 
-            await this.produtoModel.listProducts(id_fornecedor);
+            const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor);
 
-            res.status(200).send(successResponse("Produtos listados com sucesso"));
-
+            res.status(200).send(successResponse("Produtos listados com sucesso", listProducts));
         } catch (e) {
             res.status(500).send(errorResponse("Erro interno no servidor", e));
+        }
+    }
+
+    public async updateProtucts(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const id_fornecedor: number = await this.getIdFornecedorFromToken(req);
+            const datasProduct: productInterface[] = await this.productShemaValidate(req);
+
+            await this.produtoModel.updateProtucts(datasProduct, id_fornecedor);
+
+            res.status(200).send(successResponse("Produto atualizado com sucesso"));
+        } catch (e) {
+            res.status(500).send(errorResponse("Erro interno no servidor", e));
+        }
+    }
+
+    private async productShemaValidate(req: FastifyRequest): Promise<productInterface[]>{
+        try {
+            const productSchema = z.object({
+                nome: z.string().min(1, "Nome e obrigatorio"),
+                preco: z.number().nonnegative("Insira um valor valido"),
+                quantidade: z.number().nonnegative("Insira um valor valido")
+            })
+            const productArraySchema = z.array(productSchema);
+    
+            const datasProduct:productInterface[] = productArraySchema.parse(await req.body);
+    
+            return datasProduct;
+        } catch(e) {
+            if(e instanceof z.ZodError){
+                throw e;
+            }
+            throw new Error("Erro ao validar dados");
+        }
+    }
+
+    private async getIdFornecedorFromToken(req: FastifyRequest): Promise<number>{
+        try {
+            const token: string = req.headers.authorization as string;
+            const decodedToken: payloadInterface = await getPayloadFromToken(token);
+            const id_fornecedor: number = decodedToken.id;
+
+            return id_fornecedor;
+        } catch(e) {
+            throw new Error("Erro ao recuperar id");
         }
     }
 }
