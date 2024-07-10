@@ -45,7 +45,7 @@ class ProdutoController {
         }
     }
 
-    public async updateProtucts(req: FastifyRequest, res: FastifyReply) {
+    public async updateProtuct(req: FastifyRequest, res: FastifyReply) {
         try {
             const id_fornecedor: number = await this.getIdFornecedorFromToken(req);
             const datasProduct: productInterface[] = await this.productShemaValidate(req);
