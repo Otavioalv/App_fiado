@@ -23,4 +23,12 @@ module.exports = async function routers(router: FastifyInstance, options: Fastif
     router.post('/product/list', authenticatedRouteOptions, async (req: FastifyRequest, res: FastifyReply) => {
         return await new ProdutoController().listProducts(req, res);
     });
+
+    router.post('/product/update', authenticatedRouteOptions, async(req: FastifyRequest, res: FastifyReply) => {
+        return await new ProdutoController().updateProtucts(req, res);
+    }); 
+
+    router.post('/product/delete', authenticatedRouteOptions, async(req: FastifyRequest, res: FastifyReply) => {
+        return await new ProdutoController().deleteProduct(req, res);        
+    });
 }
