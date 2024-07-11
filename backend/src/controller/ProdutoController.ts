@@ -5,7 +5,6 @@ import { productInterface } from "../interfaces/productInterface";
 import { errorResponse, successResponse } from "../utils/response";
 import {ProdutoModel} from "../models/ProdutoModel";
 import { z } from "zod";
-import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 
 
 class ProdutoController {
