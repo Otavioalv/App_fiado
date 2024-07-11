@@ -42,7 +42,7 @@ class ProdutoModel  {
             client = await connection.connect();
 
             const SQL = `
-                SELECT nome, preco, disponivel, quantidade 
+                SELECT id_produto, nome, preco, disponivel, quantidade
                 FROM produto 
                 WHERE fk_id_fornecedor = $1
                 ORDER BY id_produto

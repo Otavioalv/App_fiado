@@ -27,7 +27,7 @@ class ValidateDatasUserController  {
             const messages: Record<string, string[]>[] = [];
 
             datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
-            datasRegister.nome = datasRegister.nome.trim().toUpperCase();
+            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = datasRegister.telefone.trim();
@@ -55,23 +55,15 @@ class ValidateDatasUserController  {
 
             if(!validator.isLength(datasRegister.nomeEstabelecimento, { min: 3})) {        
                 const objMenssage = {
-                    nomeEstabelecimento: ["nome do estabelecimento deve conter mais de 5 caracteres"]
+                    nomeEstabelecimento: ["Nome do estabelecimento invalido"]
                 };
 
                 messages.push(objMenssage);
             }
             
-            if(
-                !validator.isLength(datasRegister.nome, {min: 4}) || 
-                /\s\s/.test(datasRegister.nome) || 
-                !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.nome) ||
-                /[0-9]/.test(datasRegister.nome)
-            ) {
-                const objMenssage = {
-                    nome: ["Nome do ussuario invalido"]
-                };
-
-                messages.push(objMenssage);
+            const nomeVerificado = await this.verificarNome(datasRegister.nome);
+            if(nomeVerificado.nome.length) {
+                messages.push(nomeVerificado);
             }
             datasRegister.nome = await removeAccents(datasRegister.nome);
 
@@ -103,7 +95,7 @@ class ValidateDatasUserController  {
             
             if(!validator.isLength(datasRegister.logradouro, {min: 2})) {
                 const objMenssage = {
-                    logradouro: ["Logradouro deve conter mais de 2 caracteres"]
+                    logradouro: ["Nome do logradouro invalido"]
                 };
 
                 messages.push(objMenssage);
@@ -111,7 +103,7 @@ class ValidateDatasUserController  {
             
             if(!validator.isLength(datasRegister.bairro, {min: 2})) {
                 const objMenssage = {
-                    bairro: ["Bairro deve ter mais de 2 caracteres"]
+                    bairro: ["Nome do bairro invalido"]
                 };
 
                 messages.push(objMenssage);
@@ -119,7 +111,7 @@ class ValidateDatasUserController  {
             
             if(!validator.isLength(datasRegister.cep, {max: 8, min: 8})) {
                 const objMenssage = {
-                    cep: ["CEP deve conter exatamente 8 caracteres"]
+                    cep: ["CEP deve conter exatamente 8 numeros"]
                 };
 
                 messages.push(objMenssage);
@@ -163,18 +155,17 @@ class ValidateDatasUserController  {
         try {
             const messages: Record<string, string[]>[] = [];
 
-            datasLogin.nome = datasLogin.nome.trim();
+            datasLogin.nome = datasLogin.nome.trim().toLowerCase();
             datasLogin.senha = datasLogin.senha.trim();
 
-            if(!validator.isLength(datasLogin.nome, {min: 5}) || /\s\s/.test(datasLogin.nome) || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasLogin.nome)) {
-                const objMenssage = {
-                    nome: ["Nome do ussuario invalido"]
-                };
-
-                messages.push(objMenssage);
-            }
-
+            const nomeVerificado = await this.verificarNome(datasLogin.nome);
             const senhaValidada = await this.validarSenha(datasLogin.senha);
+
+            if(nomeVerificado.nome.length) {
+                messages.push(nomeVerificado);
+            }
+            datasLogin.nome = await removeAccents(datasLogin.nome);
+
             if(senhaValidada.senha.length) {
                 messages.push(senhaValidada);
             }
@@ -214,11 +205,11 @@ class ValidateDatasUserController  {
             const hashedPass:string = await hash(password, saltRoundPassword);
             return hashedPass;
         } catch(e) {
-            throw new Error("Erro ao criar hash da senha. Porfavor, tente mais tarde");
+            throw new Error("Erro ao criar hash da senha");
         }
     }
 
-    public async verifyPassword(hashedPassword: string, password: string): Promise<boolean>{
+    public async comparePassword(hashedPassword: string, password: string): Promise<boolean>{
         try {
             const match = await compare(password, hashedPassword);
             return match;
@@ -245,7 +236,7 @@ class ValidateDatasUserController  {
 
     }
 
-    private async validarSenha(senha: string): Promise<Record<string, string[]>>{
+    private async validarSenha(senha: string): Promise<{senha: string[]}>{
         const arrMenssage:string[] = [];
 
         if(!validator.isLength(senha, {min: 8, max: 15}))
@@ -267,12 +258,30 @@ class ValidateDatasUserController  {
             arrMenssage.push("Senha não deve conter letras acentuadas");
   
 
-        const messages: Record<string, string[]> = {
+        const messages = {
             senha: arrMenssage
         };
 
        return messages;
-    }     
+    }   
+    
+    private async verificarNome(nome: string): Promise<{nome: string[]}> {
+        const arrMenssage: string[] = [];
+        if(
+            !validator.isLength(nome, {min: 4}) || 
+            /\s\s/.test(nome) || 
+            !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(nome) ||
+            /[0-9]/.test(nome)
+        ) {
+            arrMenssage.push("Nome do ussuario invalido");
+        }
+
+        const objMenssage = {
+            nome: arrMenssage
+        };
+
+        return objMenssage;
+    }
 }
 
 export {ValidateDatasUserController};

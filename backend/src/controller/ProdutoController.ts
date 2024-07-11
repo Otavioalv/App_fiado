@@ -30,8 +30,9 @@ class ProdutoController {
 
     public async listProducts(req: FastifyRequest, res: FastifyReply) {
         try {
-            const {id_fornecedor} = await await req.body as fornecedorInterface;
-            
+            // const {id_fornecedor} = await await req.body as fornecedorInterface;
+            const id_fornecedor:number = await this.getIdFornecedorFromToken(req);
+
             if(!id_fornecedor || typeof id_fornecedor != "number" || id_fornecedor < 0) {
                res.status(404).send(errorResponse("Parametros invalidos"));
                return;
@@ -61,7 +62,6 @@ class ProdutoController {
                 res.status(404).send(errorResponse("Produto não existe ou não foi possivel encontra-lo"));
                 return;
             }
-                
 
             res.status(200).send(successResponse("Produto atualizado com sucesso"));
         } catch (e) {
@@ -124,7 +124,7 @@ class ProdutoController {
 
             return id_fornecedor;
         } catch(e) {
-            throw new Error("Erro ao recuperar id");
+            throw e;
         }
     }
 }

@@ -1,6 +1,5 @@
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import connection from "../database/connection";
-import { loginInterface } from "../interfaces/loginInterface";
 import { PoolClient } from "pg";
 
 class FornecedorModel {
@@ -106,20 +105,25 @@ class FornecedorModel {
         }
     }
 
-    public async getPasswordUsingUser(datasLogin: loginInterface): Promise<string>{
+    public async getPasswordUsingUser(nome: string): Promise<string>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
             const SQL = `SELECT senha from fornecedor WHERE nome = $1`;
-            const result = await client.query(SQL, [datasLogin.nome]);
+            const result = await client.query(SQL, [nome]);
             const hashedPass:string = result.rows[0]?.senha;
 
+            if(!hashedPass) 
+                throw new Error("Senha não encontrada");
+            
             return hashedPass;
         } catch (e) {
-            console.log(e);
-            throw new Error("Houve um erro interno ao verificar senha");
+            let message = "";
+            if(e instanceof Error)
+                message = e.message;
+            throw new Error(`Houve um erro interno ao verificar senha. ${message}`);
+
         } finally {
-            client = await connection.connect();
             client?.release();
         }
     }
