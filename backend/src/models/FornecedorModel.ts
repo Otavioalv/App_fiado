@@ -52,12 +52,17 @@ class FornecedorModel {
                 uf
             ];
 
+            await client.query('BEGIN');
             await client.query(SQL, VALUES);
+            await client.query('COMMIT');
+            return;
         } catch(e){
             console.error(e);
+            await client?.query('ROLLBACK');
             throw new Error("Erro ao salvar usuario no banco de dados");
         } finally {
             client?.release();
+            return;
         }
     }
 

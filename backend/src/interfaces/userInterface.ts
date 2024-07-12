@@ -1,7 +1,4 @@
-import { addressInterface } from "./addressInterface";
-
-
-export interface userInterface extends addressInterface{
+export interface userInterface{
     nome: string;
     senha: string;
     apelido?: string;

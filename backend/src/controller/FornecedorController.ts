@@ -5,11 +5,8 @@ import { errorResponse, successResponse } from "../utils/response";
 import { ValidateDatasUserController } from "./ValidateDatasUserController";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
-import { productInterface } from "../interfaces/productInterface";
-import {z} from 'zod';
-import { removeAccents } from "../utils/removeAccents";
 
-import { generateToken, getPayloadFromToken } from "../utils/tokenUtils";
+import { generateToken } from "../utils/tokenUtils";
 
 
 class FornecedorController{
@@ -19,8 +16,7 @@ class FornecedorController{
     public async register(req: FastifyRequest, res: FastifyReply) {
         try {            
             const datasRegister: fornecedorInterface = await req.body as fornecedorInterface;
-            const message = await this.validateDatasUserController.validateDatas(datasRegister);
-            
+            const message = await this.validateDatasUserController.validateDatasFornecedor(datasRegister);
             if(message.length) {
                 res.status(400).send(errorResponse("dados invalidos", message));
                 return;
@@ -65,7 +61,7 @@ class FornecedorController{
                 return;
             }
 
-            const token:string = await this.generateToken(datasLogin);
+            const token:string = await this.generateTokenUser(datasLogin);
 
             res.status(200).send(successResponse("Login realizado com sucesso", {token: token}));
             return
@@ -75,7 +71,7 @@ class FornecedorController{
         }
     }   
 
-    private async generateToken(user: loginInterface):Promise<string>{
+    private async generateTokenUser(user: loginInterface):Promise<string>{
         try{
             const fornecedor = await this.fornecedorModel.findByUsername(user.nome);
         

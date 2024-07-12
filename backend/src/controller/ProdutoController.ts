@@ -18,12 +18,14 @@ class ProdutoController {
             await this.produtoModel.addProducts(datasProduct, id_fornecedor);
 
             res.status(201).send(successResponse("Produtos adicionados"));
+            return;
         } catch (e) {
             if(e instanceof z.ZodError) {
                 res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
                 return;
             }
             res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return;
         }
     }
 
@@ -40,8 +42,10 @@ class ProdutoController {
             const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor);
 
             res.status(200).send(successResponse("Produtos listados com sucesso", listProducts));
+            return;
         } catch (e) {
             res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return;
         }
     }
 
@@ -63,11 +67,14 @@ class ProdutoController {
             }
 
             res.status(200).send(successResponse("Produto atualizado com sucesso"));
+            return;
         } catch (e) {
             if(e instanceof z.ZodError) {
                 res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
+                return;
             }
             res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return;
         }
     }
 
@@ -89,8 +96,10 @@ class ProdutoController {
             }
             
             res.status(200).send(successResponse("Produto deletado com sucesso"));
+            return;
         } catch(e) {
             res.status(500).send(errorResponse("Error interno no servidor", e));
+            return;
         } 
     }
 

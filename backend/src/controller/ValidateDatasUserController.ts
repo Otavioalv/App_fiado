@@ -12,6 +12,7 @@ import { payloadInterface } from "../interfaces/payloadInterface";
 import { saltRoundPassword } from "../config";
 import { removeAccents } from "../utils/removeAccents";
 import { getPayloadFromToken } from "../utils/tokenUtils";
+import { clienteInterface } from "../interfaces/clienteInterface";
 
 
 interface cepInterface {
@@ -22,26 +23,35 @@ interface cepInterface {
 class ValidateDatasUserController  {
     private validateDatasUserModel: ValidateDatasUserModel = new ValidateDatasUserModel();
 
-    public async validateDatas(datasRegister: fornecedorInterface):Promise<Record<string, string[]>[]>{
+    public async validateDatasFornecedor(datasRegister: fornecedorInterface):Promise<Record<string, string[]>[]>{
         try {
             const messages: Record<string, string[]>[] = [];
-
-            datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
+            
+            // dados relacionados a fornecedor e cliente
             datasRegister.nome = datasRegister.nome.trim().toLowerCase();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = datasRegister.telefone.trim();
+
+            // dados relacionados a fornecedor
+            datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
             datasRegister.logradouro = datasRegister.logradouro.trim();
             datasRegister.bairro = datasRegister.bairro.trim();
             datasRegister.uf = datasRegister.uf.trim();
             datasRegister.cep = datasRegister.cep.trim();
             datasRegister.complemento = datasRegister.complemento?.trim();
 
+            const nomeVerificado = await this.validarNome(datasRegister.nome);
+            const senhaValidada = await this.validarSenha(datasRegister.senha);
+            const apelidoValidado = await this.validarApelido(datasRegister.apelido);
+            const telefoneValidado = await this.validarTelefone(datasRegister.telefone);
+
             if(
-                !datasRegister.nomeEstabelecimento || 
                 !datasRegister.nome || 
                 !datasRegister.senha || 
                 !datasRegister.telefone || 
+                
+                !datasRegister.nomeEstabelecimento || 
                 !datasRegister.logradouro || 
                 !datasRegister.bairro || 
                 !datasRegister.cep || 
@@ -60,37 +70,22 @@ class ValidateDatasUserController  {
 
                 messages.push(objMenssage);
             }
-            
-            const nomeVerificado = await this.verificarNome(datasRegister.nome);
+
             if(nomeVerificado.nome.length) {
                 messages.push(nomeVerificado);
             }
             datasRegister.nome = await removeAccents(datasRegister.nome);
 
-            const senhaValidada = await this.validarSenha(datasRegister.senha);
             if(senhaValidada.senha.length) {
                 messages.push(senhaValidada);
             }
 
-            if(datasRegister.apelido && 
-                    (
-                        !validator.isLength(datasRegister.apelido, {min: 1}) || 
-                        /\s\s/.test(datasRegister.apelido) || 
-                        !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(datasRegister.apelido)
-                    )
-            ) {
-                const objMenssage = {
-                    apelido: ["Apelido invalido"]
-                }
-                messages.push(objMenssage);
+            if(apelidoValidado.apelido.length) {
+                messages.push(apelidoValidado);
             }
             
-            if(!validator.isMobilePhone(datasRegister.telefone, 'pt-BR')) {
-                const objMenssage = {
-                    telefone: ["Numero telefone invalido"]
-                };
-
-                messages.push(objMenssage);
+            if(telefoneValidado.telefone.length) {
+                messages.push(telefoneValidado);
             }
             
             if(!validator.isLength(datasRegister.logradouro, {min: 2})) {
@@ -151,6 +146,52 @@ class ValidateDatasUserController  {
         }
     }
 
+    public async validateDatasCliente(datasRegister: clienteInterface): Promise<Record<string, string[]>[]>{
+        try {
+            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            datasRegister.senha = datasRegister.senha.trim();
+            datasRegister.apelido = datasRegister.apelido?.trim();
+            datasRegister.telefone = datasRegister.telefone.trim();
+
+            const messages: Record<string, string[]>[] = [];
+
+            const nomeVerificado = await this.validarNome(datasRegister.nome);
+            const senhaValidada = await this.validarSenha(datasRegister.senha);
+            const apelidoValidado = await this.validarApelido(datasRegister.apelido);
+            const telefoneValidado = await this.validarTelefone(datasRegister.telefone);
+
+            if(
+                !datasRegister.nome || 
+                !datasRegister.senha || 
+                !datasRegister.telefone
+            ) {
+                const objMenssage = {
+                    all: ["Preencha os campos obrigatorios"]
+                };
+
+                messages.push(objMenssage);
+            }
+
+            if(nomeVerificado.nome.length)
+                messages.push(nomeVerificado);
+
+            datasRegister.nome = await removeAccents(datasRegister.nome);
+
+            if(senhaValidada.senha.length)
+                messages.push(senhaValidada);
+            
+            if(apelidoValidado.apelido.length)
+                messages.push(apelidoValidado);
+            
+            if(telefoneValidado.telefone.length)
+                messages.push(telefoneValidado);
+
+            return messages
+        } catch (e) {
+            throw new Error('Erro ao validar dados');
+        }
+    }
+
     public async validateLogin(datasLogin: loginInterface): Promise<Record<string, string[]>[]>{
         try {
             const messages: Record<string, string[]>[] = [];
@@ -158,7 +199,7 @@ class ValidateDatasUserController  {
             datasLogin.nome = datasLogin.nome.trim().toLowerCase();
             datasLogin.senha = datasLogin.senha.trim();
 
-            const nomeVerificado = await this.verificarNome(datasLogin.nome);
+            const nomeVerificado = await this.validarNome(datasLogin.nome);
             const senhaValidada = await this.validarSenha(datasLogin.senha);
 
             if(nomeVerificado.nome.length) {
@@ -265,7 +306,7 @@ class ValidateDatasUserController  {
        return messages;
     }   
     
-    private async verificarNome(nome: string): Promise<{nome: string[]}> {
+    private async validarNome(nome: string): Promise<{nome: string[]}> {
         const arrMenssage: string[] = [];
         if(
             !validator.isLength(nome, {min: 4}) || 
@@ -282,6 +323,42 @@ class ValidateDatasUserController  {
 
         return objMenssage;
     }
+
+    private async validarApelido(apelido: string | undefined): Promise<{apelido: string[]}> {
+        const arrMenssage: string[] = [];
+
+        if(apelido && 
+            (
+                !validator.isLength(apelido, {min: 1}) || 
+                /\s\s/.test(apelido) || 
+                !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(apelido)
+            )
+        ) {
+            arrMenssage.push("Apelido invalido");
+        }
+
+
+        const objMenssage = {
+            apelido: arrMenssage
+        }
+
+        return objMenssage;
+    }
+
+    private async validarTelefone(telefone: string): Promise<{telefone: string[]}> {
+        const arrMessage: string[] = [];
+
+        if(!validator.isMobilePhone(telefone, 'pt-BR')) {
+            arrMessage.push("Numero telefone invalido");
+        }
+
+        const objMessage = {
+            telefone: arrMessage
+        }
+
+        return objMessage;
+    }
+
 }
 
-export {ValidateDatasUserController};
+export {ValidateDatasUserController}
