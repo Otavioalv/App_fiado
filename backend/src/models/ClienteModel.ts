@@ -1,9 +1,10 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
 import { clienteInterface } from "../interfaces/clienteInterface";
+import { UserModel } from "../interfaces/class/UserModel";
 
 
-class ClienteModel {
+class ClienteModel extends UserModel<clienteInterface>{
     
     public async register(datasRegister: clienteInterface) {
         let client: PoolClient | undefined;
@@ -30,11 +31,7 @@ class ClienteModel {
             return;
         }
     }
-
-    public async login() {
-        
-    }
-
+    
     public async userExists(nome: string): Promise<boolean>{
         let client: PoolClient | undefined;
         
@@ -50,6 +47,26 @@ class ClienteModel {
         } finally {
             client?.release();
         }
+    }
+
+    public async findByUsername(username: string): Promise<clienteInterface>{
+        let client: PoolClient | undefined;
+        try {
+            
+            client = await connection.connect();
+            const SQL = `SELECT id_cliente, nome, senha, telefone, apelido from cliente WHERE nome = $1`
+            const result: clienteInterface = (await client.query(SQL, [username])).rows[0];
+
+            return result;
+        } catch (e) {
+            throw new Error("Houve um erro ao encontrar usuario");
+        } finally {
+            client?.release();
+        }
+    }
+    
+    public async findUserById(id: number): Promise<clienteInterface>{
+        return {nome: "", senha: "", telefone: ""}
     }
 
     public async getPasswordUsingUser(nome: string): Promise<string> {
@@ -75,21 +92,6 @@ class ClienteModel {
         }
     }
 
-    public async findByUsername(username: string): Promise<clienteInterface>{
-        let client: PoolClient | undefined;
-        try {
-            
-            client = await connection.connect();
-            const SQL = `SELECT id_cliente, nome, senha, telefone, apelido from cliente WHERE nome = $1`
-            const result: clienteInterface = (await client.query(SQL, [username])).rows[0];
-
-            return result;
-        } catch (e) {
-            throw new Error("Houve um erro ao encontrar usuario");
-        } finally {
-            client?.release();
-        }
-    }
 }
 
 export {ClienteModel}

@@ -10,7 +10,6 @@ export const authenticatedRouteOptions = {
 
             if(!token) {
                 throw new Error("Token de autenticação não fornecido");
-                return; 
             }
 
             await validateDatasUser.verifyFromToken(token);

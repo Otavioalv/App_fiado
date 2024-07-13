@@ -7,13 +7,14 @@ import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 
 import { generateToken } from "../utils/tokenUtils";
+import { UserController } from "../interfaces/class/UserController";
 
 
-class FornecedorController{
+class FornecedorController extends UserController{
     private fornecedorModel:FornecedorModel = new FornecedorModel();
     private validateDatasUserController:ValidateDatasUserController = new ValidateDatasUserController();
 
-    public async register(req: FastifyRequest, res: FastifyReply) {
+    public async register(req: FastifyRequest, res: FastifyReply): Promise<void> {
         try {            
             const datasRegister: fornecedorInterface = await req.body as fornecedorInterface;
             const message = await this.validateDatasUserController.validateDatasFornecedor(datasRegister);
@@ -39,7 +40,7 @@ class FornecedorController{
         }
     }
 
-    public async login(req: FastifyRequest, res: FastifyReply) {
+    public async login(req: FastifyRequest, res: FastifyReply): Promise<void>{
         try {
             const datasLogin: loginInterface = await req.body as loginInterface;
             const message = await this.validateDatasUserController.validateLogin(datasLogin);
@@ -71,7 +72,7 @@ class FornecedorController{
         }
     }   
 
-    private async generateTokenUser(user: loginInterface):Promise<string>{
+    private async generateTokenUser(user: loginInterface): Promise<string>{
         try{
             const fornecedor = await this.fornecedorModel.findByUsername(user.nome);
         

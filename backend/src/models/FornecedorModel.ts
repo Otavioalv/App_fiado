@@ -1,8 +1,9 @@
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import connection from "../database/connection";
 import { PoolClient } from "pg";
+import { UserModel } from "../interfaces/class/UserModel";
 
-class FornecedorModel {
+class FornecedorModel extends UserModel<fornecedorInterface>{
 
     public async register(datasRegister: fornecedorInterface) { 
         let client: PoolClient | undefined;
@@ -66,28 +67,12 @@ class FornecedorModel {
         }
     }
 
-    public async userExists(nome: string):Promise<boolean>{
-        let client: PoolClient | undefined;  
-        try {
-            client = await connection.connect();
-            const SQL = `SELECT 1 FROM fornecedor WHERE nome = $1`;
-            const result = await client.query(SQL, [nome]);
-
-            return result.rows.length > 0;
-        } catch(e) {
-            console.log(e);
-            throw new Error("Erro ao verificar se usuario existe");
-        } finally {
-            client?.release();
-        }
-    }
-
-    public async findByUsername(username: string): Promise<fornecedorInterface>{
+    public async findByUsername(nome: string): Promise<fornecedorInterface>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
             const SQL = `SELECT nome, senha, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, id_fornecedor, complemento, bairro from fornecedor WHERE nome = $1`;
-            const result:fornecedorInterface = (await client.query(SQL, [username])).rows[0];
+            const result:fornecedorInterface = (await client.query(SQL, [nome])).rows[0];
             
             return result;
         } catch (e) {
@@ -107,6 +92,22 @@ class FornecedorModel {
             return result;
         } catch(e) {
             throw new Error("Erro ao encontrar usuario");
+        }
+    }
+
+    public async userExists(nome: string):Promise<boolean>{
+        let client: PoolClient | undefined;  
+        try {
+            client = await connection.connect();
+            const SQL = `SELECT 1 FROM fornecedor WHERE nome = $1`;
+            const result = await client.query(SQL, [nome]);
+
+            return result.rows.length > 0;
+        } catch(e) {
+            console.log(e);
+            throw new Error("Erro ao verificar se usuario existe");
+        } finally {
+            client?.release();
         }
     }
 
@@ -132,6 +133,7 @@ class FornecedorModel {
             client?.release();
         }
     }
+    
 }
 
 export {FornecedorModel};

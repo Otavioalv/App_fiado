@@ -6,24 +6,26 @@ import { errorResponse, successResponse } from "../utils/response";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 import { generateToken } from "../utils/tokenUtils";
+import { UserController } from "../interfaces/class/UserController";
 
 
-class ClienteController {
+class ClienteController extends UserController{
     private clienteModel: ClienteModel = new ClienteModel();
     private validateDatasUserController: ValidateDatasUserController = new ValidateDatasUserController();
     
-    public async register(req: FastifyRequest, res: FastifyReply) {
+    public async register(req: FastifyRequest, res: FastifyReply): Promise<void> {
         try {
             const datasRegister: clienteInterface = await req.body as clienteInterface;
             const message = await this.validateDatasUserController.validateDatasCliente(datasRegister);
             
             if(message.length) {
                 res.status(400).send(errorResponse("Dados invalidos", message));
+                return;
             }
 
             if(await this.clienteModel.userExists(datasRegister.nome)) {
                 res.status(400).send(errorResponse("Usuario já existe. Realize o login"));
-               return; 
+                return; 
             }
 
             datasRegister.senha = await this.validateDatasUserController.hashPassword(datasRegister.senha);
@@ -34,10 +36,11 @@ class ClienteController {
             return;
         } catch(err) {
             res.status(500).send(errorResponse("Erro interno no servidor", err));
+            return;
         }
     }
 
-    public async login(req: FastifyRequest, res: FastifyReply) {
+    public async login(req: FastifyRequest, res: FastifyReply): Promise<void>{
 
         try {
             const datasLogin: loginInterface = await req.body as loginInterface;
@@ -62,26 +65,30 @@ class ClienteController {
 
             const token: string = await this.generateTokenUser(datasLogin);
             res.status(200).send(successResponse("Login realizado com sucesso", {token: token}));
+            return;
         } catch (e) {
             res.status(500).send(errorResponse("Erro interno no servidor", e));
             return;
         }
     }
 
-    public async generateTokenUser(user: loginInterface): Promise<string>{
-        const cliente = await this.clienteModel.findByUsername(user.nome);
+    private async generateTokenUser(user: loginInterface): Promise<string>{
+        try {
+            const cliente = await this.clienteModel.findByUsername(user.nome);
         
-        const payload: payloadInterface = {
-            id: cliente.id_cliente ?? 0,
-            nome: cliente.nome,
-            usuario: "cliente"
+            const payload: payloadInterface = {
+                id: cliente.id_cliente ?? 0,
+                nome: cliente.nome,
+                usuario: "cliente"
+            }
+
+            const token:string = await generateToken(payload);
+
+            return token;
+        } catch (e) {
+            throw e;
         }
-
-        const token: string = await generateToken(payload);
-
-        return token;
     }
-
 }
 
 export {ClienteController}
