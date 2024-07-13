@@ -66,7 +66,18 @@ class ClienteModel extends UserModel<clienteInterface>{
     }
     
     public async findUserById(id: number): Promise<clienteInterface>{
-        return {nome: "", senha: "", telefone: ""}
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+            const SQL = `SELECT id_cliente, nome, senha, telefone, apelido from cliente WHERE id_cliente = $1`;
+            const result: clienteInterface = (await client.query(SQL, [id])).rows[0];
+
+            return result;
+        } catch (e) {
+            throw new Error("Erro ao encontrar usuairo");
+        } finally {
+            throw new Error("Erro ao encontrar usuario");
+        }
     }
 
     public async getPasswordUsingUser(nome: string): Promise<string> {

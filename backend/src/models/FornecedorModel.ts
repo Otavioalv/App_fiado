@@ -92,6 +92,8 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             return result;
         } catch(e) {
             throw new Error("Erro ao encontrar usuario");
+        } finally {
+            client?.release();
         }
     }
 
@@ -133,7 +135,25 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             client?.release();
         }
     }
-    
+
+    public async listAll(): Promise<fornecedorInterface[]> {
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+            const SQL = `SELECT id_fornecedor, nome, apelido, telefone, nomeestabelecimento, numeroimovel, logradouro, bairro, complemento, cep, uf FROM fornecedor`;
+            const result = ((await client.query(SQL)).rows) as fornecedorInterface[];
+
+            console.log(result);
+            return result;
+
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro interno no servidor");
+        } finally {
+            client?.release();
+        }
+    }   
+
 }
 
 export {FornecedorModel};

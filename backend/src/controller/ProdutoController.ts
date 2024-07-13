@@ -41,7 +41,7 @@ class ProdutoController {
 
             const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor);
 
-            res.status(200).send(successResponse("Produtos listados com sucesso", listProducts));
+            res.status(200).send(successResponse("Produtos listados com sucesso", {produto: listProducts}));
             return;
         } catch (e) {
             res.status(500).send(errorResponse("Erro interno no servidor", e));

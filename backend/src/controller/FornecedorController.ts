@@ -18,6 +18,7 @@ class FornecedorController extends UserController{
         try {            
             const datasRegister: fornecedorInterface = await req.body as fornecedorInterface;
             const message = await this.validateDatasUserController.validateDatasFornecedor(datasRegister);
+            
             if(message.length) {
                 res.status(400).send(errorResponse("dados invalidos", message));
                 return;
@@ -71,6 +72,16 @@ class FornecedorController extends UserController{
             return
         }
     }   
+
+    public async listAll(req: FastifyRequest, res: FastifyReply): Promise<void> {
+        try {
+            const list:fornecedorInterface[] = await this.fornecedorModel.listAll();
+
+            res.status(200).send(successResponse("Fornecedores listados com sucesso", {fornecedor: list}));
+        } catch(e) {
+            res.status(500).send(errorResponse("Erro interno no servidor", e));
+        }
+    }
 
     private async generateTokenUser(user: loginInterface): Promise<string>{
         try{

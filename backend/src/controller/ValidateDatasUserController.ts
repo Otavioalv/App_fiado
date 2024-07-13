@@ -13,6 +13,7 @@ import { saltRoundPassword } from "../config";
 import { removeAccents } from "../utils/removeAccents";
 import { getPayloadFromToken } from "../utils/tokenUtils";
 import { clienteInterface } from "../interfaces/clienteInterface";
+import { ClienteModel } from "../models/ClienteModel";
 
 
 interface cepInterface {
@@ -266,7 +267,13 @@ class ValidateDatasUserController  {
             if(decodedToken.usuario == "fornecedor"){
                 const fornecedor = await new FornecedorModel().findUserById(decodedToken.id);
                 if(!fornecedor)     
-                    throw new Error("Ussuario não encontrado");
+                    throw new Error("Usuario não encontrado");
+            } else if(decodedToken.usuario == 'cliente'){
+                const cliente = await new ClienteModel().findUserById(decodedToken.id);
+                if(!cliente) 
+                    throw new Error("Usuario não encontrado");
+            } else {
+                throw new Error("Token invalido");
             }
             
             return true;
