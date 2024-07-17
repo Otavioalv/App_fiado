@@ -2,6 +2,7 @@ import { PoolClient } from "pg";
 import connection from "../database/connection";
 import { clienteInterface } from "../interfaces/clienteInterface";
 import { UserModel } from "../interfaces/class/UserModel";
+import { idsFornecedorInterface } from "../interfaces/idsFornecedorInterface";
 
 
 class ClienteModel extends UserModel<clienteInterface>{
@@ -59,7 +60,7 @@ class ClienteModel extends UserModel<clienteInterface>{
 
             return result;
         } catch (e) {
-            throw new Error("Houve um erro ao encontrar usuario");
+            throw new Error("Houve um erro ao procurar usuario");
         } finally {
             client?.release();
         }
@@ -74,9 +75,9 @@ class ClienteModel extends UserModel<clienteInterface>{
 
             return result;
         } catch (e) {
-            throw new Error("Erro ao encontrar usuairo");
+            throw new Error("Erro ao procurar usuairo");
         } finally {
-            throw new Error("Erro ao encontrar usuario");
+            client?.release();
         }
     }
 
@@ -98,6 +99,18 @@ class ClienteModel extends UserModel<clienteInterface>{
                 message = e.message;
             throw new Error(`Houve um erro interno ao verificar senha. ${message}`);
 
+        } finally {
+            client?.release();
+        }
+    }
+
+    public async associarComFornecedor(ids: idsFornecedorInterface) {
+        let client: PoolClient | undefined;
+
+        try {
+
+        } catch(e) {
+            throw new Error("Erro ao efetuar associação");
         } finally {
             client?.release();
         }

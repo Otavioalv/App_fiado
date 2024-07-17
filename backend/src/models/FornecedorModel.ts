@@ -143,9 +143,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             const SQL = `SELECT id_fornecedor, nome, apelido, telefone, nomeestabelecimento, numeroimovel, logradouro, bairro, complemento, cep, uf FROM fornecedor`;
             const result = ((await client.query(SQL)).rows) as fornecedorInterface[];
 
-            console.log(result);
             return result;
-
         } catch (e) {
             console.log(e);
             throw new Error("Erro interno no servidor");

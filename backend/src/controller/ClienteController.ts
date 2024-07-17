@@ -7,6 +7,7 @@ import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 import { generateToken } from "../utils/tokenUtils";
 import { UserController } from "../interfaces/class/UserController";
+import { idsFornecedorInterface } from "../interfaces/idsFornecedorInterface";
 
 
 class ClienteController extends UserController{
@@ -69,6 +70,28 @@ class ClienteController extends UserController{
         } catch (e) {
             res.status(500).send(errorResponse("Erro interno no servidor", e));
             return;
+        }
+    }
+
+    public async associarComFornecedor(req: FastifyRequest, res: FastifyReply): Promise<void>{
+        try {
+            const ids:idsFornecedorInterface = await req.body as idsFornecedorInterface;
+             
+            if(!ids || !ids.ids.length) {
+                res.status(404).send(errorResponse("Dados invalidos"));
+                return;
+            }
+
+            // verificar se o fornecedor existe
+            // retornar qual o id que nao existe 
+            // nao realizar a associação se pelo menos um valor estiver inccoreto
+            // realizar somente se todos os valores estiverem corretos 
+
+            await this.clienteModel.associarComFornecedor(ids);
+
+            res.status(200).send(successResponse("Solicitações enviadas com sucesso"));
+        } catch(e) {
+            res.status(500).send(errorResponse("Erro interno no servidor", e));
         }
     }
 
