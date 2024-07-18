@@ -8,10 +8,13 @@ import { payloadInterface } from "../interfaces/payloadInterface";
 import { generateToken } from "../utils/tokenUtils";
 import { UserController } from "../interfaces/class/UserController";
 import { idsFornecedorInterface } from "../interfaces/idsFornecedorInterface";
+import { FornecedorModel } from "../models/FornecedorModel";
+import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 
 
 class ClienteController extends UserController{
     private clienteModel: ClienteModel = new ClienteModel();
+    private fornecedorModel: FornecedorModel = new FornecedorModel();
     private validateDatasUserController: ValidateDatasUserController = new ValidateDatasUserController();
     
     public async register(req: FastifyRequest, res: FastifyReply): Promise<void> {
@@ -76,18 +79,27 @@ class ClienteController extends UserController{
     public async associarComFornecedor(req: FastifyRequest, res: FastifyReply): Promise<void>{
         try {
             const ids:idsFornecedorInterface = await req.body as idsFornecedorInterface;
-             
-            if(!ids || !ids.ids.length) {
+            // pegar id cliente, ver produtoController, getIdForneedorFromToken
+            // Valida os dados recebidos
+            if(!ids || !ids.ids.length || !ids.ids.every((elem) => typeof elem === 'number')) {
                 res.status(404).send(errorResponse("Dados invalidos"));
                 return;
             }
 
-            // verificar se o fornecedor existe
-            // retornar qual o id que nao existe 
-            // nao realizar a associação se pelo menos um valor estiver inccoreto
-            // realizar somente se todos os valores estiverem corretos 
+            // Remove elementos duplicados da array
+            ids.ids = [... new Set(ids.ids)];
 
-            await this.clienteModel.associarComFornecedor(ids);
+            const listFornecedor: fornecedorInterface[] = await this.fornecedorModel.findMultUsersByIds(ids);
+            if(listFornecedor.length < ids.ids.length) {
+                // verifica quais Ids nao existem no listFornecedor e os retornam
+                const foundIds = new Set(listFornecedor.map(fornecedor => fornecedor.id_fornecedor));
+                const invalidIds: number[] = ids.ids.filter(id => !foundIds.has(id));
+
+                res.status(404).send(errorResponse("Houve um erro ao procurar usuarios", {invalidIds: invalidIds}));
+                return;
+            }
+
+            await this.clienteModel.associarComFornecedor(ids, 2);
 
             res.status(200).send(successResponse("Solicitações enviadas com sucesso"));
         } catch(e) {

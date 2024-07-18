@@ -2,6 +2,7 @@ import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import connection from "../database/connection";
 import { PoolClient } from "pg";
 import { UserModel } from "../interfaces/class/UserModel";
+import { idsFornecedorInterface } from "../interfaces/idsFornecedorInterface";
 
 class FornecedorModel extends UserModel<fornecedorInterface>{
 
@@ -97,6 +98,25 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
         }
     }
 
+    public async findMultUsersByIds(ids: idsFornecedorInterface): Promise<fornecedorInterface[]>{
+        let client: PoolClient | undefined;
+        try {   
+            client = await connection.connect();
+            const strSqlValues:string = ids.ids.map((_, i) => 
+                `id_fornecedor = $${i+1}`
+            ).join(' or ');
+            const SQL: string = `SELECT nome, senha, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, id_fornecedor, complemento, bairro FROM fornecedor WHERE ${strSqlValues}`;
+            const result:fornecedorInterface[] = (await client.query(SQL, ids.ids)).rows;  
+
+            return result;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao encontrar usuarios");
+        } finally {
+            client?.release();
+        }
+    }
+
     public async userExists(nome: string):Promise<boolean>{
         let client: PoolClient | undefined;  
         try {
@@ -150,7 +170,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
         } finally {
             client?.release();
         }
-    }   
+    }  
 
 }
 
