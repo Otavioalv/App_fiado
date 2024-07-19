@@ -1,6 +1,7 @@
 import { JsonWebTokenError, TokenExpiredError, sign, verify } from "jsonwebtoken";
 import { payloadInterface } from "../interfaces/payloadInterface";
 import { authJwt } from "../config";
+import { FastifyRequest } from "fastify";
 
 export const generateToken = async (payload: payloadInterface):Promise<string> => {
     try {
@@ -27,5 +28,17 @@ export const getPayloadFromToken = async(token: string): Promise<payloadInterfac
             throw new Error("Token de login inválido");
         }
         throw new Error("Houve um erro deconhecido");
+    }
+}
+
+export const getTokenIdFromRequest = async(req: FastifyRequest) => {
+    try {
+        const token: string = req.headers.authorization as string;
+        const decodedToken: payloadInterface = await getPayloadFromToken(token);
+        const id: number = decodedToken.id;
+
+        return id;
+    } catch (e) {
+        throw e;
     }
 }

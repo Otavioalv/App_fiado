@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { payloadInterface } from "../interfaces/payloadInterface";
-import { getPayloadFromToken } from "../utils/tokenUtils";
+import { getPayloadFromToken, getTokenIdFromRequest } from "../utils/tokenUtils";
 import { productInterface } from "../interfaces/productInterface";
 import { errorResponse, successResponse } from "../utils/response";
 import {ProdutoModel} from "../models/ProdutoModel";
@@ -12,7 +12,7 @@ class ProdutoController {
 
     public async addProducts(req: FastifyRequest, res: FastifyReply) {        
         try {
-            const id_fornecedor: number = await this.getIdFornecedorFromToken(req);
+            const id_fornecedor: number = await getTokenIdFromRequest(req);
             const datasProduct: productInterface[] = await this.productShemaValidate(req);
             
             await this.produtoModel.addProducts(datasProduct, id_fornecedor);
@@ -32,7 +32,7 @@ class ProdutoController {
     public async listProducts(req: FastifyRequest, res: FastifyReply) {
         try {
             // const {id_fornecedor} = await await req.body as fornecedorInterface;
-            const id_fornecedor:number = await this.getIdFornecedorFromToken(req);
+            const id_fornecedor:number = await getTokenIdFromRequest(req);
 
             if(!id_fornecedor || typeof id_fornecedor != "number" || id_fornecedor < 0) {
                res.status(404).send(errorResponse("Parametros invalidos"));
@@ -51,7 +51,7 @@ class ProdutoController {
 
     public async updateProtuct(req: FastifyRequest, res: FastifyReply) {
         try {
-            const id_fornecedor: number = await this.getIdFornecedorFromToken(req);
+            const id_fornecedor: number = await getTokenIdFromRequest(req);
             const datasProduct: productInterface[] = await this.productShemaValidate(req);
 
             if(datasProduct.length > 1) {
@@ -81,7 +81,7 @@ class ProdutoController {
     public async deleteProduct(req: FastifyRequest, res: FastifyReply) {
         try {
             const {id_produto} = req.body as productInterface;
-            const id_fornecedor: number = await this.getIdFornecedorFromToken(req);
+            const id_fornecedor: number = await getTokenIdFromRequest(req);
 
             if(!id_produto || typeof id_produto != 'number' || id_produto < 0) {
                 res.status(404).send(errorResponse("Parametros invalidos"));
@@ -121,18 +121,6 @@ class ProdutoController {
                 throw e;
             }
             throw new Error("Erro ao validar dados");
-        }
-    }
-
-    private async getIdFornecedorFromToken(req: FastifyRequest): Promise<number>{
-        try {
-            const token: string = req.headers.authorization as string;
-            const decodedToken: payloadInterface = await getPayloadFromToken(token);
-            const id_fornecedor: number = decodedToken.id;
-
-            return id_fornecedor;
-        } catch(e) {
-            throw e;
         }
     }
 }

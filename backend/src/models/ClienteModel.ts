@@ -104,7 +104,7 @@ class ClienteModel extends UserModel<clienteInterface>{
         }
     }
 
-    public async associarComFornecedor(ids: idsFornecedorInterface, idUser: number) {
+    public async associarComFornecedor(ids: idsFornecedorInterface, id_cliente: number) {
         let client: PoolClient | undefined;
 
         try {
@@ -113,7 +113,6 @@ class ClienteModel extends UserModel<clienteInterface>{
                 INSERT INTO 
                     
             `
-
         } catch(e) {
             throw new Error("Erro ao efetuar associação");
         } finally {

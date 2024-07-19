@@ -264,6 +264,7 @@ class ValidateDatasUserController  {
         try{
             const decodedToken:payloadInterface = await getPayloadFromToken(token);
 
+
             if(decodedToken.usuario == "fornecedor"){
                 const fornecedor = await new FornecedorModel().findUserById(decodedToken.id);
                 if(!fornecedor)     

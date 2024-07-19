@@ -5,7 +5,7 @@ import { ValidateDatasUserController } from "./ValidateDatasUserController";
 import { errorResponse, successResponse } from "../utils/response";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
-import { generateToken } from "../utils/tokenUtils";
+import { generateToken, getTokenIdFromRequest } from "../utils/tokenUtils";
 import { UserController } from "../interfaces/class/UserController";
 import { idsFornecedorInterface } from "../interfaces/idsFornecedorInterface";
 import { FornecedorModel } from "../models/FornecedorModel";
@@ -79,8 +79,8 @@ class ClienteController extends UserController{
     public async associarComFornecedor(req: FastifyRequest, res: FastifyReply): Promise<void>{
         try {
             const ids:idsFornecedorInterface = await req.body as idsFornecedorInterface;
-            // pegar id cliente, ver produtoController, getIdForneedorFromToken
-            // Valida os dados recebidos
+            const id_cliente: number = await getTokenIdFromRequest(req);
+
             if(!ids || !ids.ids.length || !ids.ids.every((elem) => typeof elem === 'number')) {
                 res.status(404).send(errorResponse("Dados invalidos"));
                 return;
@@ -99,7 +99,7 @@ class ClienteController extends UserController{
                 return;
             }
 
-            await this.clienteModel.associarComFornecedor(ids, 2);
+            await this.clienteModel.associarComFornecedor(ids, id_cliente);
 
             res.status(200).send(successResponse("Solicitações enviadas com sucesso"));
         } catch(e) {

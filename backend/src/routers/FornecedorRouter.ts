@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
 import { FornecedorController } from "../controller/FornecedorController";
-import { authenticatedRouteOptions } from "../utils/authenticate";
+import { authenticate, authorize} from "../utils/authenticate";
 import { ProdutoController } from "../controller/ProdutoController";
 
 module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) {
@@ -13,19 +13,19 @@ module.exports = async function routers(router: FastifyInstance, options: Fastif
         return await new FornecedorController().login(req, res);
     });
 
-    router.post('/product/add', authenticatedRouteOptions, async (req: FastifyRequest, res: FastifyReply) => {
+    router.post('/product/add', { preHandler: [authenticate, authorize('fornecedor')] }, async (req: FastifyRequest, res: FastifyReply) => {
         return await new ProdutoController().addProducts(req, res);
     });
 
-    router.post('/product/list', authenticatedRouteOptions, async (req: FastifyRequest, res: FastifyReply) => {
+    router.post('/product/list', { preHandler: [authenticate, authorize('fornecedor')] }, async (req: FastifyRequest, res: FastifyReply) => {
         return await new ProdutoController().listProducts(req, res);
     });
 
-    router.post('/product/update', authenticatedRouteOptions, async(req: FastifyRequest, res: FastifyReply) => {
+    router.post('/product/update', { preHandler: [authenticate, authorize('fornecedor')] }, async(req: FastifyRequest, res: FastifyReply) => {
         return await new ProdutoController().updateProtuct(req, res);
     }); 
 
-    router.post('/product/delete', authenticatedRouteOptions, async(req: FastifyRequest, res: FastifyReply) => {
+    router.post('/product/delete', { preHandler: [authenticate, authorize('fornecedor')] }, async(req: FastifyRequest, res: FastifyReply) => {
         return await new ProdutoController().deleteProduct(req, res);        
     });
 }
