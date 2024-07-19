@@ -112,15 +112,18 @@ class ClienteModel extends UserModel<clienteInterface>{
             const sqlValues = await this.createSqlValuesPartner(ids);
             const SQL = `
                 INSERT INTO 
-                    cliente_fornecedor (fk_cliente_id, fk_fornecedor_id)
+                    cliente_fornecedor (fk_fornecedor_id, fk_cliente_id)
                 VALUES ${sqlValues}
             `
+            const values = await this.createArrayValuesPartner(ids, id_cliente);
 
-            
-            await this.test(ids);
-            
+            await client.query("BEGIN");
+            await client.query(SQL, values);
+            await client.query("COMMIT");
             
         } catch(e) {
+            await client?.query("ROLLBACK");
+            console.log(e);
             throw new Error("Erro ao efetuar associação");
         } finally {
             client?.release();
@@ -137,20 +140,18 @@ class ClienteModel extends UserModel<clienteInterface>{
         return strSqlValues;
     }
 
+    
+    private async createArrayValuesPartner(ids: idsFornecedorInterface, id_cliente: number): Promise<number[]>{
+        const arr:number[] = ids.ids.reduce((acc, id) => {
+            acc.push(id, id_cliente);
+            return acc;
+        }, [] as number[]);
 
-    // fazer isso 
-    private async test(ids: idsFornecedorInterface){
-        console.log(ids);
-        const arr: number[] = [];
-        console.log(0%2,1%2, 2%2, 3%2);
-        ids.ids.forEach((_, i) => {
-            if(i % 2) {
-                arr.push(90);
-            }
-            
-        });
+        // ids.ids.forEach((_, i) => {
+        //     arr.ids.splice(i * 2 + 1, 0, id_user);
+        // });
 
-        console.log(arr);
+        return arr;
     }
 
 }
