@@ -89,7 +89,10 @@ class ClienteController extends UserController{
             // Remove elementos duplicados da array
             ids.ids = [... new Set(ids.ids)];
 
+            // Procura fornecesdores com base na lista de ids
             const listFornecedor: fornecedorInterface[] = await this.fornecedorModel.findMultUsersByIds(ids);
+
+            // Varifica se encontrou todos os fornecedores
             if(listFornecedor.length < ids.ids.length) {
                 // verifica quais Ids nao existem no listFornecedor e os retornam
                 const foundIds = new Set(listFornecedor.map(fornecedor => fornecedor.id_fornecedor));

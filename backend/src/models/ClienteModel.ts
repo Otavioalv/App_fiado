@@ -109,10 +109,17 @@ class ClienteModel extends UserModel<clienteInterface>{
 
         try {
             client = await connection.connect();
+            const sqlValues = await this.createSqlValuesPartner(ids);
             const SQL = `
                 INSERT INTO 
-                    
+                    cliente_fornecedor (fk_cliente_id, fk_fornecedor_id)
+                VALUES ${sqlValues}
             `
+
+            
+            await this.test(ids);
+            
+            
         } catch(e) {
             throw new Error("Erro ao efetuar associação");
         } finally {
@@ -120,6 +127,43 @@ class ClienteModel extends UserModel<clienteInterface>{
         }
     }
 
+    private async createSqlValuesPartner(ids: idsFornecedorInterface): Promise<string>{
+        const numcols = 2;
+        
+        const strSqlValues: string = ids.ids.map((_, i) => 
+            `($${i * numcols + 1}, $${i * numcols + 2})`
+        ).join(', ');
+
+        return strSqlValues;
+    }
+
+
+    // fazer isso 
+    private async test(ids: idsFornecedorInterface){
+        console.log(ids);
+        const arr: number[] = [];
+        console.log(0%2,1%2, 2%2, 3%2);
+        ids.ids.forEach((_, i) => {
+            if(i % 2) {
+                arr.push(90);
+            }
+            
+        });
+
+        console.log(arr);
+    }
+
 }
+
+
+/* 
+INSERT INTO 
+    cliente_fornecedor (fk_cliente_id, fk_fornecedor_id)
+VALUES
+    (1, 2),
+    (4, 5),
+    (7, 3),
+    (34, 44)
+*/
 
 export {ClienteModel}
