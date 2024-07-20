@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
 import { ClienteController } from "../controller/ClienteController";
 import { authenticatedRouteOptions, authenticate, authorize } from "../utils/authenticate";
+import { ClienteFornecedorController } from "../controller/ClienteFornecedorController";
 
 
 module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) {
@@ -13,7 +14,7 @@ module.exports = async function routers(router: FastifyInstance, options: Fastif
     });
 
     router.post("/partner", { preHandler: [authenticate, authorize('cliente')] }, async(req: FastifyRequest, res: FastifyReply) => {
-        return await new ClienteController().associarComFornecedor(req, res);
+        return await new ClienteFornecedorController().associarComFornecedor(req, res);
     });
 
     // Rota de teste de autorização

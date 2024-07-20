@@ -76,40 +76,6 @@ class ClienteController extends UserController{
         }
     }
 
-    public async associarComFornecedor(req: FastifyRequest, res: FastifyReply): Promise<void>{
-        try {
-            const ids:idsFornecedorInterface = await req.body as idsFornecedorInterface;
-            const id_cliente: number = await getTokenIdFromRequest(req);
-
-            if(!ids || !ids.ids.length || !ids.ids.every((elem) => typeof elem === 'number')) {
-                res.status(404).send(errorResponse("Dados invalidos"));
-                return;
-            }
-
-            // Remove elementos duplicados da array
-            ids.ids = [... new Set(ids.ids)];
-
-            // Procura fornecesdores com base na lista de ids
-            const listFornecedor: fornecedorInterface[] = await this.fornecedorModel.findMultUsersByIds(ids);
-
-            // Varifica se encontrou todos os fornecedores
-            if(listFornecedor.length < ids.ids.length) {
-                // verifica quais Ids nao existem no listFornecedor e os retornam
-                const foundIds = new Set(listFornecedor.map(fornecedor => fornecedor.id_fornecedor));
-                const invalidIds: number[] = ids.ids.filter(id => !foundIds.has(id));
-
-                res.status(404).send(errorResponse("Houve um erro ao procurar usuarios", {invalidIds: invalidIds}));
-                return;
-            }
-
-            await this.clienteModel.associarComFornecedor(ids, id_cliente);
-
-            res.status(200).send(successResponse("Solicitações enviadas com sucesso"));
-        } catch(e) {
-            res.status(500).send(errorResponse("Erro interno no servidor", e));
-        }
-    }
-
     private async generateTokenUser(user: loginInterface): Promise<string>{
         try {
             const cliente = await this.clienteModel.findByUsername(user.nome);

@@ -92,7 +92,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             
             return result;
         } catch(e) {
-            throw new Error("Erro ao encontrar usuario");
+            throw new Error("Erro ao procurar usuario");
         } finally {
             client?.release();
         }
@@ -111,7 +111,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             return result;
         } catch (e) {
             console.log(e);
-            throw new Error("Erro ao encontrar usuarios");
+            throw new Error("Erro ao procurar usuarios");
         } finally {
             client?.release();
         }
