@@ -42,11 +42,7 @@ class ClienteFornecedorModel {
                 VALUES ${sqlValues};
             `
             const values = await this.createArrayValuesPartner(ids, id_cliente);
-            console.log(SQL);
-
-            console.log([id_cliente, ids.ids.join(', ')]);
-
-            console.log(values);
+        
             await client.query("BEGIN");
             await client.query(SQL, values);
             await client.query("COMMIT");
@@ -83,25 +79,5 @@ class ClienteFornecedorModel {
         return arr;
     }
 }
-
-/* 
-    select * from cliente_fornecedor where 
-        fk_fornecedor_id = ANY(ARRAY[18, 19, 20]::int[]) and fk_cliente_id = 1 ;
-
-    ANY($2::int[])
-*/
-
-/* 
-    INSERT INTO 
-        cliente_fornecedor (fk_cliente_id, fk_fornecedor_id)
-    VALUES
-        (1, ANY(ARRAY[18, 29]::int[]));
-        (1, 2),
-        (1, 5),
-        (1, 3),
-        (1, 44)
-
-    
-*/
 
 export {ClienteFornecedorModel}

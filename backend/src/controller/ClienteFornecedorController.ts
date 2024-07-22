@@ -37,8 +37,6 @@ class ClienteFornecedorController {
                 return;
             }
 
-
-            // Verificar se precisa mandar resposta de que ja existe associado ou passar direto do IF
             // Procura associações existentes com basse na array de ids de fornecedores, e id do cliente
             const listPartner: clienteFornecedorInterface[] = await this.clienteFornecedorModel.findMultPartner(ids, id_cliente);
             // Verifica se associação ja existe
