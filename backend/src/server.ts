@@ -31,10 +31,13 @@ async function start() {
     
     // socket IO
     await app.register(fastifySocketIO);
+    
     await app.register(fastifyStatic, {
         root: path.join(__dirname, 'public'),
-        prefix: '/frontend'
+        prefix: '/frontend',
+        index: ['index.html']
     });
+
     await socketIO(app);
     // ------
     try {
