@@ -43,10 +43,6 @@ class ClienteFornecedorController {
             if(listPartner.length > 0) {
                 // verifica quais ids existem no listPartner e os retorna
                 const foundIds = new Set(listPartner.map(partner => partner.fk_fornecedor_id));
-                // const invalidIds: number[] = ids.ids.filter(id => foundIds.has(id)); 
-
-                // res.status(404).send(errorResponse("Ja existe associação com o/os seguinte/es id/s", {invalidIds: invalidIds}));
-                // return;
 
                 ids.ids = ids.ids.filter(id => !foundIds.has(id)); 
                 
