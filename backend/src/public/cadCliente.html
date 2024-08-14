@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Cadastro cliente</title>
+</head>
+<body>
+    <section class="flex flex-col justify-center items-center py-10 constainer gap-2"> 
+        <div class="flex flex-col justify-center items-center gap-1">
+            <img class="max-w-24" src="./assets/buyCar.png" alt="icon-buy-car">
+            <h1 class="text-3xl font-extrabold text-orange-600">Carrinho</h1>
+        </div>
+
+        <div class="text-center">
+            <h1 class="font-semibold">CADASTRE-SE</h1>
+            <p>Os campos obrigatórios contém *</p>
+        </div>
+
+        <div class="w-full px-4">
+            <form class="form-user-cad flex flex-col gap-3">
+                <div class="flex flex-col">
+                    <label class="text-sm" for="username">NOME *</label>
+                    <input class="bg-gray-300 h-12 rounded-xl px-6 outline-none focus:border-2 border-orange-600" type="text" id="username" name="username" placeholder="Seu nome de usuario">
+                </div>
+                
+                <div class="flex flex-col">
+                    <label class="text-sm" for="password">SENHA *</label>
+                    <input 
+                        class="bg-gray-300 h-12 rounded-xl px-6 outline-none focus:border-2 border-orange-600"
+                        name="password" 
+                        id="password" 
+                        type="password" 
+                        onfocus="(this.type = 'text')" 
+                        onblur="(this.type = 'password')" 
+                        placeholder="Crie uma senha"
+                    >
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm" for="apelido">APELIDO</label>
+                    <input 
+                        class="bg-gray-300 h-12 rounded-xl px-6 outline-none focus:border-2 border-orange-600"
+                        name="apelido"
+                        id="apelido"
+                        type="text" 
+                        placeholder="Apelido"
+                    >
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm" for="phone">TELEFONE *</label>
+                    <!-- <input type="tel" placeholder="(XX) XXXXX-XXXX" pattern="\(\d{2}\) \d{5}-\d{4}"> -->
+                    <input 
+                        class="bg-gray-300 h-12 rounded-xl px-6 outline-none focus:border-2 border-orange-600"
+                        type="text" 
+                        name="phone"
+                        id="phone"
+                        maxlength="15"
+                        placeholder="(XX) XXXXX-XXXX" 
+                        oninput="formatPhone(this)"
+                    >
+                </div>
+
+                <button class="my-5 bg-black text-orange-600 h-14 w-full py-2 rounded-md font-black">ASSOCIAR A FORNECEDOR</button>
+            </form> 
+        </div>
+    </section>
+
+
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <script  type="module" src="./script.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>

@@ -23,7 +23,7 @@ app.setErrorHandler((err, req, res) => {
 });
 
 const PORT:number = 8090;
-const HOST:string = "127.0.0.1"
+const HOST:string = "0.0.0.0" // funciona localmente e em qualquer dispositivo conectado. Acesso acontece atraves do ip do dispoditivo que ta servindo a API
 
 async function start() {
     await app.register(cors);

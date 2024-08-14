@@ -57,7 +57,10 @@
                         type="text" 
                         name="phone"
                         id="phone"
-                        placeholder="(XX) XXXXX-XXXX" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');">
+                        maxlength="15"
+                        placeholder="(XX) XXXXX-XXXX" 
+                        oninput="formatPhone(this)"
+                    >
                 </div>
 
                 <div class="flex flex-col">
@@ -98,8 +101,9 @@
                         name="cep"
                         id="cep"
                         type="text"
-                        oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"
-                        onkeyup="console.log(this.value);"
+                        maxlength="9"
+                        oninput="formatCep(this)"
+                        placeholder="CEP"
                     >
                 </div>
                 
