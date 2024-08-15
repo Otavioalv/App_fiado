@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Adicionar produto</title>
+</head>
+<body>
+    <section class="flex flex-col justify-center items-center py-10 constainer">
+        <div class="w-full p-2">
+            <!-- id_fornecedor, nome, apelido, telefone, nomeestabelecimento, numeroimovel, logradouro, bairro, complemento, cep, uf -->
+
+            <h1>apelido</h1>
+            <h2>estabelecimento</h2>
+            
+            <form action="">
+                <ul id="addListaProduto">
+                    <li class="flex flex-col max-w-full p-3 border-b-2 border-gray-300">
+                        <div>
+                            <label for="nome">nome</label>
+                            <input type="text" name="produto" id="nome">
+                        </div>
+                        <div class="flex">
+                            <div>
+                                <label for="quantidade">QUANTIDADE</label>
+                                <input type="number" name="quantidade" id="quantidade" min="0" step="1" placeholder="0">
+                            </div>
+
+                            <div>
+                                <label for="preco">PREÇO</label>
+                                <input type="number" name="preco" id="preco" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div>
+                            <p>TOTAL<span>total</span></p>
+                        </div>
+                    </li>
+                </ul>
+            </form>
+        </div>
+    </section>
+
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <script  type="module" src="./script.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>

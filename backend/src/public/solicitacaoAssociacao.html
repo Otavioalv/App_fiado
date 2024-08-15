@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Solicitação de associação</title>
+</head>
+<body>
+    <section class="flex flex-col justify-center items-center py-10 constainer">
+        <div class="w-full p-2">
+            
+            <h1>Solicitações</h1>
+
+            <ul id="listaAssociacao">
+                <li class="max-w-full p-3 flex flex-col border-b-2 border-gray-300 gap-2">
+                    <h2>CHARLES BYTE DA SILVA</h2>
+
+                    <div class="flex justify-between">
+                        <button class="bg-black text-orange-600 w-1/4 text-xs p-2 rounded-md font-black">DETALHES</button>
+                        <button class="bg-black text-orange-600 w-1/4 text-xs p-2 rounded-md font-black">RECUSAR</button>
+                        <button class="bg-black text-orange-600 w-1/4 text-xs p-2 rounded-md font-black">APROVAR</button>
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="w-full flex justify-center h-24 fixed left-1/2 top-full -translate-x-2/4 -translate-y-full bg-white">
+                <button class="bg-black text-orange-600 w-11/12 h-14 p-2 rounded-md font-black my-3" >APROVAR TODOS</button>
+            </div>
+            
+        </div>
+    </section>
+    
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <script  type="module" src="./script.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>
