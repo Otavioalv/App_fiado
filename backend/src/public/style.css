@@ -16,5 +16,43 @@ html, body {
     font-size: 10px;
 }
 
+.msg-alert {
+    position: fixed;
+    left: 70%;
+    bottom: 85%;
+    transform: translate(-100%, 100%);
+}
 
 
+/* 
+
+font-light bg-green-500/30 rounded-md p-2 border border-green-500
+
+<div class="fixed flex flex-col test left-[90%] bottom-[95%] translate-y-full -translate-x-full">    
+    <div class="my-3  rounded-lg message-container" *ngFor="let msg of message">
+        <p class="
+            message-box
+
+            relative
+            min-w-40 text-center font-medium 
+            p-4 
+            rounded-lg 
+            border-2
+            
+            before:content-['']
+            before:absolute
+            before:w-0
+            before:h-full
+            before:top-0
+            before:left-0
+            before:inline
+
+            {{msg.type === 'success' ? 'bg-green-300/35 text-green-400 border-green-400 before:bg-green-400/30' : ''}}
+            {{msg.type === 'error' ? 'bg-red-300/35 text-red-500 border-red-500 before:bg-red-400/30' : ''}}
+            {{msg.type === 'alert' ? 'bg-yellow-200/35 text-yellow-300 border-yellow-300 before:bg-yellow-400/30' : ''}}
+        ">
+            {{msg.message}}
+        </p>
+    </div>
+</div> 
+*/

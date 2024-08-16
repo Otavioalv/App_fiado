@@ -8,6 +8,14 @@
 </head>
 <body>
     <section class="flex flex-col justify-center items-center py-10 constainer gap-2"> 
+        
+        <ul id="msg-alert" class="fixed left-[90%] bottom-[95%] -translate-x-full translate-y-full flex flex-col gap-2">
+            <!-- <li class="bg-green-400/30 p-2 rounded-md border border-green-400" id="msg-alert">
+                <p class="relative font-light min-w-40">Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
+            </li> -->
+        </ul>
+            
+
         <div class="flex flex-col justify-center items-center gap-1">
             <img class="max-w-24" src="./assets/buyCar.png" alt="icon-buy-car">
             <h1 class="text-3xl font-extrabold text-orange-600">Carrinho</h1>
@@ -19,7 +27,7 @@
         </div>
 
         <div class="w-full px-4">
-            <form class="form-user-cad flex flex-col gap-3">
+            <form class="form-user-cad flex flex-col gap-3" onsubmit="cadFornecedor(event)" id="cadFornecedorForm">
                 <h1 class="font-semibold">Dados de usuario</h1>
                 <div class="flex flex-col">
                     <label class="text-sm" for="username">NOME *</label>
@@ -133,7 +141,7 @@
                     >
                 </div>
 
-                <button class="my-5 bg-black text-orange-600 h-14 w-full py-2 rounded-md font-black">FORNECER PRODUTOS</button>
+                <button type="submit"  class="my-5 bg-black text-orange-600 h-14 w-full py-2 rounded-md font-black">FORNECER PRODUTOS</button>
             </form> 
         </div>
     </section>
