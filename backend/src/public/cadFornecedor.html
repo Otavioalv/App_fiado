@@ -32,6 +32,12 @@
                 <div class="flex flex-col">
                     <label class="text-sm" for="username">NOME *</label>
                     <input class="bg-gray-300 h-12 rounded-xl px-6 outline-none focus:border-2 border-orange-600" type="text" id="username" name="username" placeholder="Seu nome de usuario">
+                    
+                    <ul class="text-red-600 font-semibold hidden" id="nomeError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
                 
                 <div class="flex flex-col">
@@ -45,10 +51,16 @@
                         onblur="(this.type = 'password')" 
                         placeholder="Crie uma senha"
                     >
+
+                    <ul class="text-red-600 font-semibold hidden" id="senhaError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="text-sm" for="apelido">APELIDO</label>
+                    <label class="text-sm" for="apelido">APELIDO </label>
                     <input 
                         class="bg-gray-300 h-12 rounded-xl px-6 outline-none focus:border-2 border-orange-600"
                         name="apelido"
@@ -56,6 +68,12 @@
                         type="text" 
                         placeholder="Apelido"
                     >
+
+                    <ul class="text-red-600 font-semibold hidden" id="apelidoError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
 
                 <div class="flex flex-col">
@@ -70,6 +88,12 @@
                         placeholder="(XX) XXXXX-XXXX" 
                         oninput="formatPhone(this)"
                     >
+
+                    <ul class="text-red-600 font-semibold hidden" id="telefoneError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
 
                 <h1 class="font-semibold">Dados de localização</h1>
@@ -82,6 +106,12 @@
                         id="estabelecimento"
                         type="text" 
                         placeholder="Nome do estabelecimento">
+
+                    <ul class="text-red-600 font-semibold hidden" id="nomeEstabelecimentoError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
                 <div class="flex flex-col">
                     <label class="text-sm" for="logradouro">LOGRADOURO *</label>
@@ -92,6 +122,12 @@
                         type="text" 
                         placeholder="Rua/Avenida"
                     >
+
+                    <ul class="text-red-600 font-semibold hidden" id="logradouroError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
                 
                 <div class="flex flex-col">
@@ -103,6 +139,12 @@
                         type="text"
                         placeholder="Bairro"
                     >
+
+                    <ul class="text-red-600 font-semibold hidden" id="bairroError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
 
                 <div class="flex flex-col">
@@ -116,17 +158,35 @@
                         oninput="formatCep(this)"
                         placeholder="CEP"
                     >
+
+                    <ul class="text-red-600 font-semibold hidden" id="cepError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
                 
                 <div class="flex items-center justify-center gap-3">
                     <div >
                         <label class="text-sm" for="uf">UF *</label>
                         <input type="text" id="uf" name="uf" class="bg-gray-300  h-12 rounded-xl px-6 outline-none focus:border-2 border-orange-600 w-full">
+
+                        <ul class="text-red-600 font-semibold hidden" id="ufError">
+                            <!-- <li>
+                                *erro
+                            </li> -->
+                        </ul>
                     </div>
 
                     <div>
                         <label class="text-sm" for="numEstabelecimento">NUM ESTABELECIMENTO *</label>
                         <input type="text" id="numEstabelecimento" name="numEstabelecimento" placeholder="" class="bg-gray-300  h-12 rounded-xl px-6  outline-none focus:border-2 border-orange-600 w-full">
+
+                        <ul class="text-red-600 font-semibold hidden" id="numeroImovelError">
+                            <!-- <li>
+                                *erro
+                            </li> -->
+                        </ul>
                     </div>
                 </div>
                 
@@ -139,6 +199,12 @@
                         type="text"
                         placeholder="Complemento"
                     >
+
+                    <ul class="text-red-600 font-semibold hidden" id="complementoError">
+                        <!-- <li>
+                            *erro
+                        </li> -->
+                    </ul>
                 </div>
 
                 <button type="submit"  class="my-5 bg-black text-orange-600 h-14 w-full py-2 rounded-md font-black">FORNECER PRODUTOS</button>

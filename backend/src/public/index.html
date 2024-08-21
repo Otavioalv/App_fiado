@@ -8,6 +8,12 @@
 </head>
 <body>
     <section class="flex flex-col justify-center items-center py-10 constainer">
+        <ul id="msg-alert" class="fixed left-[90%] bottom-[95%] -translate-x-full translate-y-full flex flex-col gap-2">
+            <!-- <li class="bg-green-400/30 p-2 rounded-md border border-green-400" id="msg-alert">
+                <p class="relative font-light min-w-40">Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
+            </li> -->
+        </ul>
+
         <div class="flex flex-col justify-center items-center gap-1">
             <img class="max-w-40" src="./assets/buyCar.png" alt="icon-buy-car">
             <h1 class="text-4xl font-extrabold text-orange-600">Carrinho</h1>
@@ -20,7 +26,7 @@
                     <h3 class="text-sm font-bold">LOGIN</h3>
                 </div>
                 
-                <form class="form-user flex flex-col gap-2 my-2 w-full px-5">
+                <form class="form-user flex flex-col gap-2 my-2 w-full px-5" onsubmit="return false;">
                     <div class="flex flex-col">
                         <label for="name" class="">NOME</label>
                         <input 
@@ -30,6 +36,9 @@
                             type="text" 
                             placeholder="Digite seu nome..."
                         >
+                        <ul class="text-red-600 font-semibold hidden" id="nomeError">
+                            <!-- <li></li> -->
+                        </ul>
                     </div> 
                     
                     <div class="flex flex-col">
@@ -43,14 +52,18 @@
                             onblur="(this.type = 'password')" 
                             placeholder="Digite sua senha..."
                         >
+
+                        <ul class="text-red-600 font-semibold hidden" id="senhaError">
+                            <!-- <li></li> -->
+                        </ul>
                     </div>
 
                     <div class="flex flex-col items-center justify-center my-1 gap-2">
                         <div>
                             <h3 class="font-normal text-sm">ENTRAR COMO</h3>
                         </div>
-                        <button class="bg-black text-orange-600 w-full py-2 rounded-md font-black" >COMPRADOR</button>
-                        <button class="bg-black text-orange-600 w-full py-2 rounded-md font-black" >FORNECEDOR</button>
+                        <button class="bg-black text-orange-600 w-full py-2 rounded-md font-black">COMPRADOR</button>
+                        <button onclick="loginFornecedor(event)" class="bg-black text-orange-600 w-full py-2 rounded-md font-black" >FORNECEDOR</button>
                     </div>
 
                     <button>Esqueceu a senha ?</button>
@@ -67,8 +80,8 @@
                 </div>
 
                 <div class="form-user flex flex-col gap-2 my-2 w-full px-5">
-                    <button class="bg-black text-orange-600 w-full py-2 rounded-md font-black" >COMPRADOR</button>
-                    <button class="bg-black text-orange-600 w-full py-2 rounded-md font-black" >FORNECEDOR</button>
+                    <button onclick="window.location.href='./cadCliente.html'" class="bg-black text-orange-600 w-full py-2 rounded-md font-black" >COMPRADOR</button>
+                    <button onclick="window.location.href='./cadFornecedor.html'" class="bg-black text-orange-600 w-full py-2 rounded-md font-black" >FORNECEDOR</button>
                 </div>
             </div>
         </div>

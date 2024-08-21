@@ -7,6 +7,36 @@
     <title>Adicionar produto</title>
 </head>
 <body>
+    <script>
+        function getToken() {
+            const name = "authToken=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookies = decodedCookie.split(';');
+    
+            for(let i = 0; i<  cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if(cookie.indexOf(name) === 0) {
+                    return cookie.substring(name.length, cookie.length);
+                }
+                
+            }
+    
+            return null;
+        }
+
+        function checkAuth() {
+            const token = getToken();
+
+            if(!token) {
+                window.location.href = "http://127.0.0.1:8090/frontend/";
+            }
+
+        }
+
+        window.onload = checkAuth;
+        
+    </script>
+
     <section class="flex flex-col justify-center items-center py-10 constainer">
         <div class="w-full p-2">
             <!-- id_fornecedor, nome, apelido, telefone, nomeestabelecimento, numeroimovel, logradouro, bairro, complemento, cep, uf -->
@@ -59,9 +89,9 @@
                                 <label for="quantidade">QUANTIDADE</label>
                                 
                                 <div class="flex gap-2 justify-center items-center">
-                                    <button type="button" class="text-3xl">-</button>
-                                    <input type="number" class="w-14 text-center rounded-sm bg-gray-300 p-1 px-2 outline-none border-orange-600 focus:border " name="quantidade" id="quantidade" min="0" step="1" placeholder="0">
-                                    <button type="button" class="text-3xl">+</button>
+                                    <button type="button" class="text-3xl" onclick="calcQtd('-')">-</button>
+                                    <input type="number" class="w-14 text-center rounded-sm bg-gray-300 p-1 px-2 outline-none border-orange-600 focus:border " name="quantidade" id="quantidade" min="0" step="1" placeholder="0" value="0">
+                                    <button type="button" class="text-3xl" onclick="calcQtd('+')">+</button>
                                 </div>
 
                             </div>

@@ -27,6 +27,7 @@ const HOST:string = "0.0.0.0" // funciona localmente e em qualquer dispositivo c
 
 async function start() {
     await app.register(cors);
+    
     await app.register(routers);
     
     // socket IO
