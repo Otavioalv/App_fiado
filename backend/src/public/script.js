@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     window.loginFornecedor = async (e) => {
+        const ip = getIp();
+
         e.preventDefault();
         const form = e.target.closest('form');
         
@@ -42,8 +44,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
 
+
         // Por algum motivo, pra acessar externamente tem q usar o ip do pc
-        const url = "http://127.0.0.1:8090/fornecedor/login";
+        const url = `http://${ip}:8090/fornecedor/login`;
 
         const [result, status] = await fetch(url, {
             method: 'POST',
@@ -70,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             setTokenCookie(result.data.token);
             // deleteCookie();
             // console.log(getToken());
-            window.location.href = "http://127.0.0.1:8090/frontend/addProduto.html";
+            window.location.href = `http://${ip}:8090/frontend/addProduto.html`;
         }
     }
 
@@ -104,7 +107,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             cep: cep
         }
 
-        const url = "http://127.0.0.1:8090/fornecedor/register";
+
+        const ip = getIp();
+        const url = `http://${ip}:8090/fornecedor/register`;
         
         const [result, status] = await fetch(url, {
             method: 'POST',
@@ -122,14 +127,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         createMessageAlert(result.message, status);
         
         if(status === 200) {
-            window.location.href = "http://127.0.0.1:8090/frontend/";
+
+            window.location.href = `http://${ip}:8090/frontend/`;
         }
     }
 
     window.calcQtd = (op) => {
         const qtdElement = document.getElementById("quantidade");
-        var value = parseInt(qtdElement.value);
-
+        var value = parseInt(qtdElement.value) || 0;
         if(op === "-") {
             value > 0 ? value-- : null;
         } else if(op === "+") {
@@ -137,6 +142,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         qtdElement.value = value;
+    }
+
+    window.calcTotal = () => {
+        const qtd = parseInt(document.getElementById("quantidade").value) || 0;
+        const preco = parseFloat(document.getElementById("preco").value) || 0;
+        const totalElememt = document.getElementById("totalCalc");
+        const total = (qtd * preco).toFixed(2);
+
+        totalElememt.innerText = total.replace(".", ",");
     }
 
     function createErrorAlertLogin(errors) {
@@ -375,14 +389,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function createMessageAlert(message, status) {
         const msgElement = document.getElementById('msg-alert');
-        console.log(status);
         if(status <= 200 && status < 300) {
             msgElement.innerHTML = `
                 <li class="bg-green-400/30 p-2 rounded-md border border-green-400" id="msg-alert">
                     <p class="relative font-light min-w-40 text-center">${message}</p>
                 </li>
             `;
-        } else if(status > 200 && status <= 400) {
+        } else if(status > 200 && status <= 499) {
             msgElement.innerHTML =`
                 <li class="bg-yellow-400/30 p-2 rounded-md border border-yellow-400" id="msg-alert">
                     <p class="relative font-light min-w-40 text-center">${message}</p>
@@ -390,7 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         } else{
             msgElement.innerHTML = `
-                <li class="bg-green-400/30 p-2 rounded-md border border-green-400" id="msg-alert">
+                <li class="bg-red-400/30 p-2 rounded-md border border-red-400" id="msg-alert">
                     <p class="relative font-light min-w-40 text-center">${message}</p>
                 </li>
             `;
@@ -432,4 +445,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         return null;
     }
+
+    function getIp() {
+        const urlLocation = window.location.href;
+        // const ip = urlLocation.substring(7, urlLocation.substring(urlLocation.indexOf("/")+2).indexOf(":") + urlLocation.indexOf("/") +2)
+        const ip = urlLocation.split('/')[2].split(':')[0]; 
+
+        return ip;
+    }
+
 });

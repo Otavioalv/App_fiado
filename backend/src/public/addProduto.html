@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Adicionar produto</title>
+</head>
+<body>
+    <section class="flex flex-col justify-center items-center py-10 constainer">
+        <div class="w-full p-2">
+            <!-- id_fornecedor, nome, apelido, telefone, nomeestabelecimento, numeroimovel, logradouro, bairro, complemento, cep, uf -->
+
+            <div class="flex justify-between px-3">
+                <div>
+                    <h1 class="text-xl">apelido</h1>
+                    <h2 class="text-base">estabelecimento</h2>
+                </div>  
+                <div class=" flex items-center">
+                    <button
+                        class="group cursor-pointer outline-none hover:rotate-90 duration-300"
+                        title="Add New"
+                    >
+                        <svg
+                            class="stroke-black w-9 h-9 fill-none hover:stroke-orange-600 group-active:duration-0 duration-300"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                        <path
+                            stroke-width="1.5"
+                            d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                        ></path>
+                        <path stroke-width="1.5" d="M8 12H16"></path>
+                        <path stroke-width="1.5" d="M12 16V8"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <form>
+                <ul id="addListaProduto">
+                    <li class="flex flex-col max-w-full p-3 border-b-2 border-gray-300 gap-2">
+                        
+                        <div class="flex items-center justify-end">
+                            <button 
+                                type="button"
+                                class="relative bg-transparent border-none w-6 h-6 cursor-pointer before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:w-full before:h-[2px] before:bg-red-600 before:origin-center after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:w-full after:h-[2px] after:bg-red-600 after:origin-center before:-translate-x-2/4 before:-translate-y-2/4 before:rotate-45 after:-translate-x-2/4 after:-translate-y-2/4 after:-rotate-45 hover:rotate-90 duration-300"
+                            >
+                            </button>
+                        </div>
+
+                        <div class="flex gap-2 items-center">
+                            <label for="nome">NOME</label>
+                            <input class="w-full rounded-sm outline-none border-orange-600 focus:border p-1 px-2 bg-gray-300 " type="text" name="produto" id="nome" placeholder="Nome do produto">
+                        </div> 
+
+                        <div class="flex gap-3">
+                            <div class="flex flex-col gap-1">
+                                <label for="quantidade">QUANTIDADE</label>
+                                
+                                <div class="flex gap-2 justify-center items-center">
+                                    <button onclick="calcQtd('-'); calcTotal()" type="button" class="text-3xl">-</button>
+                                    <input type="number" oninput="calcTotal()" class="w-14 text-center rounded-sm bg-gray-300 p-1 px-2 outline-none border-orange-600 focus:border " name="quantidade" id="quantidade" min="0" step="1" value="0" placeholder="0">
+                                    <button onclick="calcQtd('+'); calcTotal()" type="button" class="text-3xl">+</button>
+                                </div>
+
+                            </div>
+
+                            <div class="w-full flex flex-col gap-1">
+                                <label for="preco">PREÇO</label>
+                                <input type="number" oninput="calcTotal()" class="w-full rounded-sm bg-gray-300 p-1 px-2 outline-none border-orange-600 focus:border" name="preco" id="preco" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <p>TOTAL<span class="bg-gray-300 p-1 px-2 ml-3" id="totalCalc">0,00</span></p>
+                        </div>
+                    </li>
+                </ul>
+                <div class="w-full flex justify-center h-24 fixed left-1/2 top-full -translate-x-2/4 -translate-y-full bg-white">
+                    <button  class="bg-black text-orange-600 w-11/12 h-14 p-2 rounded-md font-black my-3" >CONCLUIR</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <script  type="module" src="./script.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>
