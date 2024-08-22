@@ -231,17 +231,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const liElements = ulElement.querySelectorAll('li');
         const productsObj = [];
 
-        /* 
-            [
-                {
-                    "nome": "Teste de adicioan produto",
-                    "preco": 10.29,
-                    "quantidade": 10
-                }
-            ]   
-        */
-        
-        
         liElements.forEach((li, i) => {
             const nameProd = li.querySelector('input[name="produto"]').value;
             const qtdProd = li.querySelector('input[name="quantidade"]').value;
@@ -255,7 +244,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             productsObj.push(produto);
         });
 
-        console.log(productsObj);
+
+        const ip = getIp();
+        const url = `http://${ip}:8090/fornecedor/product/add`;
+        const token = getToken();
+
+        const [result, status] = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(productsObj)
+        })
+        .then(async res => {
+            return [await res.json(), res.status];
+        })
+
+        console.log(result, status);
     }
 
     function createErrorAlertLogin(errors) {
