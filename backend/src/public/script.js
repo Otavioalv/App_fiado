@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             productsObj.push(produto);
         });
 
+        // editando aqui agora
 
         const ip = getIp();
         const url = `http://${ip}:8090/fornecedor/product/add`;
