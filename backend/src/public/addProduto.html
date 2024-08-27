@@ -7,6 +7,40 @@
     <title>Adicionar produto</title>
 </head>
 <body>
+    <script>
+        function getToken() {
+            const name = "authToken=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookies = decodedCookie.split(';');
+    
+            for(let i = 0; i<  cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if(cookie.indexOf(name) === 0) {
+                    return cookie.substring(name.length, cookie.length);
+                }
+                
+            }
+    
+            return null;
+        }
+
+        function checkAuth() {
+            const token = getToken();
+
+            if(!token) {
+                window.location.href = "http://127.0.0.1:8090/frontend/";
+            }
+
+        }
+
+        window.onload = checkAuth;
+        
+    </script>
+    <ul id="msg-alert" class="fixed left-[90%] bottom-[95%] -translate-x-full translate-y-full flex flex-col gap-2">
+        <!-- <li class="bg-green-400/30 p-2 rounded-md border border-green-400" id="msg-alert">
+            <p class="relative font-light min-w-40">Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
+        </li> -->
+    </ul>
     <section class="flex flex-col justify-center items-center py-10 constainer">
         <div class="w-full p-2">
             <!-- id_fornecedor, nome, apelido, telefone, nomeestabelecimento, numeroimovel, logradouro, bairro, complemento, cep, uf -->

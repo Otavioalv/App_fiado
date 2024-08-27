@@ -1,4 +1,26 @@
 document.addEventListener('DOMContentLoaded', async () => {
+
+    if(window.location.pathname === '/frontend/listaFornecedores.html') {
+        const ip = getIp();
+        const url = `http://${ip}:8090/user/fornecedor/list-all`;
+        const token = getToken();
+
+        
+        const [result, status] = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(async res => {
+            return [await res.json(), res.status];
+        })
+
+        if(status === 200) {
+            listAllFornecedorView(result.data.fornecedor);
+        }
+    }
+
     
     window.formatPhone = function (input) {
         // Remove tudo que não seja dígito
@@ -70,12 +92,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log(result, status);
 
         if(status == 200) {
+            deleteCookie();
             setTokenCookie(result.data.token);
             // deleteCookie();
             // console.log(getToken());
             window.location.href = `http://${ip}:8090/frontend/addProduto.html`;
         }
     }
+
+    window.loginComprador = async (e) => {
+        const ip = getIp();
+
+        e.preventDefault();
+        const form = e.target.closest('form');
+        
+        const username = (form.querySelector("#name")).value.trim();
+        const senha = (form.querySelector("#password")).value.trim();
+
+
+        const dataObj = {
+            nome: username,
+            senha: senha
+        }
+        
+
+
+        // Por algum motivo, pra acessar externamente tem q usar o ip do pc
+        const url = `http://${ip}:8090/cliente/login`;
+
+        const [result, status] = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataObj)
+        })
+        .then(async res => {
+            return [await res.json(), res.status];
+        })
+
+        
+
+        if(result.errors)
+            createErrorAlertLogin(result.errors);
+        
+        createMessageAlert(result.message, status);
+
+
+        console.log(result, status);
+
+        if(status == 200) {
+            deleteCookie();
+            setTokenCookie(result.data.token);
+            window.location.href = `http://${ip}:8090/frontend/listaFornecedores.html`;
+        }
+    }    
 
     window.cadFornecedor = async (e) => {
         e.preventDefault();
@@ -132,6 +203,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    window.cadComprador = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+
+        const username = (form.querySelector("#username")).value.trim();
+        const password = (form.querySelector('#password')).value.trim();
+        const apelido = (form.querySelector('#apelido')).value.trim();
+        const telefone = (form.querySelector('#phone').value.trim()).replace(/[-()\s]/g, "");
+
+        const dataObj = {
+            nome: username,   
+            senha: password,
+            apelido: apelido,
+            telefone: telefone,
+        }
+
+        const ip = getIp();
+        const url = `http://${ip}:8090/cliente/register`;
+        
+        const [result, status] = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataObj)
+        })
+        .then(async res => {
+            return [await res.json(), res.status];
+        })
+        
+        console.log(result);
+
+        if(result.errors)
+            createErrorAlert(result.errors);
+        createMessageAlert(result.message, status);
+        
+        if(status === 200) {
+            window.location.href = `http://${ip}:8090/frontend/`;
+        }
+    }
+
     window.calcQtd = (op, id) => {
         const qtdElement = document.getElementById(`quantidade-${id}`);
         var value = parseInt(qtdElement.value) || 0;
@@ -159,7 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ulElement = document.getElementById('addListaProduto');
         const liElement = document.createElement('li');
         const newId = MD5(`${Math.random()}`);
-    
+
         liElement.className = "flex flex-col max-w-full p-3 border-b-2 border-gray-300 gap-2";
         liElement.id = `listProduct-${newId}`
         liElement.innerHTML = `
@@ -221,8 +333,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.deleteFormProduct = (id) => {
         const liElement = document.getElementById(`listProduct-${id}`);
 
-        if(liElement)
-            liElement.remove();
+        if(liElement) {
+            // LINDOOO LINDOO LINNDOOOOOO
+            setTimeout(() => {
+                liElement.remove();
+            }, 100);
+        }
+            
     }
 
     window.addProduto = async (e) => {
@@ -238,8 +355,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             const produto = {
                 nome: nameProd,
-                preco: precoProd,
-                quantidade: qtdProd
+                preco: parseFloat(precoProd),
+                quantidade: parseInt(qtdProd)
             }   
             productsObj.push(produto);
         });
@@ -262,7 +379,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             return [await res.json(), res.status];
         })
 
-        console.log(result, status);
+        createMessageAlert(result.message, status);
+    }
+
+    window.associar = async (id) => {
+        const ip = getIp();
+        const url = `http://${ip}:8090/cliente/partner`;
+        const token = getToken();
+        const objId = {
+            ids: [id]
+        }
+
+        const [result, status] = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(objId)
+        })
+        .then(async res => {
+            return [await res.json(), res.status]
+        })
+        
+        
+        if(status === 200){
+            createMessageAlert(result.message, status);
+            const buttonElement = document.getElementById(`fornecedor-${id}`);
+            buttonElement.innerText = "SOLICITADO"
+        }
+
     }
 
     function createErrorAlertLogin(errors) {
@@ -501,7 +647,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function createMessageAlert(message, status) {
         const msgElement = document.getElementById('msg-alert');
-        if(status <= 200 && status < 300) {
+        if(status <= 200 || status < 300) {
             msgElement.innerHTML = `
                 <li class="bg-green-400/30 p-2 rounded-md border border-green-400" id="msg-alert">
                     <p class="relative font-light min-w-40 text-center">${message}</p>
@@ -513,7 +659,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p class="relative font-light min-w-40 text-center">${message}</p>
                 </li>
             `;
-        } else{
+        } else {
             msgElement.innerHTML = `
                 <li class="bg-red-400/30 p-2 rounded-md border border-red-400" id="msg-alert">
                     <p class="relative font-light min-w-40 text-center">${message}</p>
@@ -566,4 +712,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         return ip;
     }
 
+    function listAllFornecedorView(fornecedores) {
+        const ulElementList = document.getElementById("listaFornecedores");
+
+        fornecedores.forEach(fornecedor => {
+            const liElement = document.createElement('li');
+            liElement.className = "max-w-full p-3 flex justify-between items-center border-b-2 border-gray-300";
+
+            liElement.innerHTML = `
+                <div class="w-2/3 "> 
+                    <h1 class="text-xl overflow-hidden text-ellipsis">${fornecedor.nome}</h1>
+                    <h2 class="text-base overflow-hidden text-ellipsis">${fornecedor.apelido ? fornecedor.apelido : "..."}</h2>
+                </div>
+                
+                <button 
+                    id="fornecedor-${fornecedor.id_fornecedor}"
+                    onclick="associar(${fornecedor.id_fornecedor})"
+                    class="bg-black text-orange-600 text-xs p-2 rounded-md font-black w-2/6"
+                >
+                    SOLICITAR
+                </button>
+            `; 
+            ulElementList.appendChild(liElement);
+        });
+    }
 });
