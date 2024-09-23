@@ -33,7 +33,7 @@ class ClienteFornecedorController {
                 const foundIds = new Set(listFornecedor.map(fornecedor => fornecedor.id_fornecedor));
                 const invalidIds: number[] = ids.ids.filter(id => !foundIds.has(id));
 
-                res.status(404).send(errorResponse("Ussuario nao existem", {invalidIds: invalidIds}));
+                res.status(404).send(errorResponse("Ussuarios nao existem", {invalidIds: invalidIds}));
                 return;
             }
 

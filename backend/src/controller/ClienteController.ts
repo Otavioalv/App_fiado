@@ -45,7 +45,6 @@ class ClienteController extends UserController{
     }
 
     public async login(req: FastifyRequest, res: FastifyReply): Promise<void>{
-
         try {
             const datasLogin: loginInterface = await req.body as loginInterface;
             const message = await this.validateDatasUserController.validateLogin(datasLogin);
