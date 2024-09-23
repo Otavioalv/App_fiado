@@ -7,7 +7,7 @@ export const socketIO = async (app: FastifyInstance) => {
             console.log("Erro ao conectar usuario ao socketIO/websocket");
             throw err
         };
-        
+
         app.io.on('connection', async (socket: Socket) => {
             console.log(`user was connectes: ${socket.id}`);
 

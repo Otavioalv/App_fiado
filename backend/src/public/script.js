@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
+    socketIoConnections()
+
     if(window.location.pathname === '/frontend/listaFornecedores.html') {
         const ip = getIp();
         const url = `http://${ip}:8090/user/fornecedor/list-all`;
@@ -734,6 +736,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </button>
             `; 
             ulElementList.appendChild(liElement);
+        });
+    }
+
+    function socketIoConnections() {
+        const socket = io('http://127.0.0.1:8090');
+
+        socket.on('connect', () => {
+            console.log("conectado");
         });
     }
 });
