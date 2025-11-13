@@ -1,3 +1,3 @@
-export interface idsFornecedorInterface{
+export interface idsPartnerInterface{
     ids: number[]
 }

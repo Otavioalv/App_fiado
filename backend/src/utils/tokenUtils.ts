@@ -39,6 +39,7 @@ export const getTokenIdFromRequest = async(req: FastifyRequest) => {
 
         return id;
     } catch (e) {
+        console.log(e);
         throw e;
     }
 }

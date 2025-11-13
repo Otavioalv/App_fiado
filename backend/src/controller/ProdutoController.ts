@@ -10,22 +10,22 @@ import { z } from "zod";
 class ProdutoController {
     private produtoModel:ProdutoModel = new ProdutoModel();
 
-    public async addProducts(req: FastifyRequest, res: FastifyReply) {        
+    public async addProducts(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {        
         try {
             const id_fornecedor: number = await getTokenIdFromRequest(req);
             const datasProduct: productInterface[] = await this.productShemaValidate(req);
             
             await this.produtoModel.addProducts(datasProduct, id_fornecedor);
 
-            res.status(201).send(successResponse("Produtos adicionados"));
-            return;
+            return res.status(201).send(successResponse("Produtos adicionados"));
+            
         } catch (e) {
             if(e instanceof z.ZodError) {
-                res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
-                return;
+                return res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
+                
             }
-            res.status(500).send(errorResponse("Erro interno no servidor", e));
-            return;
+            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            
         }
     }
 
@@ -53,18 +53,15 @@ class ProdutoController {
         try {
             const id_fornecedor: number = await getTokenIdFromRequest(req);
             const datasProduct: productInterface[] = await this.productShemaValidate(req);
+            
+            for(const prod of datasProduct) {
+                const result:boolean = await this.produtoModel.updateProtucts([prod], id_fornecedor);
 
-            if(datasProduct.length > 1) {
-                res.status(400).send(errorResponse("Somente um produto por vez"));
-                return;
-            }
-
-            const result:boolean = await this.produtoModel.updateProtucts(datasProduct, id_fornecedor);
-
-            if(!result) {
-                res.status(404).send(errorResponse("Produto não existe ou não foi possivel encontra-lo"));
-                return;
-            }
+                if(!result) {
+                    res.status(404).send(errorResponse("Um ou mais produtos não foram encontrados"));
+                    return;
+                }    
+            } 
 
             res.status(200).send(successResponse("Produto atualizado com sucesso"));
             return;
@@ -80,26 +77,24 @@ class ProdutoController {
 
     public async deleteProduct(req: FastifyRequest, res: FastifyReply) {
         try {
-            const {id_produto} = req.body as productInterface;
+            const dataIds = req.body as number[];
             const id_fornecedor: number = await getTokenIdFromRequest(req);
 
-            if(!id_produto || typeof id_produto != 'number' || id_produto < 0) {
-                res.status(404).send(errorResponse("Parametros invalidos"));
-                return 
-            }
+            for(const idProd of dataIds) {
+                if(!idProd || typeof idProd != 'number' || idProd < 0) {
+                    return res.status(404).send(errorResponse("Parametros invalidos"));
+                }
 
-            const result:boolean = await this.produtoModel.deleteProduct(id_produto, id_fornecedor);
+                const result:boolean = await this.produtoModel.deleteProduct(idProd, id_fornecedor);
 
-            if(!result) {
-                res.status(404).send(errorResponse("Produto não existe ou não foi possivel encontra-lo"));
-                return;
+                if(!result) {
+                    return res.status(404).send(errorResponse("Um ou mais Produtos não existem ou não foi possivel encontra-los"));
+                }
             }
             
-            res.status(200).send(successResponse("Produto deletado com sucesso"));
-            return;
+            return res.status(200).send(successResponse("Produto deletado com sucesso"));
         } catch(e) {
-            res.status(500).send(errorResponse("Error interno no servidor", e));
-            return;
+            return res.status(500).send(errorResponse("Error interno no servidor", e));
         } 
     }
 
@@ -113,8 +108,9 @@ class ProdutoController {
             })
             const productArraySchema = z.array(productSchema);
 
+            
             const datasProduct:productInterface[] = productArraySchema.parse(await req.body);
-    
+            
             return datasProduct;
         } catch(e) {
             if(e instanceof z.ZodError){

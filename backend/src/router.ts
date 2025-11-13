@@ -1,11 +1,11 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 
-const fornecedor = require("./routers/FornecedorRouter");
-const cliente = require("./routers/ClienteRouter");
-const user = require("./routers/UserRouter");
+import { fornecedorRouter } from "./routers/FornecedorRouter";
+import { clienteRouter } from "./routers/ClienteRouter";
+import { userRouter } from "./routers/UserRouter";
 
 export async function routers(fastify: FastifyInstance, options: FastifyPluginOptions) {
-    fastify.register(fornecedor, {prefix: "/fornecedor"});
-    fastify.register(cliente, {prefix: "/cliente"});
-    fastify.register(user, {prefix: "/user"});
+    fastify.register(fornecedorRouter, {prefix: "/fornecedor"});
+    fastify.register(clienteRouter, {prefix: "/cliente"});
+    fastify.register(userRouter, {prefix: "/user"});
 }

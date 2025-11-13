@@ -7,3 +7,4 @@ export interface fornecedorInterface extends userInterface, addressInterface{
     nomeEstabelecimento:string;
 }
 
+

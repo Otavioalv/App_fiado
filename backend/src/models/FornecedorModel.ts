@@ -2,7 +2,7 @@ import { fornecedorInterface } from "../interfaces/fornecedorInterface";
 import connection from "../database/connection";
 import { PoolClient } from "pg";
 import { UserModel } from "../interfaces/class/UserModel";
-import { idsFornecedorInterface } from "../interfaces/idsFornecedorInterface";
+import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
 
 class FornecedorModel extends UserModel<fornecedorInterface>{
 
@@ -57,14 +57,13 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             await client.query('BEGIN');
             await client.query(SQL, VALUES);
             await client.query('COMMIT');
-            return;
+            
         } catch(e){
             console.error(e);
             await client?.query('ROLLBACK');
             throw new Error("Erro ao salvar usuario no banco de dados");
         } finally {
             client?.release();
-            return;
         }
     }
 
@@ -98,7 +97,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
         }
     }
 
-    public async findMultUsersByIds(ids: idsFornecedorInterface): Promise<fornecedorInterface[]>{
+    public async findMultUsersByIds(ids: idsPartnerInterface): Promise<fornecedorInterface[]>{
         let client: PoolClient | undefined;
         try {   
             client = await connection.connect();
@@ -171,6 +170,44 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             client?.release();
         }
     }  
+
+    public async getPartnerByIdCliente(id: number): Promise<fornecedorInterface[]>{
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+
+            const SQL:string = `
+                SELECT 
+                    f.id_fornecedor,
+                    f.nome,
+                    f.apelido,
+                    f.telefone,
+                    f.nomeestabelecimento,
+                    f.numeroimovel,
+                    f. logradouro,
+                    f. bairro,
+                    f. complemento,
+                    f. cep,
+                    f. uf ,
+                    cf.cliente_check,
+                    cf.fornecedor_check
+                FROM 
+                    fornecedor AS f
+                JOIN
+                    cliente_fornecedor AS cf ON f.id_fornecedor = cf.fk_fornecedor_id
+                WHERE 
+                    cf.fk_cliente_id = $1;`
+
+            const result:fornecedorInterface[] = (await client.query(SQL, [id])).rows;  
+
+            return result;
+        } catch(e) {
+            console.error(e);
+            throw new Error("Erro ao coletar parcerias");
+        } finally {
+            client?.release;
+        }
+    }
 
 }
 

@@ -2,7 +2,7 @@ import { PoolClient } from "pg";
 import connection from "../database/connection";
 import { clienteInterface } from "../interfaces/clienteInterface";
 import { UserModel } from "../interfaces/class/UserModel";
-import { idsFornecedorInterface } from "../interfaces/idsFornecedorInterface";
+import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
 
 
 class ClienteModel extends UserModel<clienteInterface>{
@@ -81,6 +81,26 @@ class ClienteModel extends UserModel<clienteInterface>{
         }
     }
 
+    public async findMultUsersByIds(ids: idsPartnerInterface): Promise<clienteInterface[]>{
+        let client: PoolClient | undefined;
+        try {   
+            client = await connection.connect();
+            const strSqlValues:string = ids.ids.map((_, i) => 
+                `id_cliente = $${i+1}`
+            ).join(' or ');
+            const SQL: string = `SELECT nome, senha, apelido, telefone, id_cliente FROM cliente WHERE ${strSqlValues}`;
+
+            const result:clienteInterface[] = (await client.query(SQL, ids.ids)).rows;  
+
+            return result;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao procurar usuarios");
+        } finally {
+            client?.release();
+        }
+    }
+
     public async getPasswordUsingUser(nome: string): Promise<string> {
         let client: PoolClient | undefined;
         try {
@@ -101,6 +121,37 @@ class ClienteModel extends UserModel<clienteInterface>{
 
         } finally {
             client?.release();
+        }
+    }
+
+    public async getPartnerByIdFornecedor(id: number): Promise<clienteInterface[]>{
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+
+            const SQL:string = `
+                SELECT 
+                    c.id_cliente,
+                    c.nome,
+                    c.apelido,
+                    c.telefone,
+                    cf.cliente_check,
+                    cf.fornecedor_check
+                FROM 
+                    cliente AS c
+                JOIN 
+                    cliente_fornecedor AS cf ON c.id_cliente = cf.fk_cliente_id
+                WHERE 
+                    cf.fk_fornecedor_id = $1;`
+
+            const result:clienteInterface[] = (await client.query(SQL, [id])).rows;  
+
+            return result;
+        } catch(e) {
+            console.error(e);
+            throw new Error("Erro ao coletar parcerias");
+        } finally {
+            client?.release;
         }
     }
 }

@@ -44,3 +44,9 @@ export const authorize = (user: "fornecedor" | "cliente") => {
 export const authenticatedRouteOptions = {
     preHandler: authenticate  
 }
+
+export const authorizedOptions = (role: "fornecedor" | "cliente") => {
+    return {
+        preHandler: [authenticate, authorize(role)]
+    }
+}

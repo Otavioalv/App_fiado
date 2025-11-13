@@ -23,13 +23,14 @@ class ProdutoModel  {
                 product.quantidade, 
                 product.fk_id_fornecedor = id_fornecedor
             ]);
-
+            
             await client.query('BEGIN');
             await client.query(SQL, values);
             await client.query('COMMIT');
             
         } catch (e) {
             await client?.query('ROLLBACK');
+            console.log(e)
             throw new Error("Erro ao adicionar produtos");
         } finally {
             client?.release();
@@ -42,7 +43,7 @@ class ProdutoModel  {
             client = await connection.connect();
 
             const SQL = `
-                SELECT id_produto, nome, preco, disponivel, quantidade
+                SELECT id_produto, nome, preco, quantidade
                 FROM produto 
                 WHERE fk_id_fornecedor = $1
                 ORDER BY id_produto

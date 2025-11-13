@@ -133,13 +133,13 @@ class ValidateDatasUserController  {
                 messages.push(objMenssage);
             }
 
-            if(typeof datasRegister.numeroImovel != "number"){
-                const objMenssage = {
-                    numeroImovel: ["numero do imovel invalido"]
-                }
+            // if(typeof datasRegister.numeroImovel != "number"){
+            //     const objMenssage = {
+            //         numeroImovel: ["numero do imovel invalido"]
+            //     }
 
-                messages.push(objMenssage);
-            }
+            //     messages.push(objMenssage);
+            // }
 
             return messages
         } catch(err) {
@@ -253,7 +253,7 @@ class ValidateDatasUserController  {
 
     public async comparePassword(hashedPassword: string, password: string): Promise<boolean>{
         try {
-            const match = await compare(password, hashedPassword);
+            const match:boolean = await compare(password, hashedPassword);
             return match;
         } catch(e) {
             throw new Error("Erro ao verificar a senha");

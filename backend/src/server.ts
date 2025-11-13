@@ -29,6 +29,8 @@ async function start() {
     await app.register(cors);
     
     await app.register(routers);
+
+    // adicionar, resposta de erro interno no servidor
     
     // socket IO
     await app.register(fastifySocketIO);

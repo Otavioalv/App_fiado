@@ -13,7 +13,7 @@ interface authJwtInterface {
 }
 
 export const databaseConfig: databaseConfigInterface = {
-    user: String(process.env.USER),
+    user: String(process.env.USER_PSQL_X),
     database: String(process.env.DATABASE),
     host: String(process.env.HOST),
     password: String(process.env.PASSWORD),

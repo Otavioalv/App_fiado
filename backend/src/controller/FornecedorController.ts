@@ -6,82 +6,104 @@ import { ValidateDatasUserController } from "./ValidateDatasUserController";
 import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 
-import { generateToken } from "../utils/tokenUtils";
+import { generateToken, getTokenIdFromRequest } from "../utils/tokenUtils";
 import { UserController } from "../interfaces/class/UserController";
+import { ClienteModel } from "../models/ClienteModel";
+import { clienteInterface } from "../interfaces/clienteInterface";
 
 
 class FornecedorController extends UserController{
     private fornecedorModel:FornecedorModel = new FornecedorModel();
+    private clienteModel:ClienteModel = new ClienteModel();
     private validateDatasUserController:ValidateDatasUserController = new ValidateDatasUserController();
 
-    public async register(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    public async register(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {            
             const datasRegister: fornecedorInterface = await req.body as fornecedorInterface;
+            
+            if(!datasRegister){
+                return res.status(404).send(errorResponse("Dados não solicitados"))
+            }
+
             const message = await this.validateDatasUserController.validateDatasFornecedor(datasRegister);
             
+
             if(message.length) {
-                res.status(400).send(errorResponse("dados invalidos", message));
-                return;
+                return res.status(400).send(errorResponse("dados invalidos", message));
             }
 
             if(await this.fornecedorModel.userExists(datasRegister.nome)) {
-                res.status(400).send(errorResponse("Usuario já existe. Realize o login"));
-                return;
+                return res.status(400).send(errorResponse("Usuario já existe. Realize o login"));
+                
             }
 
             datasRegister.senha = await this.validateDatasUserController.hashPassword(datasRegister.senha);
 
             await this.fornecedorModel.register(datasRegister);
 
-            res.status(200).send(successResponse("Ussuario registrado com sucesso"));
-            return;
+            return res.status(200).send(successResponse("Ussuario registrado com sucesso"));
         } catch(err) {
-            res.status(500).send(errorResponse("Erro Interno no servidor", err));
-            return
+            return res.status(500).send(errorResponse("Erro Interno no servidor", err));
         }
     }
 
-    public async login(req: FastifyRequest, res: FastifyReply): Promise<void>{
+    public async login(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply>{
         try {
             const datasLogin: loginInterface = await req.body as loginInterface;
             const message = await this.validateDatasUserController.validateLogin(datasLogin);
 
             if(message.length){
-                res.status(400).send(errorResponse("dados invalidos", message));
-                return;
+                return res.status(400).send(errorResponse("dados invalidos", message));
             }
 
             if(!await this.fornecedorModel.userExists(datasLogin.nome)) {
-                res.status(404).send(errorResponse("Ussuario não existe"));
-                return;
+                return res.status(404).send(errorResponse("Nome de usuario ou senha incorreto"));
+                
             }
 
             const hashedPass:string = await this.fornecedorModel.getPasswordUsingUser(datasLogin.nome);
             
             if(!await this.validateDatasUserController.comparePassword(hashedPass, datasLogin.senha)) {
-                res.status(401).send(errorResponse("Senha incorreta"));
-                return;
+                return res.status(401).send(errorResponse("Nome de usuario ou senha incorreto"));
             }
 
             const token:string = await this.generateTokenUser(datasLogin);
 
-            res.status(200).send(successResponse("Login realizado com sucesso", {token: token}));
-            return
+            return res.status(200).send(successResponse("Login realizado com sucesso", {token: token}));
+            
         } catch(err) {
-            res.status(500).send(errorResponse("Erro interno no servidor", err));
-            return
+            return res.status(500).send(errorResponse("Erro interno no servidor", err));
         }
-    }   
+    }
 
-    public async listAll(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    public async listAll(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             const list:fornecedorInterface[] = await this.fornecedorModel.listAll();
 
-            res.status(200).send(successResponse("Fornecedores listados com sucesso", {fornecedor: list}));
+            return res.status(200).send(successResponse("Fornecedores listados com sucesso", {fornecedor: list}));
         } catch(e) {
-            res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return res.status(500).send(errorResponse("Erro interno no servidor", e));
         }
     }
+
+    public async partnerList(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> { 
+        try {
+            const id:number = await getTokenIdFromRequest(req);
+
+            if(!id) {
+                return res.status(404).send(errorResponse("Erro ao coletar lista de parcerias"));
+            }
+
+            // coletar lista pelo model
+            const listPartner:clienteInterface[] = await this.clienteModel.getPartnerByIdFornecedor(id);
+
+            return res.status(200).send(successResponse("Listado com sucesso", listPartner));
+        } catch(e) {
+            console.error(e);
+            return res.status(500).send(errorResponse("Erro interno no servidor"));
+        }
+    }
+
 
     private async generateTokenUser(user: loginInterface): Promise<string>{
         try{
