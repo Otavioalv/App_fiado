@@ -67,7 +67,7 @@ class ClienteController extends UserController{
         }
     }
 
-    public async partnerList(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> { 
+    public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: "all" | "received" | "sent" | "accepted" = "all"): Promise<FastifyReply> { 
         try {
             const id:number = await getTokenIdFromRequest(req);
 
@@ -75,7 +75,7 @@ class ClienteController extends UserController{
                 return res.status(404).send(errorResponse("Erro ao coletar lista de parcerias"));
             }
             
-            const listPartner:fornecedorInterface[] = await this.fornecedorModel.getPartnerByIdCliente(id)
+            const listPartner:fornecedorInterface[] = await this.fornecedorModel.getPartnerByIdCliente(id, typeList)
             return res.status(200).send(successResponse("Listado com sucesso", listPartner));
         } catch(e) {
             console.error(e);

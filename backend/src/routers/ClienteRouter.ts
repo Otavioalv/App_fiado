@@ -21,12 +21,27 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
     router.post("/partner", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteFornecedorController.associarComFornecedor(req, res);
     });
+    
+    // Editar
+    // router.post("/partner/accept", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+    //     return await clienteFornecedorController.aceitarParceriaCliente(req, res);
+    // });
 
     router.post("/partner/list", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res);
+        return await clienteController.partnerList(req, res, "all");
     });
 
+    router.post("/partner/list/reseived", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteController.partnerList(req, res, "received");
+    });
+    
+    router.post("/partner/list/sent", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteController.partnerList(req, res, "sent");
+    }); 
 
+    router.post("/partner/list/accepted", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteController.partnerList(req, res, "accepted");
+    }); 
 
     // Rota de teste de autorização
     router.post("/test", authenticatedRouteOptions, async(req: FastifyRequest, res: FastifyReply) => {

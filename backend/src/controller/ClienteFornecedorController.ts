@@ -107,6 +107,28 @@ class ClienteFornecedorController {
         }
 
     }
+
+    public async aceitarParceriaCliente(req: FastifyRequest, res: FastifyReply): Promise<void>{
+        try {
+            const {idPartner} = await req.body as {idPartner: number};
+            const id_fornecedor: number = await getTokenIdFromRequest(req);
+
+            if(!idPartner || typeof idPartner !== 'number') {
+                return res.status(404).send(errorResponse("Dados invalidos"));
+            }   
+
+            if(!await this.clienteFornecedorModel.findPartnerCliente(idPartner, id_fornecedor)) {
+                return res.status(404).send(errorResponse("Cliente invalido"));
+            }
+
+            await this.clienteFornecedorModel.aceitarParceriaCliente(id_fornecedor, idPartner);
+            
+            return res.status(201).send(successResponse("Parceria aceita com sucesso"));
+        }catch(e) {
+            console.log("aceitarParceriaCliente >>> ", e);
+            return res.status(500).send(errorResponse("Erro interno no servidor"));
+        }
+    }
 }
 
 export {ClienteFornecedorController}

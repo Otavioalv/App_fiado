@@ -171,10 +171,20 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
         }
     }  
 
-    public async getPartnerByIdCliente(id: number): Promise<fornecedorInterface[]>{
+    public async getPartnerByIdCliente(id: number, typeList: "all" | "received" | "sent" | "accepted" = "all"): Promise<fornecedorInterface[]>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
+
+            var sqlOpt = "";
+
+            if(typeList === "received")
+                sqlOpt += "AND cf.fornecedor_check = TRUE";
+            else if(typeList === "sent") 
+                sqlOpt += "AND cf.cliente_check = TRUE";
+            else if(typeList === "accepted") 
+                sqlOpt = "AND cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE"
+
 
             const SQL:string = `
                 SELECT 
@@ -196,7 +206,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                 JOIN
                     cliente_fornecedor AS cf ON f.id_fornecedor = cf.fk_fornecedor_id
                 WHERE 
-                    cf.fk_cliente_id = $1;`
+                    cf.fk_cliente_id = $1 ${sqlOpt};`
 
             const result:fornecedorInterface[] = (await client.query(SQL, [id])).rows;  
 
