@@ -1,4 +1,4 @@
-import { fornecedorInterface } from "../interfaces/fornecedorInterface";
+import { fornecedorInterface, queryFilterFornecedor } from "../interfaces/fornecedorInterface";
 import connection from "../database/connection";
 import { PoolClient } from "pg";
 import { UserModel } from "../interfaces/class/UserModel";
@@ -155,12 +155,67 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
         }
     }
 
-    public async listAll(): Promise<fornecedorInterface[]> {
+    public async listAll(idCliente: number, filterOpt:queryFilterFornecedor): Promise<fornecedorInterface[]> {
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
-            const SQL = `SELECT id_fornecedor, nome, apelido, telefone, nomeestabelecimento, numeroimovel, logradouro, bairro, complemento, cep, uf FROM fornecedor`;
-            const result = ((await client.query(SQL)).rows) as fornecedorInterface[];
+
+            const {pagination, size, search} = filterOpt;
+
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (pagination - 1) * limit // Começa a partir do numero 
+            const searchSql: string = `%${search}%`; // para se adaptar ao filtro ILIKE
+
+            const SQL_LIST = `
+                SELECT  
+                    f.id_fornecedor,
+                    f.nome,
+                    f.apelido,
+                    f.telefone,
+                    f.nomeestabelecimento,
+                    f.numeroimovel,
+                    f.logradouro,
+                    f.bairro,
+                    f.complemento,
+                    f.cep,
+                    f.uf,
+                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check
+
+                FROM 
+                    fornecedor AS f
+                LEFT JOIN 
+                    cliente_fornecedor AS cf
+                    ON 
+                        f.id_fornecedor = cf.fk_fornecedor_id
+                    AND 
+                        cf.fk_cliente_id = $1
+                WHERE 
+                    f.nome ILIKE $2 OR 
+                    f.apelido ILIKE $2
+                ORDER BY
+                    f.id_fornecedor ASC
+                LIMIT $3 
+                OFFSET $4; 
+            `;
+
+            const SQL_TOTAL = `
+                SELECT 
+                    COUNT(*) AS total 
+                FROM 
+                    fornecedor as f
+                WHERE 
+                    f.nome ILIKE $1 OR 
+                    f.apelido ILIKE $1;
+            `;
+
+
+
+            const result = ((await client.query(SQL_LIST, [idCliente, searchSql, limit, offset])).rows) as fornecedorInterface[];
+            const {total} = ((await client.query(SQL_TOTAL, [searchSql])).rows)[0] as {total:number}; 
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
 
             return result;
         } catch (e) {

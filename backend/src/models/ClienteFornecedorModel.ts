@@ -149,6 +149,38 @@ class ClienteFornecedorModel {
         }
     }
 
+    public async aceitarParceriaFornecedor(idCliente: number, idFornecedor: number){
+        let client: PoolClient | undefined;
+
+        try {
+
+            console.log(idFornecedor, idCliente);
+
+            client = await connection.connect();
+
+            const SQL = `
+                UPDATE 
+                    cliente_fornecedor
+                SET 
+                    cliente_check = TRUE
+                WHERE   
+                    fk_cliente_id = $1 AND
+                    fk_fornecedor_id = $2
+            `
+
+            await client.query("BEGIN");
+            await client.query(SQL, [idCliente, idFornecedor]);
+            await client.query("COMMIT");
+
+        } catch(e) {
+            await client?.query("ROLLBACK");
+            console.log(e);
+            throw new Error("Erro ao efetuar associação");
+        } finally {
+            client?.release();
+        }
+    }
+
     public async findPartnerCliente(idCliente: number, idFornecedor: number): Promise<boolean>{
         let client: PoolClient | undefined;
 
@@ -167,6 +199,35 @@ class ClienteFornecedorModel {
             `;
 
             const result = await client.query(SQL, [idFornecedor, idCliente]);
+
+            return result.rows.length > 0;
+        } catch(e) {
+            console.log(e);
+            throw new Error("Erro ao efetuar associação");
+        } finally {
+            client?.release();
+        }
+    }
+
+
+    public async findPartnerFornecedor(idFornecedor: number, idCliente: number): Promise<boolean>{
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const SQL = `
+                SELECT 1 
+                FROM 
+                    cliente_fornecedor 
+                WHERE 
+                    fk_cliente_id = $1 AND 
+                    fk_fornecedor_id = $2 AND 
+                    fornecedor_check = TRUE AND
+                    cliente_check = FALSE;
+            `;
+
+            const result = await client.query(SQL, [idCliente, idFornecedor]);
 
             return result.rows.length > 0;
         } catch(e) {

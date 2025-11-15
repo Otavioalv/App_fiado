@@ -23,6 +23,10 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
     router.post("/partner", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteFornecedorController.associarComCliente(req, res);
     });
+    
+    router.post("/partner/accept", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteFornecedorController.aceitarParceriaCliente(req, res);
+    }); 
 
     router.post("/partner/list", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await fornecedorController.partnerList(req, res, "all");
@@ -38,10 +42,6 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
 
     router.post("/partner/list/accepted", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await fornecedorController.partnerList(req, res, "accepted");
-    }); 
-
-    router.post("/partner/accept", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteFornecedorController.aceitarParceriaCliente(req, res);
     }); 
 
     router.post('/product/add', authorizedOptions("fornecedor"), async (req: FastifyRequest, res: FastifyReply) => {

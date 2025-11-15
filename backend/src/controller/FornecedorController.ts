@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { FornecedorModel } from "../models/FornecedorModel";
-import { fornecedorInterface } from "../interfaces/fornecedorInterface";
+import { fornecedorInterface, queryFilterFornecedor } from "../interfaces/fornecedorInterface";
 import { errorResponse, successResponse } from "../utils/response";
 import { ValidateDatasUserController } from "./ValidateDatasUserController";
 import { loginInterface } from "../interfaces/loginInterface";
@@ -78,9 +78,17 @@ class FornecedorController extends UserController{
 
     public async listAll(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
-            const list:fornecedorInterface[] = await this.fornecedorModel.listAll();
+            const {...filterOpt} = req.query as queryFilterFornecedor;
+            const idCliente:number = await getTokenIdFromRequest(req);
 
-            return res.status(200).send(successResponse("Fornecedores listados com sucesso", {fornecedor: list}));
+            if(!await this.verifyQueryOptList(filterOpt))
+                return res.status(404).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
+
+
+            const list:fornecedorInterface[] = await this.fornecedorModel.listAll(idCliente, filterOpt);
+
+            
+            return res.status(200).send(successResponse("Fornecedores listados com sucesso", {fornecedor: list, pagination: filterOpt}));
         } catch(e) {
             return res.status(500).send(errorResponse("Erro interno no servidor", e));
         }
@@ -118,6 +126,37 @@ class FornecedorController extends UserController{
             return token;
         } catch(e) {
             throw e;
+        }
+    }
+
+    private async verifyQueryOptList(queryOpt: queryFilterFornecedor): Promise<boolean>{
+        try {
+            if(Object.keys(queryOpt).length === 0) {
+                return false;
+            }
+
+            const pagination = Number(queryOpt.pagination);
+            const size = Number(queryOpt.size);
+            const search = String(queryOpt.search);
+
+            console.log(pagination, search, size)
+
+            if(
+                (isNaN(pagination) || isNaN(size)) ||
+                (pagination <= 0 || size <= 0) || 
+                (typeof search !== "string") ||
+                (size > 100)
+            ){
+                return false;
+            }
+
+            queryOpt.pagination = Number(queryOpt.pagination);
+            queryOpt.size = Number(queryOpt.size);
+
+            return true;
+        } catch(e) {
+            console.log("Erro ao verificar query para listar fornecedor >>> ", e);
+            throw new Error("Erro ao verificar query para listar fornecedor")
         }
     }
 }

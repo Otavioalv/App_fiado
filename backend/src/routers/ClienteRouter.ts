@@ -2,10 +2,12 @@ import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } f
 import { ClienteController } from "../controller/ClienteController";
 import { authenticatedRouteOptions, authorizedOptions } from "../utils/authenticate";
 import { ClienteFornecedorController } from "../controller/ClienteFornecedorController";
+import { FornecedorController } from "../controller/FornecedorController";
 
 
 const clienteController: ClienteController = new ClienteController()
 const clienteFornecedorController: ClienteFornecedorController = new ClienteFornecedorController();
+const fornecedorController: FornecedorController = new FornecedorController();
 
 // module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions)
 // export const clienteRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => 
@@ -17,15 +19,18 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
     router.post("/login", async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.login(req, res);
     });
+
+    router.post("/list-fornecedores", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await fornecedorController.listAll(req, res);
+    });
     
     router.post("/partner", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteFornecedorController.associarComFornecedor(req, res);
     });
-    
-    // Editar
-    // router.post("/partner/accept", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-    //     return await clienteFornecedorController.aceitarParceriaCliente(req, res);
-    // });
+
+    router.post("/partner/accept", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteFornecedorController.aceitarParceriaFornecedor(req, res);
+    });
 
     router.post("/partner/list", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.partnerList(req, res, "all");

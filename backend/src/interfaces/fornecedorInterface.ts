@@ -7,4 +7,13 @@ export interface fornecedorInterface extends userInterface, addressInterface{
     nomeEstabelecimento:string;
 }
 
+// separar depois
+export type queryFilterFornecedor = {
+    pagination: number;
+    size: number;
+    total: number;
+    totalPages: number;
+    search: string;
+};
+
 
