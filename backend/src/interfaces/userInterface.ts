@@ -5,4 +5,5 @@ export interface userInterface{
     telefone: string;
     cliente_check?: boolean;
     fornecedor_chec?: boolean;
+    created_at: string;
 }

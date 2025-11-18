@@ -6,3 +6,13 @@ export interface clienteFornecedorInterface {
     cliente_check: boolean;
     fornecedor_check: boolean;
 }
+
+export type queryFilter = {
+    page: number;
+    size: number;
+    total: number;
+    filter: string;
+    totalPages?: number;
+    search?: string;
+    filterList?: string[]
+};

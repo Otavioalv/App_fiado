@@ -7,9 +7,10 @@ import { loginInterface } from "../interfaces/loginInterface";
 import { payloadInterface } from "../interfaces/payloadInterface";
 import { generateToken, getTokenIdFromRequest } from "../utils/tokenUtils";
 import { UserController } from "../interfaces/class/UserController";
-import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
 import { FornecedorModel } from "../models/FornecedorModel";
 import { fornecedorInterface } from "../interfaces/fornecedorInterface";
+import { verifyQueryOptList } from "../utils/verifyQueryOptList";
+import { queryFilter } from "../interfaces/clienteFornecedorInterface";
 
 
 class ClienteController extends UserController{
@@ -20,7 +21,7 @@ class ClienteController extends UserController{
     public async register(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             const datasRegister: clienteInterface = await req.body as clienteInterface;
-
+            
             const message = await this.validateDatasUserController.validateDatasCliente(datasRegister);
             
             if(message.length) {
@@ -69,19 +70,51 @@ class ClienteController extends UserController{
 
     public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: "all" | "received" | "sent" | "accepted" = "all"): Promise<FastifyReply> { 
         try {
+            const {...filterOpt} = req.query as queryFilter;
             const id:number = await getTokenIdFromRequest(req);
+
+            if(!filterOpt.search)
+                filterOpt.search = "";
+
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(404).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
 
             if(!id) {
                 return res.status(404).send(errorResponse("Erro ao coletar lista de parcerias"));
             }
             
-            const listPartner:fornecedorInterface[] = await this.fornecedorModel.getPartnerByIdCliente(id, typeList)
-            return res.status(200).send(successResponse("Listado com sucesso", listPartner));
+            const listPartner:fornecedorInterface[] = await this.fornecedorModel.getPartnerByIdCliente(id, typeList, filterOpt)
+            return res.status(200).send(successResponse("Listado com sucesso", {list: listPartner, pagination: filterOpt}));
         } catch(e) {
             console.error(e);
             return res.status(500).send(errorResponse("Erro interno no servidor"));
         }
     }
+
+    public async listAll(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+        try {
+            const {...filterOpt} = req.query as queryFilter;
+            const idFornecedor:number = await getTokenIdFromRequest(req);
+
+            filterOpt.filterList = ["Nome", "Apelido"]
+            
+            if(!filterOpt.filter)
+                filterOpt.filter = "Nome";
+            if(!filterOpt.search)
+                filterOpt.search = "";
+
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(404).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
+
+            const list:clienteInterface[] = await this.clienteModel.listAll(idFornecedor, filterOpt);
+            
+            return res.status(200).send(successResponse("Fornecedores listados com sucesso", {list: list, pagination: filterOpt}));
+        } catch(e) {
+            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+        }
+    }
+
+    
 
     private async generateTokenUser(user: loginInterface): Promise<string>{
         try {

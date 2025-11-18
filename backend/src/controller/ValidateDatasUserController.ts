@@ -319,10 +319,11 @@ class ValidateDatasUserController  {
         if(
             !validator.isLength(nome, {min: 4}) || 
             /\s\s/.test(nome) || 
-            !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(nome) ||
+            // !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(nome) ||
+            !/^[a-zA-Z\s]+$/.test(nome) ||
             /[0-9]/.test(nome)
         ) {
-            arrMenssage.push("Nome do ussuario invalido");
+            arrMenssage.push("Nome inválido (não use acentos, números ou caracteres especiais)");
         }
 
         const objMenssage = {

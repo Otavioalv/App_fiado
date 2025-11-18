@@ -4,7 +4,10 @@ import { getPayloadFromToken, getTokenIdFromRequest } from "../utils/tokenUtils"
 import { productInterface } from "../interfaces/productInterface";
 import { errorResponse, successResponse } from "../utils/response";
 import {ProdutoModel} from "../models/ProdutoModel";
-import { z } from "zod";
+import { unknown, z } from "zod";
+import { queryFilter } from "../interfaces/clienteFornecedorInterface";
+import { verifyQueryOptList } from "../utils/verifyQueryOptList";
+import { isNumeric } from "validator";
 
 
 class ProdutoController {
@@ -31,17 +34,23 @@ class ProdutoController {
 
     public async listProducts(req: FastifyRequest, res: FastifyReply) {
         try {
-            // const {id_fornecedor} = await await req.body as fornecedorInterface;
+            const {...filterOpt} = req.query as queryFilter;
             const id_fornecedor:number = await getTokenIdFromRequest(req);
+
+            if(!filterOpt.search)
+                filterOpt.search = "";
+
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(404).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
 
             if(!id_fornecedor || typeof id_fornecedor != "number" || id_fornecedor < 0) {
                res.status(404).send(errorResponse("Parametros invalidos"));
                return;
             }
 
-            const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor);
+            const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor, filterOpt);
 
-            res.status(200).send(successResponse("Produtos listados com sucesso", {produto: listProducts}));
+            res.status(200).send(successResponse("Produtos listados com sucesso", {list: listProducts, pagination: filterOpt}));
             return;
         } catch (e) {
             res.status(500).send(errorResponse("Erro interno no servidor", e));
@@ -97,6 +106,33 @@ class ProdutoController {
             return res.status(500).send(errorResponse("Error interno no servidor", e));
         } 
     }
+
+    public async listProductsByIdFornecedor(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const {...filterOpt} = req.query as queryFilter;
+            const {idFornecedor} = req.params as {idFornecedor:string | undefined};
+
+            if(!filterOpt.search)
+                filterOpt.search = "";
+
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(404).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
+
+            if(!idFornecedor || !isNumeric(idFornecedor))
+                return res.status(404).send(errorResponse("Parametros invalidos"));
+
+
+
+            const listProduct = await this.produtoModel.listProducts(parseInt(idFornecedor), filterOpt);
+
+
+            return res.status(200).send(successResponse("Produtos listados com sucesso", {list: listProduct, pagination: filterOpt}));
+        } catch(e) {
+            return res.status(500).send(errorResponse("Error interno no servidor", e));
+        } 
+    }
+
+    
 
     private async productShemaValidate(req: FastifyRequest): Promise<productInterface[]>{
         try {

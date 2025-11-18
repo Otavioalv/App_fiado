@@ -1,6 +1,7 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
 import { productInterface } from "../interfaces/productInterface";
+import { queryFilter } from "../interfaces/clienteFornecedorInterface";
 
 
 class ProdutoModel  {
@@ -37,19 +38,41 @@ class ProdutoModel  {
         }
     }
 
-    public async listProducts(id_fornecedor: number): Promise<productInterface[]>{
+    public async listProducts(id_fornecedor: number, filterOpt:queryFilter): Promise<productInterface[]>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
 
-            const SQL = `
+            const {size, page, search} = filterOpt;
+
+            const sqlSearch: string = `%${search}%`;
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+
+            const SQL_LIST = `
                 SELECT id_produto, nome, preco, quantidade
                 FROM produto 
-                WHERE fk_id_fornecedor = $1
-                ORDER BY id_produto
+                WHERE 
+                    fk_id_fornecedor = $1 AND 
+                    unaccent(nome) ILIKE unaccent($2)
+                ORDER BY nome ASC
+                LIMIT $3
+                OFFSET $4;
+            `;
+
+            const SQL_TOTAL = `
+                SELECT COUNT(*) as total
+                FROM produto 
+                WHERE 
+                    fk_id_fornecedor = $1 AND 
+                    unaccent(nome) ILIKE unaccent($2);
             `;
             
-            const listProducts = (await client.query(SQL, [id_fornecedor])).rows as productInterface[];
+            const listProducts = (await client.query(SQL_LIST, [id_fornecedor, sqlSearch, limit, offset])).rows as productInterface[];
+            const {total} = (await client.query(SQL_TOTAL, [id_fornecedor, sqlSearch])).rows[0] as {total: number};
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
 
             return listProducts;
         } catch (e) {
@@ -123,6 +146,34 @@ class ProdutoModel  {
         } finally {
             client?.release();
         }
+    }
+
+    public async getListProductsByIdFornecedor(idFornecedor: number): Promise<productInterface[]>{
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const SQL = `   
+                SELECT id_produto, nome, preco, quantidade
+                FROM produto 
+                WHERE 
+                    fk_id_fornecedor = $1 AND 
+                    unaccent(nome) ILIKE unaccent($2)
+                ORDER BY nome ASC
+                LIMIT $3
+                OFFSET $4;
+            `;
+
+
+            return [];
+        } catch(e) {
+            console.log("ProdutoModel >>> ", e);
+            throw new Error("Erro ao listar produtos");
+        } finally {
+            client?.release();
+        }
+
     }
 
     private async createSqlValues(arrObjs: Record<string, any>[]): Promise<string>{

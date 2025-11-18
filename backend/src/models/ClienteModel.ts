@@ -3,6 +3,8 @@ import connection from "../database/connection";
 import { clienteInterface } from "../interfaces/clienteInterface";
 import { UserModel } from "../interfaces/class/UserModel";
 import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
+import { fornecedorInterface } from "../interfaces/fornecedorInterface";
+import { queryFilter } from "../interfaces/clienteFornecedorInterface";
 
 
 class ClienteModel extends UserModel<clienteInterface>{
@@ -124,36 +126,69 @@ class ClienteModel extends UserModel<clienteInterface>{
         }
     }
 
-    public async getPartnerByIdFornecedor(id: number, typeList: "all" | "received" | "sent" | "accepted" = "all"): Promise<clienteInterface[]>{
+    public async getPartnerByIdFornecedor(id: number, typeList: "all" | "received" | "sent" | "accepted" = "all", filterOpt:queryFilter): Promise<clienteInterface[]>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
+
+
             
             var sqlOpt = "";
-
+            
+            
             if(typeList === "received")
-                sqlOpt = "AND cf.cliente_check = TRUE";
+                sqlOpt = "AND (cf.cliente_check = TRUE AND cf.fornecedor_check = FALSE)";
             else if(typeList === "sent") 
-                sqlOpt = "AND cf.fornecedor_check = TRUE";
+                sqlOpt = "AND (cf.fornecedor_check = TRUE AND cf.cliente_check = FALSE)";
             else if(typeList === "accepted") 
-                sqlOpt = "AND cf.fornecedor_check = TRUE AND cf.cliente_check = TRUE"
+                sqlOpt = "AND cf.fornecedor_check = TRUE AND cf.cliente_check = TRUE";
+            
+            console.log(id, sqlOpt);
 
-            const SQL:string = `
+            
+            
+            const {size, page} = filterOpt;
+
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+
+            const SQL_LIST:string = `
                 SELECT 
                     c.id_cliente,
                     c.nome,
                     c.apelido,
                     c.telefone,
                     cf.cliente_check,
-                    cf.fornecedor_check
+                    cf.fornecedor_check,
+                    cf.created_at
                 FROM 
                     cliente AS c
                 JOIN 
                     cliente_fornecedor AS cf ON c.id_cliente = cf.fk_cliente_id
                 WHERE 
-                    cf.fk_fornecedor_id = $1 ${sqlOpt};`
+                    cf.fk_fornecedor_id = $1 ${sqlOpt}
+                ORDER BY 
+                    cf.created_at DESC
+                LIMIT $2
+                OFFSET $3;`
 
-            const result:clienteInterface[] = (await client.query(SQL, [id])).rows;  
+            const SQL_TOTAL = `
+                SELECT 
+                    COUNT(*) AS total
+                FROM 
+                    cliente AS c
+                JOIN 
+                    cliente_fornecedor AS cf ON c.id_cliente = cf.fk_cliente_id
+                WHERE 
+                    cf.fk_fornecedor_id = $1 ${sqlOpt}
+            `;
+
+            const result:clienteInterface[] = (await client.query(SQL_LIST, [id, limit, offset])).rows;  
+            const {total} = ((await client.query(SQL_TOTAL, [id])).rows)[0] as {total:number}; 
+
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
 
             return result;
         } catch(e) {
@@ -161,6 +196,73 @@ class ClienteModel extends UserModel<clienteInterface>{
             throw new Error("Erro ao coletar parcerias");
         } finally {
             client?.release;
+        }
+    }
+
+    public async listAll(idFornecedor: number, filterOpt:queryFilter): Promise<clienteInterface[]> {
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+
+            const {page, size, search, filter} = filterOpt;
+
+            const sqlFilterList: Record<string, string> = {
+                "Nome": "c.nome",
+                "Apelido": "LOWER(unaccent(c.apelido))",
+            };
+
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+            const searchSql: string = `%${search}%`; // para se adaptar ao filtro ILIKE
+            const sqlFilter = sqlFilterList[filter]; // Se não tiver filter, por padrao pega pelo nome
+            
+            const SQL_LIST = `
+                SELECT 
+                    c.id_cliente, 
+                    c.nome, 
+                    c.apelido, 
+                    c.telefone,
+                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check
+                FROM
+                    cliente as c
+                LEFT JOIN
+                    cliente_fornecedor AS cf
+                    ON
+                        c.id_cliente = cf.fk_cliente_id
+                    AND
+                        cf.fk_fornecedor_id = $1
+                WHERE
+                    c.nome ILIKE $2 OR 
+                    unaccent(c.apelido) ILIKE unaccent($2)
+                ORDER BY 
+                    ${sqlFilter} ASC
+                LIMIT $3
+                OFFSET $4;
+            `;
+
+            const SQL_TOTAL = `
+                SELECT 
+                    COUNT(*) AS total 
+                FROM 
+                    cliente as c
+                WHERE 
+                    c.nome ILIKE $1 OR 
+                    unaccent(c.apelido) ILIKE unaccent($1);
+            `;
+
+            const result = ((await client.query(SQL_LIST, [idFornecedor, searchSql, limit, offset])).rows) as clienteInterface[];
+            const {total} = ((await client.query(SQL_TOTAL, [searchSql])).rows)[0] as {total:number}; 
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
+
+            return result;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro interno no servidor");
+        } finally {
+            client?.release();
         }
     }
 }

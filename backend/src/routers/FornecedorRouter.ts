@@ -3,11 +3,13 @@ import { FornecedorController } from "../controller/FornecedorController";
 import { authorizedOptions } from "../utils/authenticate";
 import { ProdutoController } from "../controller/ProdutoController";
 import { ClienteFornecedorController } from "../controller/ClienteFornecedorController";
+import { ClienteController } from "../controller/ClienteController";
 
 
 const fornecedorController:FornecedorController = new FornecedorController();
 const produtoController:ProdutoController = new ProdutoController();
 const clienteFornecedorController: ClienteFornecedorController = new ClienteFornecedorController();
+const clienteControler: ClienteController = new ClienteController();
 
 // module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) 
 export const fornecedorRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => {
@@ -18,6 +20,10 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
 
     router.post('/login', async(req: FastifyRequest, res: FastifyReply) => {
         return await fornecedorController.login(req, res);
+    });
+
+    router.post("/list-clientes", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteControler.listAll(req, res);
     });
     
     router.post("/partner", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {

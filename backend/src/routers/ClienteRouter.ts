@@ -3,11 +3,13 @@ import { ClienteController } from "../controller/ClienteController";
 import { authenticatedRouteOptions, authorizedOptions } from "../utils/authenticate";
 import { ClienteFornecedorController } from "../controller/ClienteFornecedorController";
 import { FornecedorController } from "../controller/FornecedorController";
+import { ProdutoController } from "../controller/ProdutoController";
 
 
 const clienteController: ClienteController = new ClienteController()
 const clienteFornecedorController: ClienteFornecedorController = new ClienteFornecedorController();
 const fornecedorController: FornecedorController = new FornecedorController();
+const produtoController: ProdutoController = new ProdutoController();
 
 // module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions)
 // export const clienteRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => 
@@ -47,6 +49,16 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
     router.post("/partner/list/accepted", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.partnerList(req, res, "accepted");
     }); 
+
+    router.post("/product/list/:idFornecedor", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.listProductsByIdFornecedor(req, res);
+    }); 
+
+    router.post("/product/buy", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.listProductsByIdFornecedor(req, res);
+    }); 
+
+    
 
     // Rota de teste de autorização
     router.post("/test", authenticatedRouteOptions, async(req: FastifyRequest, res: FastifyReply) => {
