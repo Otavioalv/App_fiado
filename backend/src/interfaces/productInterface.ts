@@ -6,3 +6,19 @@ export interface productInterface {
     preco: number;
     quantidade: number;
 }
+
+export interface compraInterface {
+    id_produto: number;
+    id_fornecedor: number;
+    quantidade: number; 
+    
+    prazo: Date; 
+
+    nome_produto?: string;
+    
+    valor_unit?: number;
+    id_cliente?: number;
+    
+    quitado?: boolean;
+    retirado?: boolean;
+}

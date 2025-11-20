@@ -238,6 +238,32 @@ class ClienteFornecedorModel {
         }
     }
 
+    public async getPartnerAccepted(idFornecedor: number, idCliente:number) {
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const SQL = `
+                SELECT 1
+                FROM 
+                    cliente_fornecedor 
+                WHERE 
+                    (fk_cliente_id = $1 AND fk_fornecedor_id = $2) AND 
+                    (fornecedor_check = TRUE AND cliente_check = TRUE);
+            `;
+
+            const result = await client.query(SQL, [idCliente, idFornecedor]);
+
+            return result.rows.length > 0;
+        } catch(e) {
+            console.log(e);
+            throw new Error("Erro ao efetuar associação");
+        } finally {
+            client?.release();
+        }
+    }
+
     private async createSqlValuesPartner(ids: idsPartnerInterface): Promise<string>{
         const numcols = 2;
         
