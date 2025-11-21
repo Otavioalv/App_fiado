@@ -1,7 +1,6 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
-import { clienteFornecedorInterface } from "../interfaces/clienteFornecedorInterface";
+import { idsPartnerInterface, clienteFornecedorInterface } from "../interfaces/userInterfaces";
 
 
 class ClienteFornecedorModel {
@@ -279,10 +278,6 @@ class ClienteFornecedorModel {
             acc.push(id, id_cliente);
             return acc;
         }, [] as number[]);
-
-        // ids.ids.forEach((_, i) => {
-        //     arr.ids.splice(i * 2 + 1, 0, id_user);
-        // });
 
         return arr;
     }

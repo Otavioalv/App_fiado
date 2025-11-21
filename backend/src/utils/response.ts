@@ -1,5 +1,3 @@
-import { FastifyReply } from "fastify";
-
 interface ApiResponseInterface<T> {
     status: 'sucess'| 'error';
     message: string;

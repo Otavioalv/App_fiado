@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { errorResponse } from "./response";
-import { ValidateDatasUserController } from "../controller/ValidateDatasUserController";
+import { ValidateDatasUser } from "../validators/ValidateDatasUser";
 import { getPayloadFromToken } from "./tokenUtils";
-import { payloadInterface } from "../interfaces/payloadInterface";
+import { payloadInterface } from "../interfaces/utilsInterfeces";
 
 declare module 'fastify' {
     interface FastifyRequest {
@@ -12,7 +12,7 @@ declare module 'fastify' {
 
 export const authenticate = async (req: FastifyRequest, res: FastifyReply) => {
     try {
-        const validateDatasUser = new ValidateDatasUserController();
+        const validateDatasUser = new ValidateDatasUser();
         const token = req.headers.authorization;
 
         if(!token || !token.startsWith("Bearer ")) {

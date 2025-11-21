@@ -1,9 +1,8 @@
-import { fornecedorInterface } from "../interfaces/fornecedorInterface";
+import { idsPartnerInterface, fornecedorInterface } from "../interfaces/userInterfaces";
 import connection from "../database/connection";
 import { PoolClient } from "pg";
 import { UserModel } from "../interfaces/class/UserModel";
-import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
-import { queryFilter } from "../interfaces/clienteFornecedorInterface";
+import { queryFilter } from "../interfaces/utilsInterfeces";
 
 class FornecedorModel extends UserModel<fornecedorInterface>{
 
@@ -26,7 +25,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                         telefone, 
                         uf
                     ) 
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
             const {
                     apelido, 
                     bairro,
@@ -218,8 +217,6 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                     unaccent(f.nomeestabelecimento) ILIKE unaccent($1);
             `;
 
-
-
             const result = ((await client.query(SQL_LIST, [idCliente, searchSql, limit, offset])).rows) as fornecedorInterface[];
             const {total} = ((await client.query(SQL_TOTAL, [searchSql])).rows)[0] as {total:number}; 
 
@@ -255,14 +252,6 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             const limit:number = size; // numero de quantidades a mostrar
             const offset:number = (page - 1) * limit // Começa a partir do numero 
 
-
-            /* 
-            SELECT 1 FROM cliente_fornecedor cf
-JOIN produto p ON p.fk_fornecedor_id = cf.fk_fornecedor_id
-WHERE cf.fk_cliente_id = $cliente
-  AND p.id_produto = $produto;
-
-            */
 
             console.log(id, filterOpt)
 

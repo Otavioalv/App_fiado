@@ -1,10 +1,8 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { clienteInterface } from "../interfaces/clienteInterface";
+import { clienteInterface, idsPartnerInterface } from "../interfaces/userInterfaces";
 import { UserModel } from "../interfaces/class/UserModel";
-import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
-import { fornecedorInterface } from "../interfaces/fornecedorInterface";
-import { queryFilter } from "../interfaces/clienteFornecedorInterface";
+import { queryFilter } from "../interfaces/utilsInterfeces";
 
 
 class ClienteModel extends UserModel<clienteInterface>{
@@ -34,23 +32,6 @@ class ClienteModel extends UserModel<clienteInterface>{
             return;
         }
     }
-    
-    public async userExists(nome: string): Promise<boolean>{
-        let client: PoolClient | undefined;
-        
-        try {
-            client = await connection.connect();
-            const SQL = `SELECT 1 FROM cliente WHERE nome = $1;`;
-            const result = await client.query(SQL, [nome]);
-
-            return result.rows.length > 0;
-        } catch (e) {
-            console.log(e);
-            throw new Error("Erro ao verificar se o usuario existe");
-        } finally {
-            client?.release();
-        }
-    }
 
     public async findByUsername(username: string): Promise<clienteInterface>{
         let client: PoolClient | undefined;
@@ -67,7 +48,7 @@ class ClienteModel extends UserModel<clienteInterface>{
             client?.release();
         }
     }
-    
+
     public async findUserById(id: number): Promise<clienteInterface>{
         let client: PoolClient | undefined;
         try {
@@ -102,6 +83,23 @@ class ClienteModel extends UserModel<clienteInterface>{
             client?.release();
         }
     }
+    
+    public async userExists(nome: string): Promise<boolean>{
+        let client: PoolClient | undefined;
+        
+        try {
+            client = await connection.connect();
+            const SQL = `SELECT 1 FROM cliente WHERE nome = $1;`;
+            const result = await client.query(SQL, [nome]);
+
+            return result.rows.length > 0;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao verificar se o usuario existe");
+        } finally {
+            client?.release();
+        }
+    }
 
     public async getPasswordUsingUser(nome: string): Promise<string> {
         let client: PoolClient | undefined;
@@ -126,6 +124,73 @@ class ClienteModel extends UserModel<clienteInterface>{
         }
     }
 
+    public async listAll(idFornecedor: number, filterOpt:queryFilter): Promise<clienteInterface[]> {
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+
+            const {page, size, search, filter} = filterOpt;
+
+            const sqlFilterList: Record<string, string> = {
+                "Nome": "c.nome",
+                "Apelido": "LOWER(unaccent(c.apelido))",
+            };
+
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+            const searchSql: string = `%${search}%`; // para se adaptar ao filtro ILIKE
+            const sqlFilter = sqlFilterList[filter]; // Se não tiver filter, por padrao pega pelo nome
+            
+            const SQL_LIST = `
+                SELECT 
+                    c.id_cliente, 
+                    c.nome, 
+                    c.apelido, 
+                    c.telefone,
+                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check
+                FROM
+                    cliente as c
+                LEFT JOIN
+                    cliente_fornecedor AS cf
+                    ON
+                        c.id_cliente = cf.fk_cliente_id
+                    AND
+                        cf.fk_fornecedor_id = $1
+                WHERE
+                    c.nome ILIKE $2 OR 
+                    unaccent(c.apelido) ILIKE unaccent($2)
+                ORDER BY 
+                    ${sqlFilter} ASC
+                LIMIT $3
+                OFFSET $4;
+            `;
+
+            const SQL_TOTAL = `
+                SELECT 
+                    COUNT(*) AS total 
+                FROM 
+                    cliente as c
+                WHERE 
+                    c.nome ILIKE $1 OR 
+                    unaccent(c.apelido) ILIKE unaccent($1);
+            `;
+
+            const result = ((await client.query(SQL_LIST, [idFornecedor, searchSql, limit, offset])).rows) as clienteInterface[];
+            const {total} = ((await client.query(SQL_TOTAL, [searchSql])).rows)[0] as {total:number}; 
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
+
+            return result;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro interno no servidor");
+        } finally {
+            client?.release();
+        }
+    }
+    
     public async getPartnerByIdFornecedor(id: number, typeList: "all" | "received" | "sent" | "accepted" = "all", filterOpt:queryFilter): Promise<clienteInterface[]>{
         let client: PoolClient | undefined;
         try {
@@ -196,73 +261,6 @@ class ClienteModel extends UserModel<clienteInterface>{
             throw new Error("Erro ao coletar parcerias");
         } finally {
             client?.release;
-        }
-    }
-
-    public async listAll(idFornecedor: number, filterOpt:queryFilter): Promise<clienteInterface[]> {
-        let client: PoolClient | undefined;
-        try {
-            client = await connection.connect();
-
-            const {page, size, search, filter} = filterOpt;
-
-            const sqlFilterList: Record<string, string> = {
-                "Nome": "c.nome",
-                "Apelido": "LOWER(unaccent(c.apelido))",
-            };
-
-            const limit:number = size; // numero de quantidades a mostrar
-            const offset:number = (page - 1) * limit // Começa a partir do numero 
-            const searchSql: string = `%${search}%`; // para se adaptar ao filtro ILIKE
-            const sqlFilter = sqlFilterList[filter]; // Se não tiver filter, por padrao pega pelo nome
-            
-            const SQL_LIST = `
-                SELECT 
-                    c.id_cliente, 
-                    c.nome, 
-                    c.apelido, 
-                    c.telefone,
-                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
-                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check
-                FROM
-                    cliente as c
-                LEFT JOIN
-                    cliente_fornecedor AS cf
-                    ON
-                        c.id_cliente = cf.fk_cliente_id
-                    AND
-                        cf.fk_fornecedor_id = $1
-                WHERE
-                    c.nome ILIKE $2 OR 
-                    unaccent(c.apelido) ILIKE unaccent($2)
-                ORDER BY 
-                    ${sqlFilter} ASC
-                LIMIT $3
-                OFFSET $4;
-            `;
-
-            const SQL_TOTAL = `
-                SELECT 
-                    COUNT(*) AS total 
-                FROM 
-                    cliente as c
-                WHERE 
-                    c.nome ILIKE $1 OR 
-                    unaccent(c.apelido) ILIKE unaccent($1);
-            `;
-
-            const result = ((await client.query(SQL_LIST, [idFornecedor, searchSql, limit, offset])).rows) as clienteInterface[];
-            const {total} = ((await client.query(SQL_TOTAL, [searchSql])).rows)[0] as {total:number}; 
-
-            filterOpt.total = Number(total);
-            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
-
-            return result;
-        } catch (e) {
-            console.log(e);
-            throw new Error("Erro interno no servidor");
-        } finally {
-            client?.release();
         }
     }
 }

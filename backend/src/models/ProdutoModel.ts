@@ -1,7 +1,7 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
 import { compraInterface, productInterface } from "../interfaces/productInterface";
-import { queryFilter } from "../interfaces/clienteFornecedorInterface";
+import { queryFilter } from "../interfaces/utilsInterfeces";
 
 
 class ProdutoModel  {
@@ -120,7 +120,7 @@ class ProdutoModel  {
         }
     }
 
-    public async updateProtucts(products: productInterface[], id_fornecedor: number): Promise<boolean>{
+    public async updateProtucts(products: productInterface[], id_fornecedor: number) {
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
@@ -141,14 +141,8 @@ class ProdutoModel  {
             ]);
 
             await client.query('BEGIN');
-            const results = await client.query(SQL, values);
+            await client.query(SQL, values);
             await client.query('COMMIT');
-            
-            // Diferença de performance insignificante em relação ao return
-            // Escolhi os "!!", pois tem mais legibilidade
-            return !!results.rowCount;
-            // return (results.rowCount != null && results.rowCount > 0);
-
         } catch (e) {
             await client?.query("ROLLBACK");
             throw new Error(`Erro ao atualizar produto`);
@@ -156,6 +150,81 @@ class ProdutoModel  {
             client?.release();
         }
     }
+
+    public async getManyProducts(ids: number[], id_fornecedor: number) {
+        const client = await connection.connect();
+        try {
+            const SQL = `
+                SELECT id_produto 
+                FROM produto
+                WHERE fk_id_fornecedor = $1
+                AND id_produto = ANY($2)
+            `;
+
+            const result = await client.query(SQL, [id_fornecedor, ids]);
+            return result.rows;
+        } finally {
+            client.release();
+        }
+    }
+
+    public async updateManyProducts(produtos: productInterface[], id_fornecedor: number) {
+        const client = await connection.connect();
+
+        try {
+            const valuesList = produtos
+                .map((p, i) => 
+                    `($${i*4+1}, $${i*4+2}, $${i*4+3}, $${i*4+4})`
+                )
+                .join(", ");
+
+            const values = produtos.flatMap(p => [
+                p.id_produto,
+                p.nome,
+                p.preco,
+                p.quantidade
+            ]);
+
+            
+            const SQL = `
+                UPDATE produto AS p
+                SET 
+                    nome = v.nome,
+                    preco = v.preco,
+                    quantidade = v.quantidade
+                FROM (
+                    SELECT
+                        CAST(v.id_produto AS INTEGER),
+                        CAST(v.nome AS TEXT),
+                        CAST(v.preco AS NUMERIC),
+                        CAST(v.quantidade AS INTEGER)
+                    FROM (
+                        VALUES ${valuesList}
+                    ) AS v(id_produto, nome, preco, quantidade)
+                ) AS v(id_produto, nome, preco, quantidade)
+                WHERE 
+                    p.id_produto = v.id_produto
+                    AND p.fk_id_fornecedor = $${values.length + 1};
+            `;
+
+                    
+            console.log(SQL);
+            await client.query("BEGIN");
+            values.push(id_fornecedor);
+
+            await client.query(SQL, values);
+            await client.query("COMMIT");
+
+        } catch (e) {
+            console.log(e);
+            await client.query("ROLLBACK");
+            throw e;
+        } finally {
+            client.release();
+        }
+    }
+
+
 
     public async deleteProduct(id_produto: number, id_fornecedor: number): Promise<boolean>{
         let client: PoolClient | undefined;
@@ -175,7 +244,7 @@ class ProdutoModel  {
             const result = await client.query(SQL, values);
             await client.query('COMMIT');
 
-            return !!result.rowCount;
+            return (result.rowCount ?? 0) > 0;
 
         } catch (e) {
             await client?.query('ROLLBACK');
@@ -184,6 +253,40 @@ class ProdutoModel  {
             client?.release();
         }
     }
+
+    public async deleteManyProducts(ids: number[], id_fornecedor: number): Promise<boolean> {
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const params = ids.map((_, i) => `$${i + 1}`).join(", ");
+
+            const SQL = `
+                DELETE FROM produto
+                WHERE id_produto IN (${params})
+                AND fk_id_fornecedor = $${ids.length + 1}
+            `;
+
+            
+            const values = [...ids, id_fornecedor];
+            // console.log(SQL, values);
+
+            await client.query('BEGIN');
+            const result = await client.query(SQL, values);
+            await client.query('COMMIT');
+
+            return (result.rowCount ?? 0) > 0;
+        } catch(e) {
+            await client?.query("ROLLBACK");
+            console.log("produtoModel.deleteManyProducts >>> ", e);
+            throw new Error("Erro ao deletar produto");
+        }
+        finally {
+            client?.release();
+        }
+    }
+
 
     public async getProductById(idProduto:number): Promise<productInterface>{
         let client: PoolClient | undefined;

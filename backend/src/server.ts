@@ -1,52 +1,25 @@
-import Fastify, {FastifyInstance} from "fastify";
-import { Socket, Server as SocketIOServer } from "socket.io";
-import fastifySocketIO from "fastify-socket.io";
-import fastifyStatic from '@fastify/static';
-import { routers } from "./router";
-import cors from '@fastify/cors';
-import { socketIO } from "./utils/socketIO";
-import path from "path";
+import { apiConfig } from "./config";
+import { buildApp } from "./app";
 
-declare module 'fastify' {
-    interface FastifyInstance {
-        io: SocketIOServer;
-    }
-}
 
-const app = Fastify({logger: false});
+// const PORT:number = 8090;
+// const HOST:string = "0.0.0.0";
 
-app.setErrorHandler((err, req, res) => {
-    res.code(404).send({
-        message: err.message, // Alterar pra uma resposta normalizada
-        test: 'Deu ERRO AQUI' // alterar para a resposta normalizada
-    });
-});
-
-const PORT:number = 8090;
-const HOST:string = "0.0.0.0" // funciona localmente e em qualquer dispositivo conectado. Acesso acontece atraves do ip do dispoditivo que ta servindo a API
+// declare module 'fastify' {
+//     interface FastifyInstance {
+//         io: SocketIOServer;
+//     }
+// };
 
 async function start() {
-    await app.register(cors);
+    const app = await buildApp()
     
-    await app.register(routers);
+    const {host, port} = apiConfig;
 
-    // adicionar, resposta de erro interno no servidor
-    
-    // socket IO
-    await app.register(fastifySocketIO);
-    
-    await app.register(fastifyStatic, {
-        root: path.join(__dirname, 'public'),
-        prefix: '/frontend',
-        index: ['index.html']
-    });
-
-    await socketIO(app);
-    // ------
     try {
-        await app.listen({port: PORT, host: HOST}, () => {
-            console.log(`API rodando na url >>> http://${HOST}:${PORT}\n`);
-        })
+        await app.listen({port: port, host: host}, () => {
+            console.log(`API rodando na url >>> http://${host}:${port}\n`);
+        });
     } catch {
         process.exit(1);
     }

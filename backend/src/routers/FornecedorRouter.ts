@@ -11,7 +11,7 @@ const produtoController:ProdutoController = new ProdutoController();
 const clienteFornecedorController: ClienteFornecedorController = new ClienteFornecedorController();
 const clienteControler: ClienteController = new ClienteController();
 
-// module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) 
+
 export const fornecedorRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => {
    
     router.post("/register", async(req: FastifyRequest, res: FastifyReply) => {
@@ -59,7 +59,7 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
     });
 
     router.post('/product/update', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await produtoController.updateProtuct(req, res);
+        return await produtoController.updateProduct(req, res);
     }); 
 
     router.post('/product/delete', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {

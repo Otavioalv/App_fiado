@@ -1,4 +1,4 @@
-import { queryFilter } from "../interfaces/clienteFornecedorInterface";
+import { queryFilter } from "../interfaces/utilsInterfeces";
 
 export async function verifyQueryOptList(queryOpt: queryFilter): Promise<boolean>{
         try {
@@ -8,7 +8,7 @@ export async function verifyQueryOptList(queryOpt: queryFilter): Promise<boolean
 
             const pagination = Number(queryOpt.page);
             const size = Number(queryOpt.size);
-            const search = String(queryOpt.search);
+            const search = String(queryOpt.search).trim();
             const {filterList, filter} = queryOpt;
 
             if(

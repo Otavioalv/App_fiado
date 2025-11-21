@@ -1,17 +1,11 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
-import { ValidateDatasUserController } from "../controller/ValidateDatasUserController";
-import { authenticatedRouteOptions } from "../utils/authenticate";
-import { FornecedorController } from "../controller/FornecedorController";
+import { ValidateDatasUser } from "../validators/ValidateDatasUser";
 
-// module.exports = async function routers(router: FastifyInstance, options: FastifyPluginOptions) 
-// export const userRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => 
+
+const validateDatasUser: ValidateDatasUser = new ValidateDatasUser();
+
 export const userRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => {
-    
-    router.post("/validateCEP", async(req: FastifyRequest, res: FastifyReply) => {
-        return await new ValidateDatasUserController().validateAdressCep(req, res);
-    });
-
-    router.post("/fornecedor/list-all", authenticatedRouteOptions, async(req: FastifyRequest, res: FastifyReply) => {
-        return await new FornecedorController().listAll(req, res);
+    router.post("/validate-cep", async(req: FastifyRequest, res: FastifyReply) => {
+        return await validateDatasUser.validateAdressCep(req, res);
     });
 }

@@ -1,15 +1,13 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { payloadInterface } from "../interfaces/payloadInterface";
-import { getPayloadFromToken, getTokenIdFromRequest } from "../utils/tokenUtils";
+import { getTokenIdFromRequest } from "../utils/tokenUtils";
 import { compraInterface, productInterface } from "../interfaces/productInterface";
 import { errorResponse, successResponse } from "../utils/response";
 import {ProdutoModel} from "../models/ProdutoModel";
-import { unknown, z } from "zod";
-import { queryFilter } from "../interfaces/clienteFornecedorInterface";
+import { z } from "zod";
+import { queryFilter } from "../interfaces/utilsInterfeces";
 import { verifyQueryOptList } from "../utils/verifyQueryOptList";
 import { isNumeric } from "validator";
 import { ClienteFornecedorModel } from "../models/ClienteFornecedorModel";
-import { idsPartnerInterface } from "../interfaces/idsFornecedorInterface";
 
 
 class ProdutoController {
@@ -19,23 +17,30 @@ class ProdutoController {
     public async addProducts(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {        
         try {
             const id_fornecedor: number = await getTokenIdFromRequest(req);
-            const datasProduct: productInterface[] = await this.productShemaValidate(req);
+
+            let productData = req.body as productInterface[];
+             // Verifica o tipo do dado
+            if(!productData.length || !Array.isArray(productData)) {
+                return res.status(400).send(errorResponse("Dados não preenchidos corretamente"));
+            }
+
+            // Verifica dados
+            productData = await this.productShemaValidate(productData);
             
-            await this.produtoModel.addProducts(datasProduct, id_fornecedor);
+            await this.produtoModel.addProducts(productData, id_fornecedor);
 
             return res.status(201).send(successResponse("Produtos adicionados"));
-            
         } catch (e) {
-            if(e instanceof z.ZodError) {
-                return res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));
-                
-            }
+            console.log("Erro ao adicionar produto >>> ", e);
+
+            if(Array.isArray(e))
+                return res.status(404).send(errorResponse("Erro com dados recebidos", e));
+
             return res.status(500).send(errorResponse("Erro interno no servidor", e));
-            
         }
     }
 
-    public async listProducts(req: FastifyRequest, res: FastifyReply) {
+    public async listProducts(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             const {...filterOpt} = req.query as queryFilter;
             const id_fornecedor:number = await getTokenIdFromRequest(req);
@@ -47,70 +52,85 @@ class ProdutoController {
                 return res.status(400).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
 
             if(!id_fornecedor || typeof id_fornecedor != "number" || id_fornecedor < 0) {
-               res.status(400).send(errorResponse("Parametros invalidos"));
-               return;
+               return res.status(400).send(errorResponse("Parametros invalidos"));
+               
             }
 
             const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor, filterOpt);
 
-            res.status(200).send(successResponse("Produtos listados com sucesso", {list: listProducts, pagination: filterOpt}));
-            return;
+            return res.status(200).send(successResponse("Produtos listados com sucesso", {list: listProducts, pagination: filterOpt}));
+            
         } catch (e) {
-            res.status(500).send(errorResponse("Erro interno no servidor", e));
-            return;
+            return res.status(500).send(errorResponse("Erro interno no servidor", e));
         }
     }
 
-    public async updateProtuct(req: FastifyRequest, res: FastifyReply) {
+    public async updateProduct(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
-            const id_fornecedor: number = await getTokenIdFromRequest(req);
-            const datasProduct: productInterface[] = await this.productShemaValidate(req);
-            
-            for(const prod of datasProduct) {
-                const result:boolean = await this.produtoModel.updateProtucts([prod], id_fornecedor);
-
-                if(!result) {
-                    res.status(400).send(errorResponse("Um ou mais produtos não foram encontrados"));
-                    return;
-                }    
-            } 
-
-            res.status(200).send(successResponse("Produto atualizado com sucesso"));
-            return;
-        } catch(e) {
-            if(e instanceof z.ZodError) {
-                return res.status(400).send(errorResponse("Parametros invalidos", e.errors[0].path));   
+            const id_fornecedor = await getTokenIdFromRequest(req);
+            // const produtos = await this.productShemaValidate(req);
+            let produtos = req.body as productInterface[];
+             
+            // Verifica o tipo do dado
+            if(!produtos.length || !Array.isArray(produtos)) {
+                return res.status(400).send(errorResponse("Dados não preenchidos corretamente"));
             }
 
-            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            // Verifica dados
+            produtos = await this.productShemaValidate(produtos);
+
+            if(produtos.some(p => !p.id_produto)) {
+                return res.status(400).send(errorResponse("Algum produto não pode ser identificado na lista corretamente"));
+            }
+
+            const ids = produtos.map(p => p.id_produto ?? 0);
+
+            const existentes = await this.produtoModel.getManyProducts(ids, id_fornecedor);
+
+            if(existentes.length !== produtos.length) {
+                return res.status(400).send(errorResponse("Um ou mais produtos não existem"));
+            }
+
+            await this.produtoModel.updateManyProducts(produtos, id_fornecedor);
+
+            return res.status(200).send(successResponse("Produtos atualizados com sucesso"));
+        } catch (e) {
+            console.log("Erro ao atualizar produtos >>> ", e);
+
+            if(Array.isArray(e))
+                return res.status(404).send(errorResponse("Erro com dados recebidos", e));
             
+            return res.status(500).send(errorResponse("Erro interno no servidor"));
         }
     }
 
-    public async deleteProduct(req: FastifyRequest, res: FastifyReply) {
+    public async deleteProduct(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply>{
         try {
             const dataIds = req.body as number[];
             const id_fornecedor: number = await getTokenIdFromRequest(req);
 
-            for(const idProd of dataIds) {
-                if(!idProd || typeof idProd != 'number' || idProd < 0) {
-                    return res.status(400).send(errorResponse("Parametros invalidos"));
-                }
-
-                const result:boolean = await this.produtoModel.deleteProduct(idProd, id_fornecedor);
-
-                if(!result) {
-                    return res.status(400).send(errorResponse("Um ou mais Produtos não existem ou não foi possivel encontra-los"));
-                }
+            if (!Array.isArray(dataIds) || dataIds.length === 0) {
+                return res.status(400).send(errorResponse("Parametros invalidos"));
             }
-            
-            return res.status(200).send(successResponse("Produto deletado com sucesso"));
-        } catch(e) {
-            return res.status(500).send(errorResponse("Error interno no servidor", e));
-        } 
+
+            if (!dataIds.every(id => Number.isInteger(id) && id > 0)) {
+                return res.status(400).send(errorResponse("Lista Invalida"));
+            }
+
+            const result = await this.produtoModel.deleteManyProducts(dataIds, id_fornecedor);
+
+            if (!result) {
+                return res.status(400).send(errorResponse("Nenhum produto encontrado para deletar"));
+            }
+
+            return res.status(200).send(successResponse("Produtos deletados com sucesso"));
+
+        } catch (e) {
+            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+        }
     }
 
-    public async listProductsByIdFornecedor(req: FastifyRequest, res: FastifyReply) {
+    public async listProductsByIdFornecedor(req: FastifyRequest, res: FastifyReply):Promise<FastifyReply> {
         try {
             const {...filterOpt} = req.query as queryFilter;
             const {idFornecedor} = req.params as {idFornecedor:string | undefined};
@@ -192,7 +212,7 @@ class ProdutoController {
 
     
 
-    private async productShemaValidate(req: FastifyRequest): Promise<productInterface[]>{
+    private async productShemaValidate(dataProd: productInterface[]): Promise<productInterface[]>{
         try {
             const productSchema = z.object({
                 id_produto: z.number().nonnegative("Insira um valor valido").optional(), 
@@ -202,13 +222,15 @@ class ProdutoController {
             })
             const productArraySchema = z.array(productSchema);
 
-            
-            const datasProduct:productInterface[] = productArraySchema.parse(await req.body);
-            
-            return datasProduct;
+            return productArraySchema.parse(dataProd);
         } catch(e) {
             if(e instanceof z.ZodError){
-                throw e;
+                const formatted = e.errors.map(err => ({
+                    path: err.path,
+                    message: err.message
+                }));
+
+                throw formatted
             }
             throw new Error("Erro ao validar dados");
         }
@@ -227,13 +249,7 @@ class ProdutoController {
             });
             const compraArraySchema = z.array(compraSchema);
             
-            // const dataProd:compraInterface[] = compraArraySchema.parse(await req.body);
-            
-            // console.log("DSAf: ", dataProd);
-
-            // console.log(dataProd);
             return compraArraySchema.parse(dataProd)
-            // return compraArraySchema.parse(dataProd);
         } catch(e) {
             if(e instanceof z.ZodError){
                 const formatted = e.errors.map(err => ({

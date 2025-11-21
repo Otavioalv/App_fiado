@@ -6,13 +6,13 @@ import validator from 'validator';
 import { ValidateDatasUserModel } from "../models/ValidateDatasUserModel";
 import { FornecedorModel } from "../models/FornecedorModel";
 import { errorResponse, successResponse } from "../utils/response";
-import { fornecedorInterface } from "../interfaces/fornecedorInterface";
-import { loginInterface } from "../interfaces/loginInterface";
-import { payloadInterface } from "../interfaces/payloadInterface";
+import { fornecedorInterface } from "../interfaces/userInterfaces";
+import { loginInterface } from "../interfaces/userInterfaces";
+import { payloadInterface } from "../interfaces/utilsInterfeces";
 import { saltRoundPassword } from "../config";
 import { removeAccents } from "../utils/removeAccents";
 import { getPayloadFromToken } from "../utils/tokenUtils";
-import { clienteInterface } from "../interfaces/clienteInterface";
+import { clienteInterface } from "../interfaces/userInterfaces";
 import { ClienteModel } from "../models/ClienteModel";
 
 
@@ -21,7 +21,7 @@ interface cepInterface {
 }
 
 
-class ValidateDatasUserController  {
+class ValidateDatasUser {
     private validateDatasUserModel: ValidateDatasUserModel = new ValidateDatasUserModel();
 
     public async validateDatasFornecedor(datasRegister: fornecedorInterface):Promise<Record<string, string[]>[]>{
@@ -29,7 +29,8 @@ class ValidateDatasUserController  {
             const messages: Record<string, string[]>[] = [];
             
             // dados relacionados a fornecedor e cliente
-            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            // datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            datasRegister.nome = datasRegister.nome.trim();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = datasRegister.telefone.trim();
@@ -149,7 +150,8 @@ class ValidateDatasUserController  {
 
     public async validateDatasCliente(datasRegister: clienteInterface): Promise<Record<string, string[]>[]>{
         try {
-            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            // datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            datasRegister.nome = datasRegister.nome.trim();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = datasRegister.telefone.trim();
@@ -197,7 +199,8 @@ class ValidateDatasUserController  {
         try {
             const messages: Record<string, string[]>[] = [];
 
-            datasLogin.nome = datasLogin.nome.trim().toLowerCase();
+            // datasLogin.nome = datasLogin.nome.trim().toLowerCase();
+            datasLogin.nome = datasLogin.nome.trim();
             datasLogin.senha = datasLogin.senha.trim();
 
             const nomeVerificado = await this.validarNome(datasLogin.nome);
@@ -218,27 +221,25 @@ class ValidateDatasUserController  {
         }
     }
 
-    public async validateAdressCep(req: FastifyRequest, res: FastifyReply) {
+    public async validateAdressCep(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply>{
         try {
             var obj = await req.body as cepInterface;
 
             if(!obj.cep){
-                res.status(400).send(errorResponse("CEP vazio"));
-                return;
+                return res.status(400).send(errorResponse("CEP vazio"));
             }
 
             obj.cep = obj.cep.replace(/\D/g, ""); // remove qualquer caracter e mantem os numeros
 
             if(!/^[0-9]{8}$/.test(obj.cep)) {
-                res.status(400).send(errorResponse("Formato do CEP inválido"));
-                return;
+                return res.status(400).send(errorResponse("Formato do CEP inválido"));
             }
     
             const result = await this.validateDatasUserModel.validateAdressCep(obj.cep);
-            res.status(200).send(successResponse("CEP validado com sucesso", result));
+            return res.status(200).send(successResponse("CEP validado com sucesso", result));
             
         } catch(err){
-            res.status(500).send(errorResponse("Erro interno no servidor", err));
+            return res.status(500).send(errorResponse("Erro interno no servidor", err));
         }
     }
 
@@ -370,4 +371,4 @@ class ValidateDatasUserController  {
 
 }
 
-export {ValidateDatasUserController}
+export {ValidateDatasUser}
