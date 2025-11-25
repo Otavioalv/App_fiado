@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
 import { FornecedorController } from "../controller/FornecedorController";
-import { authorizedOptions } from "../utils/authenticate";
+import { authorizedOptions } from "../shared/utils/authenticate";
 import { ProdutoController } from "../controller/ProdutoController";
 import { ClienteFornecedorController } from "../controller/ClienteFornecedorController";
 import { ClienteController } from "../controller/ClienteController";

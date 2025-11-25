@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
-import { ValidateDatasUser } from "../validators/ValidateDatasUser";
+import { ValidateDatasUser } from "../shared/validators/ValidateDatasUser";
 
 
 const validateDatasUser: ValidateDatasUser = new ValidateDatasUser();

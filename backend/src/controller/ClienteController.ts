@@ -1,13 +1,13 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ClienteModel } from "../models/ClienteModel";
-import { clienteInterface, loginInterface, fornecedorInterface} from "../interfaces/userInterfaces";
-import { ValidateDatasUser } from "../validators/ValidateDatasUser";
-import { errorResponse, successResponse } from "../utils/response";
-import { generateToken, getTokenIdFromRequest } from "../utils/tokenUtils";
-import { UserController } from "../interfaces/class/UserController";
+import { clienteInterface, loginInterface, fornecedorInterface} from "../shared/interfaces/userInterfaces";
+import { ValidateDatasUser } from "../shared/validators/ValidateDatasUser";
+import { errorResponse, successResponse } from "../common/responses/api.response";
+import { generateToken, getTokenIdFromRequest } from "../shared/utils/tokenUtils";
+import { UserController } from "../shared/interfaces/class/UserController";
 import { FornecedorModel } from "../models/FornecedorModel";
-import { verifyQueryOptList } from "../utils/verifyQueryOptList";
-import { queryFilter, payloadInterface } from "../interfaces/utilsInterfeces";
+import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
+import { queryFilter, payloadInterface } from "../shared/interfaces/utilsInterfeces";
 
 
 class ClienteController extends UserController{

@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { idsPartnerInterface, clienteFornecedorInterface } from "../interfaces/userInterfaces";
+import { idsPartnerInterface, clienteFornecedorInterface } from "../shared/interfaces/userInterfaces";
 
 
 class ClienteFornecedorModel {

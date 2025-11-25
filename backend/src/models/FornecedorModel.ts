@@ -1,8 +1,8 @@
-import { idsPartnerInterface, fornecedorInterface } from "../interfaces/userInterfaces";
+import { idsPartnerInterface, fornecedorInterface } from "../shared/interfaces/userInterfaces";
 import connection from "../database/connection";
 import { PoolClient } from "pg";
-import { UserModel } from "../interfaces/class/UserModel";
-import { queryFilter } from "../interfaces/utilsInterfeces";
+import { UserModel } from "../shared/interfaces/class/UserModel";
+import { queryFilter } from "../shared/interfaces/utilsInterfeces";
 
 class FornecedorModel extends UserModel<fornecedorInterface>{
 

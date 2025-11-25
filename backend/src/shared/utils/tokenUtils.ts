@@ -1,6 +1,6 @@
 import { JsonWebTokenError, TokenExpiredError, sign, verify } from "jsonwebtoken";
 import { payloadInterface } from "../interfaces/utilsInterfeces";
-import { authJwt } from "../config";
+import { authJwt } from "../../config";
 import { FastifyRequest } from "fastify";
 
 export const generateToken = async (payload: payloadInterface):Promise<string> => {

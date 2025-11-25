@@ -1,8 +1,8 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { clienteInterface, idsPartnerInterface } from "../interfaces/userInterfaces";
-import { UserModel } from "../interfaces/class/UserModel";
-import { queryFilter } from "../interfaces/utilsInterfeces";
+import { clienteInterface, idsPartnerInterface } from "../shared/interfaces/userInterfaces";
+import { UserModel } from "../shared/interfaces/class/UserModel";
+import { queryFilter } from "../shared/interfaces/utilsInterfeces";
 
 
 class ClienteModel extends UserModel<clienteInterface>{

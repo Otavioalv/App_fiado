@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { getTokenIdFromRequest } from "../utils/tokenUtils";
-import { errorResponse, successResponse } from "../utils/response";
-import { idsPartnerInterface, fornecedorInterface, clienteFornecedorInterface, clienteInterface, userInterface } from "../interfaces/userInterfaces";
+import { getTokenIdFromRequest } from "../shared/utils/tokenUtils";
+import { errorResponse, successResponse } from "../common/responses/api.response";
+import { idsPartnerInterface, fornecedorInterface, clienteFornecedorInterface, clienteInterface, userInterface } from "../shared/interfaces/userInterfaces";
 import { FornecedorModel } from "../models/FornecedorModel";
 import { ClienteFornecedorModel } from "../models/ClienteFornecedorModel";
 import { ClienteModel } from "../models/ClienteModel";
@@ -106,7 +106,7 @@ class ClienteFornecedorController {
                     "new-message",
                     {
                         type: "new_partner",
-                        message: `Você recebeu uma nova solicitação de parceria ${cliente.nome}${cliente.apelido ? ` conhecido por ${cliente.apelido}.` : "."}`,
+                        message: `Você recebeu uma nova solicitação de parceria de ${fornecedorData.nome}${fornecedorData.apelido ? ` conhecido por ${fornecedorData.apelido}.` : "."}`,
                         user: {
                             id: id_fornecedor,
                             nome: fornecedorData.nome,

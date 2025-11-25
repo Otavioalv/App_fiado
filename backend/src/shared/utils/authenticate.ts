@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { errorResponse } from "./response";
+import { errorResponse } from "../../common/responses/api.response";
 import { ValidateDatasUser } from "../validators/ValidateDatasUser";
 import { getPayloadFromToken } from "./tokenUtils";
 import { payloadInterface } from "../interfaces/utilsInterfeces";

@@ -1,9 +1,4 @@
-interface ApiResponseInterface<T> {
-    status: 'sucess'| 'error';
-    message: string;
-    data?: T;
-    errors?: any
-}
+import { ApiResponseInterface } from "../../shared/interfaces/responseInterfaces";
 
 const successResponse = <T>(message: string, data?: T): ApiResponseInterface<T> => ({
     status: "sucess",

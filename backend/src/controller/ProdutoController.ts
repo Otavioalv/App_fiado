@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { getTokenIdFromRequest } from "../utils/tokenUtils";
-import { compraInterface, productInterface } from "../interfaces/productInterface";
-import { errorResponse, successResponse } from "../utils/response";
+import { getTokenIdFromRequest } from "../shared/utils/tokenUtils";
+import { compraInterface, productInterface } from "../shared/interfaces/productInterface";
+import { errorResponse, successResponse } from "../common/responses/api.response";
 import {ProdutoModel} from "../models/ProdutoModel";
 import { z } from "zod";
-import { queryFilter } from "../interfaces/utilsInterfeces";
-import { verifyQueryOptList } from "../utils/verifyQueryOptList";
+import { queryFilter } from "../shared/interfaces/utilsInterfeces";
+import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { isNumeric } from "validator";
 import { ClienteFornecedorModel } from "../models/ClienteFornecedorModel";
 

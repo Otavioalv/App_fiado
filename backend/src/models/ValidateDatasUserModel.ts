@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { addressInterface } from "../interfaces/userInterfaces";
+import { addressInterface } from "../shared/interfaces/userInterfaces";
 
 class ValidateDatasUserModel {
     private viaCepApi:string = "https://viacep.com.br/ws/";

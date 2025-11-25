@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { ValidateDatasUser } from "../validators/ValidateDatasUser";
-import { getPayloadFromToken } from "../utils/tokenUtils";
+import { ValidateDatasUser } from "../shared/validators/ValidateDatasUser";
+import { getPayloadFromToken } from "../shared/utils/tokenUtils";
 
 
 export const socketAuth = (app: FastifyInstance) => {

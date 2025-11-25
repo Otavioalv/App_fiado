@@ -1,7 +1,7 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { compraInterface, productInterface } from "../interfaces/productInterface";
-import { queryFilter } from "../interfaces/utilsInterfeces";
+import { compraInterface, productInterface } from "../shared/interfaces/productInterface";
+import { queryFilter } from "../shared/interfaces/utilsInterfeces";
 
 
 class ProdutoModel  {
