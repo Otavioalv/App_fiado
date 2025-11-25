@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { getTokenIdFromRequest } from "../utils/tokenUtils";
 import { errorResponse, successResponse } from "../utils/response";
-import { idsPartnerInterface, fornecedorInterface, clienteFornecedorInterface, clienteInterface } from "../interfaces/userInterfaces";
+import { idsPartnerInterface, fornecedorInterface, clienteFornecedorInterface, clienteInterface, userInterface } from "../interfaces/userInterfaces";
 import { FornecedorModel } from "../models/FornecedorModel";
 import { ClienteFornecedorModel } from "../models/ClienteFornecedorModel";
 import { ClienteModel } from "../models/ClienteModel";
@@ -61,6 +61,8 @@ class ClienteFornecedorController {
             const ids: idsPartnerInterface = await req.body as idsPartnerInterface;
             const id_fornecedor: number = await getTokenIdFromRequest(req);
 
+            // console.log("id_fornecedor: ", id_fornecedor);
+
             if(!ids || !ids.ids.length || !ids.ids.every((elem) => typeof elem === 'number')) {
                 return res.status(400).send(errorResponse("Dados invalidos"));
             }
@@ -77,6 +79,7 @@ class ClienteFornecedorController {
 
 
             const listPartner: clienteFornecedorInterface[] = await this.clienteFornecedorModel.findMultPartnerClient(ids, id_fornecedor);
+            console.log(listCliente);
 
             // Verifica se associação ja existe
             if(listPartner.length > 0) {
@@ -89,8 +92,38 @@ class ClienteFornecedorController {
                     return res.status(400).send(errorResponse("Todos estes clientes ja receberam solicitação de parceria"))
                 }
             }
-
+    
+            // Envia no banco de dados
             await this.clienteFornecedorModel.associarComCliente(ids, id_fornecedor);
+
+            // Envia notificação
+            const notifier = req.server.notifier;
+            const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
+
+            listCliente.forEach(cliente => {
+                notifier.toUser(
+                    cliente.id_cliente?.toString() ?? "0",
+                    "new-message",
+                    {
+                        type: "new_partner",
+                        message: `Você recebeu uma nova solicitação de parceria ${cliente.nome}${cliente.apelido ? ` conhecido por ${cliente.apelido}.` : "."}`,
+                        user: {
+                            id: id_fornecedor,
+                            nome: fornecedorData.nome,
+                            apelido: fornecedorData.apelido
+                        }
+                    }
+                );
+            });
+
+            /* 
+            notifier.toUser(
+    idCliente.toString(),
+    "notify",
+    NotificationTemplates.novaSolicitacao(id_fornecedor)
+);
+ */
+            // ---------------------------------------------------------------------
 
             return res.status(201).send(successResponse("Solicitações enviadas com sucesso"));
         }catch(e) {

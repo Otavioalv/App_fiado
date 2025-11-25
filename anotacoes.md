@@ -135,3 +135,19 @@ tabela, campos
 - aceito false
 
  -->
+
+Na rota onde o cliente faz compra, emitir notificação
+import { notify } from "../sockets/notify";
+
+export const buyProductController = (app) => async (req, res) => {
+    const { idFornecedor, idCliente, produto } = req.body;
+
+    // ... lógica de compra no banco
+
+    notify(app).toUser(idFornecedor, "nova-compra", {
+        cliente: idCliente,
+        produto
+    });
+
+    return res.send({ ok: true });
+};

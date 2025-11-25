@@ -72,6 +72,7 @@ class ClienteModel extends UserModel<clienteInterface>{
                 `id_cliente = $${i+1}`
             ).join(' or ');
             const SQL: string = `SELECT nome, senha, apelido, telefone, id_cliente FROM cliente WHERE ${strSqlValues}`;
+            // const SQL: string = `SELECT nome, apelido, telefone, id_cliente FROM cliente WHERE ${strSqlValues}`;
 
             const result:clienteInterface[] = (await client.query(SQL, ids.ids)).rows;  
 

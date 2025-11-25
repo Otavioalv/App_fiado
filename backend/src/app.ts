@@ -6,10 +6,16 @@ import { routers } from "./router";
 import cors from '@fastify/cors';
 import { socketIO } from "./sockets/socketIO";
 import path from "path";
+import { notify } from "./sockets/notify";
 
+
+// NotifierClass
 declare module 'fastify' {
     interface FastifyInstance {
-        io: SocketIOServer;
+        notifier: {
+            toUser: (userId: string, event: string, payload: any) => void,
+            broadcast: (event: string, payload: any) => void
+        }
     }
 }
 
@@ -24,17 +30,22 @@ export async function buildApp() {
     await app.register(cors);
 
     // teste (DELETAR FUTURAMENTE) ----------
-    await app.register(fastifyStatic, {
-        root: path.join(__dirname, 'public'),
-        prefix: '/frontend',
-        index: ['index.html']
-    });
+    // await app.register(fastifyStatic, {
+    //     root: path.join(__dirname, 'public'),
+    //     prefix: '/frontend',
+    //     index: ['index.html']
+    // });
     // --------------------------------------
     
-    await app.register(routers);
     await app.register(fastifySocketIO);
     await socketIO(app);
+
+    const notifier = notify(app);
+    app.decorate("notifier", notifier);
+
+    await app.register(routers);
     
+
     app.setNotFoundHandler((req, res) => {
         res.status(404).send({
             message: "Rota nao encontrada",

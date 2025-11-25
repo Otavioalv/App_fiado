@@ -279,7 +279,6 @@ class ValidateDatasUser {
             }
             
             return true;
-        
         } catch(e) {
             throw e;
         }

@@ -24,7 +24,6 @@ export const authenticate = async (req: FastifyRequest, res: FastifyReply) => {
     } catch (e) {
         res.status(401).send(errorResponse("Você não tem autorização para acessar esse conteudo", e))
     }
-        
 }
 
 export const authorize = (user: "fornecedor" | "cliente") => {
