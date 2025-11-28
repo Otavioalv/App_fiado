@@ -13,7 +13,7 @@ CREATE TABLE cliente_fornecedor (
 );
 
 CREATE TABLE IF NOT EXISTS compra (
-    id_compra SERIAL,
+    id_compra SERIAL PRIMARY KEY,
 
     nome_produto TEXT,
     quantidade INTEGER,
@@ -29,6 +29,20 @@ CREATE TABLE IF NOT EXISTS compra (
     fk_fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id_fornecedor) ON DELETE CASCADE
 );
 
+
+
+CREATE TABLE IF NOT EXISTS mensagens (
+    id_mensagem SERIAL PRIMARY KEY, 
+    mensagem TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(), 
+    
+    from_user_id INTEGER NOT NULL, 
+    to_user_id INTEGER NOT NULL, 
+    
+    from_user_type VARCHAR(10) NOT NULL CHECK(from_user_type IN ('cliente', 'fornecedor', 'system')),
+    to_user_type VARCHAR(10) NOT NULL CHECK(to_user_type IN ('cliente', 'fornecedor', 'all')),
+    type VARCHAR(50) NOT NULL
+);
 
 
 INSERT INTO cliente_fornecedor 
@@ -84,3 +98,14 @@ ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT NOW();
 
 ALTER TABLE produto
 ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+
+delete from cliente_fornecedor where fk_cliente_id = 1 and fk_fornecedor_id = 6;
+
+DELETE FROM cliente_fornecedor 
+WHERE (fk_cliente_id = 1 OR fk_cliente_id = 24 OR fk_cliente_id = 25 )  AND
+fk_fornecedor_id = 6;
+
+DELETE FROM cliente_fornecedor 
+WHERE (fk_fornecedor_id = 80 OR fk_fornecedor_id = 81 OR fk_fornecedor_id = 82 OR fk_fornecedor_id = 83)  AND
+fk_cliente_id = 111;

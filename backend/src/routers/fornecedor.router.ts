@@ -1,19 +1,21 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
-import { FornecedorController } from "../controller/FornecedorController";
+import { FornecedorController } from "../controller/fornecedor.controller";
 import { authorizedOptions } from "../shared/utils/authenticate";
-import { ProdutoController } from "../controller/ProdutoController";
-import { ClienteFornecedorController } from "../controller/ClienteFornecedorController";
-import { ClienteController } from "../controller/ClienteController";
+import { ProdutoController } from "../controller/produto.controller";
+import { ClienteFornecedorController } from "../controller/clienteFornecedor.controller";
+import { ClienteController } from "../controller/cliente.controller";
+import { NotificationController } from "../controller/notification.controller";
 
-
-const fornecedorController:FornecedorController = new FornecedorController();
-const produtoController:ProdutoController = new ProdutoController();
-const clienteFornecedorController: ClienteFornecedorController = new ClienteFornecedorController();
-const clienteControler: ClienteController = new ClienteController();
 
 
 export const fornecedorRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => {
-   
+    
+    const fornecedorController:FornecedorController = new FornecedorController();
+    const produtoController:ProdutoController = new ProdutoController();
+    const clienteFornecedorController: ClienteFornecedorController = new ClienteFornecedorController();
+    const clienteControler: ClienteController = new ClienteController();
+    const notificationController: NotificationController = new NotificationController()
+
     router.post("/register", async(req: FastifyRequest, res: FastifyReply) => {
         return await fornecedorController.register(req, res);
     });
@@ -65,4 +67,12 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
     router.post('/product/delete', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.deleteProduct(req, res);        
     });
+
+    router.post('/message/list', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await notificationController.listMessages(req, res, "fornecedor");        
+    });
+
+    router.post("/message/delete", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await notificationController.deleteMessages(req, res, "fornecedor");
+    });  
 }

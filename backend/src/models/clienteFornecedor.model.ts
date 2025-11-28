@@ -121,7 +121,9 @@ class ClienteFornecedorModel {
 
         try {
 
-            console.log(idFornecedor, idCliente);
+            console.log("aceitar parceria cliente: ");
+            console.log('fornecedor: ', idFornecedor);
+            console.log("cliente: ", idCliente);
 
             client = await connection.connect();
 
@@ -198,6 +200,8 @@ class ClienteFornecedorModel {
             `;
 
             const result = await client.query(SQL, [idFornecedor, idCliente]);
+
+            console.log(SQL, idCliente, idFornecedor);
 
             return result.rows.length > 0;
         } catch(e) {

@@ -6,16 +6,22 @@ import { routers } from "./router";
 import cors from '@fastify/cors';
 import { socketIO } from "./sockets/socketIO";
 import path from "path";
-import { notify } from "./sockets/notify";
+import { notify } from "./sockets/events/notify";
+import { NotifierBroadcastParams, NotifierToUserParams } from "./shared/interfaces/notifierInterfaces";
+import { NotificationService } from "./services/notification.service";
+
+
+
 
 
 // NotifierClass
 declare module 'fastify' {
     interface FastifyInstance {
         notifier: {
-            toUser: (userId: string, event: string, payload: any) => void,
-            broadcast: (event: string, payload: any) => void
-        }
+            toUser: ({toId, event, payload}: NotifierToUserParams) => void,
+            broadcast: ({event, payload}: NotifierBroadcastParams) => void
+        },
+        notificationService: NotificationService
     }
 }
 
@@ -42,6 +48,7 @@ export async function buildApp() {
 
     const notifier = notify(app);
     app.decorate("notifier", notifier);
+    app.decorate("notificationService", new NotificationService(app));
 
     await app.register(routers);
     

@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 
-import { fornecedorRouter } from "./routers/FornecedorRouter";
-import { clienteRouter } from "./routers/ClienteRouter";
-import { userRouter } from "./routers/UserRouter";
+import { fornecedorRouter } from "./routers/fornecedor.router";
+import { clienteRouter } from "./routers/cliente.router";
+import { userRouter } from "./routers/user.router";
 
 export async function routers(fastify: FastifyInstance, options: FastifyPluginOptions) {
     fastify.register(fornecedorRouter, {prefix: "/fornecedor"});

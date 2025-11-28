@@ -1,38 +1,40 @@
 import { cliEventNames } from "../../shared/consts/cliEventsNames";
-
-type NotificationFn<TInput, TOutput> = (input: TInput) => TOutput;
-
-type NotificationsMap<TInput, TOutput> = Record<string, NotificationFn<TInput, TOutput>>;
-
-
-interface UserData {
-    id: number;
-    nome: string;
-    apelido?: string;
-}
-
-interface NotificationPayload {
-    type: string;
-    message: string;
-    user: UserData;
-}
+import { typeNotificationList } from "../../shared/consts/typeNotificationList";
+import { NotificationsMap } from "../../shared/interfaces/notifierInterfaces";
+import { Messages } from "./messages";
+// import { NotificationPayload, NotificationsMap, UserDataNotfy } from "../../shared/interfaces/utilsInterfeces";
 
 
 
-export const Notifications: NotificationsMap<UserData, NotificationPayload> = {
-    novaSolicitacaoParceria: (userData) => ({
-        type: cliEventNames.newPartner, 
-        message: `Você recebeu uma nova solicitação de parceria de ${userData.nome}${userData.apelido ? ` conhecido por ${userData.apelido}.` : "."}`,
-        user: {
-            ...userData
+export const Notifications: NotificationsMap = {
+    novaSolicitacaoParceria: (data) => ({
+        toId: data.toId,
+        event: cliEventNames.newMessage,
+        payload: {
+            message: Messages.novaSolicitacaoParceria(data.user),
+            created_at: data.created_at,
+            type: typeNotificationList.newPartner,
+            user: data.user
         }        
     }),
-
-    novaCompra: (userData) => ({
-        type: cliEventNames.newCharge, 
-        message: `Você recebeu uma nova solicitação de parceria de ${userData.nome}${userData.apelido ? ` conhecido por ${userData.apelido}.` : "."}`,
-        user: userData  
-    })
-
+    parceriaAceita: (data) => ({
+        toId: data.toId,
+        event: cliEventNames.newMessage,
+        payload: {
+            message: Messages.parceriaAceita(data.user),
+            created_at: data.created_at,
+            type: typeNotificationList.newPartner,
+            user: data.user
+        }        
+    }), 
+    solicitarCompra: (data) => ({
+        toId: data.toId,
+        event: cliEventNames.newMessage,
+        payload: {
+            message: Messages.novaSolicitacaoCompra({...data.user, compra: data.produtos}),
+            created_at: data.created_at,
+            type: typeNotificationList.newPartner,
+            user: data.user
+        }        
+    }), 
 };
-

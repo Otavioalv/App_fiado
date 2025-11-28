@@ -1,5 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
 
+// Tipos e interfaces que não consegui definir um tipo expecifico
+
 export type queryFilter = {
     page: number;
     size: number;

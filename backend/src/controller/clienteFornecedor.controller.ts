@@ -1,16 +1,25 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { getTokenIdFromRequest } from "../shared/utils/tokenUtils";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import { idsPartnerInterface, fornecedorInterface, clienteFornecedorInterface, clienteInterface, userInterface } from "../shared/interfaces/userInterfaces";
-import { FornecedorModel } from "../models/FornecedorModel";
-import { ClienteFornecedorModel } from "../models/ClienteFornecedorModel";
-import { ClienteModel } from "../models/ClienteModel";
+import { FornecedorModel } from "../models/fornecedor.model";
+import { ClienteFornecedorModel } from "../models/clienteFornecedor.model";
+import { ClienteModel } from "../models/cliente.model";
+import { Notifications } from "../common/messages/notifications";
+import { NotificationInput } from "../shared/interfaces/notifierInterfaces";
+import { NotificationService } from "../services/notification.service";
 
 
 class ClienteFornecedorController {
     private fornecedorModel: FornecedorModel = new FornecedorModel();
     private clienteModel: ClienteModel = new ClienteModel();
     private clienteFornecedorModel: ClienteFornecedorModel = new ClienteFornecedorModel();
+    // private notificationService: NotificationService;
+
+    // constructor(app: FastifyInstance){
+    //     this.notificationService = new NotificationService(app);
+    // }
+
 
     public async associarComFornecedor(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply>{
         try {
@@ -50,6 +59,29 @@ class ClienteFornecedorController {
 
             await this.clienteFornecedorModel.associarComFornecedor(ids, id_cliente);
 
+
+            const notificationService = req.server.notificationService;
+            const clienteData = await this.clienteModel.findUserById(id_cliente);
+
+            for(const fornecedor of listFornecedor) {
+                const data: NotificationInput = {
+                    toId: fornecedor.id_fornecedor!.toString(),
+                    created_at: new Date(),
+                    fromUserType: "cliente",
+                    toUserType: "fornecedor",
+                    user: {
+                        id: id_cliente,
+                        nome: clienteData.nome,
+                        apelido: clienteData.apelido
+                    }
+                };
+
+                await notificationService.saveAndSendPrepared(
+                    Notifications.novaSolicitacaoParceria(data),
+                    data
+                );
+            };
+
             return res.status(201).send(successResponse("Solicitações enviadas com sucesso"));
         } catch(e) {
             return res.status(500).send(errorResponse("Erro interno no servidor", e));
@@ -79,7 +111,7 @@ class ClienteFornecedorController {
 
 
             const listPartner: clienteFornecedorInterface[] = await this.clienteFornecedorModel.findMultPartnerClient(ids, id_fornecedor);
-            console.log(listCliente);
+            // console.log(listCliente);
 
             // Verifica se associação ja existe
             if(listPartner.length > 0) {
@@ -97,37 +129,32 @@ class ClienteFornecedorController {
             await this.clienteFornecedorModel.associarComCliente(ids, id_fornecedor);
 
             // Envia notificação
-            const notifier = req.server.notifier;
+            const notificationService = req.server.notificationService;
             const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
 
-            listCliente.forEach(cliente => {
-                notifier.toUser(
-                    cliente.id_cliente?.toString() ?? "0",
-                    "new-message",
-                    {
-                        type: "new_partner",
-                        message: `Você recebeu uma nova solicitação de parceria de ${fornecedorData.nome}${fornecedorData.apelido ? ` conhecido por ${fornecedorData.apelido}.` : "."}`,
-                        user: {
-                            id: id_fornecedor,
-                            nome: fornecedorData.nome,
-                            apelido: fornecedorData.apelido
-                        }
+            for(const cliente of listCliente){
+                const data: NotificationInput = {
+                    toId: cliente.id_cliente!.toString(),
+                    created_at: new Date(),
+                    fromUserType: "fornecedor",
+                    toUserType: "cliente",
+                    user: {
+                        id: id_fornecedor,
+                        nome: fornecedorData.nome,
+                        apelido: fornecedorData.apelido
                     }
-                );
-            });
+                };
 
-            /* 
-            notifier.toUser(
-    idCliente.toString(),
-    "notify",
-    NotificationTemplates.novaSolicitacao(id_fornecedor)
-);
- */
-            // ---------------------------------------------------------------------
+                await notificationService.saveAndSendPrepared
+                    (Notifications.novaSolicitacaoParceria(data),
+                    data
+                );
+            };
 
             return res.status(201).send(successResponse("Solicitações enviadas com sucesso"));
         }catch(e) {
-            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            console.log(e);
+            return res.status(500).send(errorResponse("Erro interno no servidor"));
         }
 
     }
@@ -137,6 +164,8 @@ class ClienteFornecedorController {
             const {idPartner} = await req.body as {idPartner: number};
             const id_fornecedor: number = await getTokenIdFromRequest(req);
 
+
+
             if(!idPartner || typeof idPartner !== 'number') {
                 return res.status(400).send(errorResponse("Dados invalidos"));
             }   
@@ -145,7 +174,30 @@ class ClienteFornecedorController {
                 return res.status(400).send(errorResponse("Cliente invalido"));
             }
 
+        
+            
             await this.clienteFornecedorModel.aceitarParceriaCliente(id_fornecedor, idPartner);
+
+
+            // Mandar notificação
+            const notificationService = req.server.notificationService;
+            const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
+
+            const data: NotificationInput = {
+                toId: idPartner.toString(),
+                created_at: new Date(),
+                fromUserType: "fornecedor",
+                toUserType: "cliente",
+                user: {
+                    id: id_fornecedor,
+                    nome: fornecedorData.nome,
+                    apelido: fornecedorData.apelido
+                }
+            };
+            await notificationService.saveAndSendPrepared
+                (Notifications.parceriaAceita(data),
+                data
+            );
             
             return res.status(201).send(successResponse("Parceria aceita com sucesso"));
         }catch(e) {
@@ -168,6 +220,27 @@ class ClienteFornecedorController {
             }
 
             await this.clienteFornecedorModel.aceitarParceriaFornecedor(id_cliente, idPartner);
+
+            // Mando notificação
+            const notificationService = req.server.notificationService;
+            const clienteData = await this.fornecedorModel.findUserById(id_cliente);
+
+            const data: NotificationInput = {
+                toId: idPartner.toString(),
+                created_at: new Date(),
+                fromUserType: "cliente",
+                toUserType: "fornecedor",
+                user: {
+                    id: id_cliente,
+                    nome: clienteData.nome,
+                    apelido: clienteData.apelido
+                }
+            };
+            await notificationService.saveAndSendPrepared
+                (Notifications.parceriaAceita(data),
+                data
+            );
+
             
             return res.status(201).send(successResponse("Parceria aceita com sucesso"));
         }catch(e) {

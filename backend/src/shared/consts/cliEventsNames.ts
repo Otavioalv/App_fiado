@@ -1,6 +1,6 @@
 import { cliEventNamesinterface } from "../interfaces/socketIOInterfaces";
 
 export const cliEventNames:cliEventNamesinterface = {
-    newPartner: "new-partner",
+    newMessage: "new-message",
     newCharge: "new_charge"
-}
+} as const;

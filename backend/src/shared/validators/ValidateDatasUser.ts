@@ -3,8 +3,8 @@ import { compare, hash } from 'bcrypt';
 import validator from 'validator';
 
 
-import { ValidateDatasUserModel } from "../../models/ValidateDatasUserModel";
-import { FornecedorModel } from "../../models/FornecedorModel";
+import { ValidateDatasUserModel } from "../../models/validateDatasUser.model";
+import { FornecedorModel } from "../../models/fornecedor.model";
 import { errorResponse, successResponse } from "../../common/responses/api.response";
 import { fornecedorInterface } from "../interfaces/userInterfaces";
 import { loginInterface } from "../interfaces/userInterfaces";
@@ -13,7 +13,7 @@ import { saltRoundPassword } from "../../config";
 import { removeAccents } from "../utils/removeAccents";
 import { getPayloadFromToken } from "../utils/tokenUtils";
 import { clienteInterface } from "../interfaces/userInterfaces";
-import { ClienteModel } from "../../models/ClienteModel";
+import { ClienteModel } from "../../models/cliente.model";
 
 
 interface cepInterface {

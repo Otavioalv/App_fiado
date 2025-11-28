@@ -1,18 +1,21 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { FornecedorModel } from "../models/FornecedorModel";
+import { FornecedorModel } from "../models/fornecedor.model";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import { ValidateDatasUser } from "../shared/validators/ValidateDatasUser";
 import { payloadInterface, queryFilter } from "../shared/interfaces/utilsInterfeces";
 import { generateToken, getTokenIdFromRequest } from "../shared/utils/tokenUtils";
 import { UserController } from "../shared/interfaces/class/UserController";
-import { ClienteModel } from "../models/ClienteModel";
+import { ClienteModel } from "../models/cliente.model";
 import { fornecedorInterface, loginInterface, clienteInterface } from "../shared/interfaces/userInterfaces";
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
+import { MessageInterface } from "../shared/interfaces/notifierInterfaces";
+import { NotificationModel } from "../models/notification.model";
 
 
 class FornecedorController extends UserController{
     private fornecedorModel:FornecedorModel = new FornecedorModel();
     private clienteModel:ClienteModel = new ClienteModel();
+    private notificationModel: NotificationModel = new NotificationModel();
     private validateDatasUser:ValidateDatasUser = new ValidateDatasUser();
 
     public async register(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {

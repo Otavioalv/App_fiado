@@ -6,8 +6,11 @@ import { socketAuth } from "./auth";
 
 
 export const socketIO = async (app: FastifyInstance) => {
+    
+    // Verifica se usuario está autenticado
     socketAuth(app);
 
+    // se usuario tiver autenticado, passa pra essa linha
     app.ready(async (err: Error | null) => {
 
         app.io.on('connection', async (socket: Socket) => {
@@ -26,9 +29,11 @@ export const socketIO = async (app: FastifyInstance) => {
             
             // console.log(userToSocket, socketToUser);
 
+            console.log("=================================");
             console.log("userToSocket: ", userToSocket);
             console.log("socketToUser: ", socketToUser);
             console.log("userId: ", userId);
+            console.log("=================================\n");
             
             // realiza somente uma conexao, ele nao duplica nem recria se existe, de forma automatica
             socket.join(userId);

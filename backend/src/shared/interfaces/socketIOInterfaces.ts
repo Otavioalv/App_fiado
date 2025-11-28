@@ -1,4 +1,4 @@
 export interface cliEventNamesinterface {
-    newPartner: string,
+    newMessage: string,
     newCharge: string
 }

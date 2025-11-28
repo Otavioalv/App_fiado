@@ -1,15 +1,17 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from "fastify";
-import { ClienteController } from "../controller/ClienteController";
+import { ClienteController } from "../controller/cliente.controller";
 import { authorizedOptions } from "../shared/utils/authenticate";
-import { ClienteFornecedorController } from "../controller/ClienteFornecedorController";
-import { FornecedorController } from "../controller/FornecedorController";
-import { ProdutoController } from "../controller/ProdutoController";
+import { ClienteFornecedorController } from "../controller/clienteFornecedor.controller";
+import { FornecedorController } from "../controller/fornecedor.controller";
+import { ProdutoController } from "../controller/produto.controller";
+import { NotificationController } from "../controller/notification.controller";
 
 
 const clienteController: ClienteController = new ClienteController()
 const clienteFornecedorController: ClienteFornecedorController = new ClienteFornecedorController();
 const fornecedorController: FornecedorController = new FornecedorController();
 const produtoController: ProdutoController = new ProdutoController();
+const notificationController: NotificationController = new NotificationController()
 
 
 export const clienteRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => {
@@ -43,7 +45,7 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
     
     router.post("/partner/list/sent", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.partnerList(req, res, "sent");
-    }); 
+    });
 
     router.post("/partner/list/accepted", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.partnerList(req, res, "accepted");
@@ -55,5 +57,13 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
 
     router.post("/product/buy", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.buyProducts(req, res);
+    }); 
+
+    router.post("/message/list", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await notificationController.listMessages(req, res, "cliente");
+    }); 
+
+    router.post("/message/delete", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await notificationController.deleteMessages(req, res, "cliente");
     }); 
 }

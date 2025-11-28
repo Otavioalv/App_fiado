@@ -2,17 +2,21 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { getTokenIdFromRequest } from "../shared/utils/tokenUtils";
 import { compraInterface, productInterface } from "../shared/interfaces/productInterface";
 import { errorResponse, successResponse } from "../common/responses/api.response";
-import {ProdutoModel} from "../models/ProdutoModel";
+import {ProdutoModel} from "../models/produto.model";
 import { z } from "zod";
 import { queryFilter } from "../shared/interfaces/utilsInterfeces";
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { isNumeric } from "validator";
-import { ClienteFornecedorModel } from "../models/ClienteFornecedorModel";
+import { ClienteFornecedorModel } from "../models/clienteFornecedor.model";
+import { ClienteModel } from "../models/cliente.model";
+import { NotificationCompraInput, NotificationInput } from "../shared/interfaces/notifierInterfaces";
+import { Notifications } from "../common/messages/notifications";
 
 
 class ProdutoController {
     private produtoModel:ProdutoModel = new ProdutoModel();
     private clienteFornecedorModel: ClienteFornecedorModel = new ClienteFornecedorModel();
+    private clienteModel: ClienteModel = new ClienteModel();
 
     public async addProducts(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {        
         try {
@@ -180,7 +184,6 @@ class ProdutoController {
             const compraData:compraInterface[] = [];
 
             for(const pd of productData) {
-                
                 const produto:productInterface = await this.produtoModel.getProductExists(pd.id_produto, pd.id_fornecedor);
 
                 if(!produto) {
@@ -199,6 +202,50 @@ class ProdutoController {
             
             await this.produtoModel.addCompra(compraData);
 
+
+            // Preparar enviar notificação
+            const compraAgrupada = compraData.reduce<Record<number, compraInterface[]>>((acc, item) => {
+                if(!acc[item.id_fornecedor]) {
+                    acc[item.id_fornecedor] = [];
+                }
+
+                acc[item.id_fornecedor].push({
+                    nome_produto: item.nome_produto,
+                    id_fornecedor: item.id_fornecedor,
+                    id_produto: item.id_produto,
+                    quantidade: item.quantidade,
+                    prazo: item.prazo
+                });
+
+                return acc;
+            }, {});
+
+
+            // Mandar notificação
+            const notificationService = req.server.notificationService;
+            const clienteData = await this.clienteModel.findUserById(id_cliente);
+
+            for(const [id_fornecedor, compra] of Object.entries(compraAgrupada)) {
+                // console.log(id_fornecedor, compra);
+
+                const data: NotificationCompraInput = {
+                    toId: id_fornecedor,
+                    created_at: new Date(),
+                    fromUserType: "cliente",
+                    toUserType: "fornecedor",
+                    user: {
+                        id: parseInt(id_fornecedor),
+                        nome: clienteData.nome,
+                        apelido: clienteData.apelido
+                    },
+                    produtos: compra
+                };
+                
+                await notificationService.saveAndSendPrepared
+                    (Notifications.solicitarCompra(data),
+                    data
+                );
+            };
             return res.status(200).send(successResponse("Compra solicitada com sucesso"));
         } catch(e) {
             console.log("Erro ao efeturar compra >>> ", e);

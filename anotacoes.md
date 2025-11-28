@@ -1,13 +1,14 @@
 # App fiado
 
-lista por data em dec
-limitar quantidade da lista de associados em cliente/fornecedor
-limitar quantidade de qualquer lista cliente/fornecedor
+
+
 
 # Anotações
 ## Banco de dados (POSTGRES)
 
 obs: fazer geração de id aleatoria
+listar compras cliente/fornecedor
+validar se foi retirado e/ou foi pago => fornecedor
 
 mostrar a tabela criada: ``` pg_dump -U <usuario> -d <nomeBD> -t <nomeTabela> --schema-only // equivalente a show create table ```
 
