@@ -10,6 +10,7 @@ import { fornecedorInterface, loginInterface, clienteInterface } from "../shared
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { MessageInterface } from "../shared/interfaces/notifierInterfaces";
 import { NotificationModel } from "../models/notification.model";
+import { ResponseApi } from "../shared/consts/responseApi";
 
 
 class FornecedorController extends UserController{
@@ -21,19 +22,18 @@ class FornecedorController extends UserController{
     public async register(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {            
             const datasRegister: fornecedorInterface = await req.body as fornecedorInterface;
-
-            if(!datasRegister){
-                return res.status(400).send(errorResponse("Dados não solicitados"))
-            }
-            
             const message = await this.validateDatasUser.validateDatasFornecedor(datasRegister);
 
+            if(!datasRegister){
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA))
+            }
+
             if(message.length) {
-                return res.status(400).send(errorResponse("dados invalidos", message));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA, message));
             }
 
             if(await this.fornecedorModel.userExists(datasRegister.nome)) {
-                return res.status(400).send(errorResponse("Usuario já existe. Realize o login"));
+                return res.status(400).send(errorResponse(ResponseApi.Auth.USER_ALREADY_EXISTS));
                 
             }
 
@@ -41,9 +41,9 @@ class FornecedorController extends UserController{
 
             await this.fornecedorModel.register(datasRegister);
 
-            return res.status(210).send(successResponse("Ussuario registrado com sucesso"));
+            return res.status(201).send(successResponse(ResponseApi.Auth.REGISTER_SUCCESS));
         } catch(err) {
-            return res.status(500).send(errorResponse("Erro Interno no servidor", err));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, err));
         }
     }
 
@@ -54,26 +54,26 @@ class FornecedorController extends UserController{
             const message = await this.validateDatasUser.validateLogin(datasLogin);
 
             if(message.length){
-                return res.status(400).send(errorResponse("dados invalidos", message));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA, message));
             }
 
             if(!await this.fornecedorModel.userExists(datasLogin.nome)) {
-                return res.status(404).send(errorResponse("Nome de usuario ou senha incorreto"));
+                return res.status(404).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
                 
             }
 
             const hashedPass:string = await this.fornecedorModel.getPasswordUsingUser(datasLogin.nome);
             
             if(!await this.validateDatasUser.comparePassword(hashedPass, datasLogin.senha)) {
-                return res.status(401).send(errorResponse("Nome de usuario ou senha incorreto"));
+                return res.status(401).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
             }
 
             const token:string = await this.generateTokenUser(datasLogin);
 
-            return res.status(200).send(successResponse("Login realizado com sucesso", {token: token}));
+            return res.status(200).send(successResponse(ResponseApi.Auth.LOGIN_SUCCESS, {token: token}));
             
         } catch(err) {
-            return res.status(500).send(errorResponse("Erro interno no servidor", err));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, err));
         }
     }
 
@@ -84,19 +84,17 @@ class FornecedorController extends UserController{
             
             filterOpt.filterList = ["Nome", "Apelido", "Estabelecimento"];
 
-            if(!await verifyQueryOptList(filterOpt))
-                return res.status(400).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
-
             if(!filterOpt.filter)
                 filterOpt.filter = "Nome";
-            if(!filterOpt.search)
-                filterOpt.search = "";
+            
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
             const list:fornecedorInterface[] = await this.fornecedorModel.listAll(idCliente, filterOpt);
 
-            return res.status(200).send(successResponse("Fornecedores listados com sucesso", {list: list, pagination: filterOpt}));
+            return res.status(200).send(successResponse(ResponseApi.Users.LIST_SUCCESS, {list: list, pagination: filterOpt}));
         } catch(e) {
-            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }
     }
 
@@ -109,18 +107,18 @@ class FornecedorController extends UserController{
                 filterOpt.search = "";
 
             if(!await verifyQueryOptList(filterOpt))
-                return res.status(400).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
             if(!id) {
-                return res.status(404).send(errorResponse("Erro ao coletar lista de parcerias"));
+                return res.status(404).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
             }
 
             const listPartner:clienteInterface[] = await this.clienteModel.getPartnerByIdFornecedor(id, typeList, filterOpt);
 
-            return res.status(200).send(successResponse("Listado com sucesso", {list: listPartner, pagination: filterOpt}));
+            return res.status(200).send(successResponse(ResponseApi.Partner.LIST_SUCCESS, {list: listPartner, pagination: filterOpt}));
         } catch(e) {
             console.error(e);
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
 

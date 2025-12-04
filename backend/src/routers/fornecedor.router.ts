@@ -68,6 +68,23 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
         return await produtoController.deleteProduct(req, res);        
     });
 
+    router.post('/product/buy/list/:toUser?', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.shopList(req, res, "fornecedor");        
+    });
+
+    router.post('/product/accept', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.acceptOrRefucePurchaces(req, res, true);
+    });
+
+    router.post('/product/refuse', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.acceptOrRefucePurchaces(req, res, false);
+    });
+
+    router.post('/product/purchace/update', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.updatePurchaces(req, res);
+    });
+
+
     router.post('/message/list', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await notificationController.listMessages(req, res, "fornecedor");        
     });

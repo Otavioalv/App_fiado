@@ -3,6 +3,7 @@ import { errorResponse } from "../../common/responses/api.response";
 import { ValidateDatasUser } from "../validators/ValidateDatasUser";
 import { getPayloadFromToken } from "./tokenUtils";
 import { payloadInterface } from "../interfaces/utilsInterfeces";
+import { ResponseApi } from "../consts/responseApi";
 
 declare module 'fastify' {
     interface FastifyRequest {
@@ -22,7 +23,7 @@ export const authenticate = async (req: FastifyRequest, res: FastifyReply) => {
         await validateDatasUser.verifyFromToken(token);
         req.user = await getPayloadFromToken(token);
     } catch (e) {
-        res.status(401).send(errorResponse("Você não tem autorização para acessar esse conteudo", e))
+        res.status(401).send(errorResponse(ResponseApi.Auth.FORBIDDEN, e))
     }
 }
 
@@ -35,7 +36,7 @@ export const authorize = (user: "fornecedor" | "cliente") => {
             
             done();   
         } catch (e) {
-            res.status(401).send(errorResponse("Voce nao te autorização para acessar esse conteuto", e))
+            res.status(401).send(errorResponse(ResponseApi.Auth.FORBIDDEN, e))
         }
     };
 }

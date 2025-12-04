@@ -4,19 +4,22 @@ import { compraInterface, productInterface } from "../shared/interfaces/productI
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import {ProdutoModel} from "../models/produto.model";
 import { z } from "zod";
-import { queryFilter } from "../shared/interfaces/utilsInterfeces";
+import { FilterListShop, queryFilter } from "../shared/interfaces/utilsInterfeces";
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { isNumeric } from "validator";
 import { ClienteFornecedorModel } from "../models/clienteFornecedor.model";
 import { ClienteModel } from "../models/cliente.model";
-import { NotificationCompraInput, NotificationInput } from "../shared/interfaces/notifierInterfaces";
+import { NotificationCompraInput, NotificationInput, UserType } from "../shared/interfaces/notifierInterfaces";
 import { Notifications } from "../common/messages/notifications";
+import { FornecedorModel } from "../models/fornecedor.model";
+import { ResponseApi } from "../shared/consts/responseApi";
 
 
 class ProdutoController {
     private produtoModel:ProdutoModel = new ProdutoModel();
     private clienteFornecedorModel: ClienteFornecedorModel = new ClienteFornecedorModel();
     private clienteModel: ClienteModel = new ClienteModel();
+    private fornecedorModel: FornecedorModel = new FornecedorModel();
 
     public async addProducts(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {        
         try {
@@ -25,7 +28,7 @@ class ProdutoController {
             let productData = req.body as productInterface[];
              // Verifica o tipo do dado
             if(!productData.length || !Array.isArray(productData)) {
-                return res.status(400).send(errorResponse("Dados não preenchidos corretamente"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.REQUIRED_FIELDS));
             }
 
             // Verifica dados
@@ -33,14 +36,14 @@ class ProdutoController {
             
             await this.produtoModel.addProducts(productData, id_fornecedor);
 
-            return res.status(201).send(successResponse("Produtos adicionados"));
+            return res.status(201).send(successResponse(ResponseApi.Product.ADD_SUCCESS));
         } catch (e) {
             console.log("Erro ao adicionar produto >>> ", e);
 
             if(Array.isArray(e))
-                return res.status(404).send(errorResponse("Erro com dados recebidos", e));
+                return res.status(404).send(errorResponse(ResponseApi.Validation.INVALID_DATA, e));
 
-            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }
     }
 
@@ -53,19 +56,18 @@ class ProdutoController {
                 filterOpt.search = "";
 
             if(!await verifyQueryOptList(filterOpt))
-                return res.status(400).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
             if(!id_fornecedor || typeof id_fornecedor != "number" || id_fornecedor < 0) {
-               return res.status(400).send(errorResponse("Parametros invalidos"));
-               
+               return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FORMAT));
             }
 
             const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor, filterOpt);
 
-            return res.status(200).send(successResponse("Produtos listados com sucesso", {list: listProducts, pagination: filterOpt}));
+            return res.status(200).send(successResponse(ResponseApi.Product.LIST_SUCCESS, {list: listProducts, pagination: filterOpt}));
             
         } catch (e) {
-            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }
     }
 
@@ -74,17 +76,21 @@ class ProdutoController {
             const id_fornecedor = await getTokenIdFromRequest(req);
             // const produtos = await this.productShemaValidate(req);
             let produtos = req.body as productInterface[];
+
+            // console.log(id_fornecedor);
              
             // Verifica o tipo do dado
             if(!produtos.length || !Array.isArray(produtos)) {
-                return res.status(400).send(errorResponse("Dados não preenchidos corretamente"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.REQUIRED_FIELDS));
             }
 
             // Verifica dados
             produtos = await this.productShemaValidate(produtos);
+            
+            // console.log(produtos);
 
             if(produtos.some(p => !p.id_produto)) {
-                return res.status(400).send(errorResponse("Algum produto não pode ser identificado na lista corretamente"));
+                return res.status(400).send(errorResponse(ResponseApi.Product.NOT_FOUND));
             }
 
             const ids = produtos.map(p => p.id_produto ?? 0);
@@ -92,19 +98,19 @@ class ProdutoController {
             const existentes = await this.produtoModel.getManyProducts(ids, id_fornecedor);
 
             if(existentes.length !== produtos.length) {
-                return res.status(400).send(errorResponse("Um ou mais produtos não existem"));
+                return res.status(400).send(errorResponse(ResponseApi.Product.NOT_EXIST));
             }
 
             await this.produtoModel.updateManyProducts(produtos, id_fornecedor);
 
-            return res.status(200).send(successResponse("Produtos atualizados com sucesso"));
+            return res.status(200).send(successResponse(ResponseApi.Product.UPDATE_SUCCESS));
         } catch (e) {
             console.log("Erro ao atualizar produtos >>> ", e);
 
             if(Array.isArray(e))
-                return res.status(404).send(errorResponse("Erro com dados recebidos", e));
+                return res.status(404).send(errorResponse(ResponseApi.Validation.INVALID_DATA, e));
             
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
 
@@ -114,7 +120,7 @@ class ProdutoController {
             const id_fornecedor: number = await getTokenIdFromRequest(req);
 
             if (!Array.isArray(dataIds) || dataIds.length === 0) {
-                return res.status(400).send(errorResponse("Parametros invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
             }
 
             if (!dataIds.every(id => Number.isInteger(id) && id > 0)) {
@@ -124,13 +130,13 @@ class ProdutoController {
             const result = await this.produtoModel.deleteManyProducts(dataIds, id_fornecedor);
 
             if (!result) {
-                return res.status(400).send(errorResponse("Nenhum produto encontrado para deletar"));
+                return res.status(400).send(errorResponse(ResponseApi.Product.ALL_NOT_FOUND));
             }
 
-            return res.status(200).send(successResponse("Produtos deletados com sucesso"));
+            return res.status(200).send(successResponse(ResponseApi.Product.DELETE_SUCCESS));
 
         } catch (e) {
-            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }
     }
 
@@ -143,19 +149,19 @@ class ProdutoController {
                 filterOpt.search = "";
 
             if(!await verifyQueryOptList(filterOpt))
-                return res.status(400).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
             if(!idFornecedor || !isNumeric(idFornecedor))
-                return res.status(400).send(errorResponse("Parametros invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
 
 
 
             const listProduct = await this.produtoModel.listProducts(parseInt(idFornecedor), filterOpt);
 
 
-            return res.status(200).send(successResponse("Produtos listados com sucesso", {list: listProduct, pagination: filterOpt}));
+            return res.status(200).send(successResponse(ResponseApi.Product.LIST_SUCCESS, {list: listProduct, pagination: filterOpt}));
         } catch(e) {
-            return res.status(500).send(errorResponse("Error interno no servidor", e));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         } 
     }
 
@@ -166,7 +172,7 @@ class ProdutoController {
 
             // Verifica o tipo do dado
             if(!productData.length || !Array.isArray(productData)) {
-                return res.status(400).send(errorResponse("Dados não preenchidos corretamente"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.REQUIRED_FIELDS));
             }
 
             // Verifica dados
@@ -177,17 +183,17 @@ class ProdutoController {
 
             for(const idFornecedor of ids) {
                 if(!await this.clienteFornecedorModel.getPartnerAccepted(idFornecedor, id_cliente))
-                    return res.status(400).send(errorResponse("Um ou mais usuarios não são associados"));
+                    return res.status(400).send(errorResponse(ResponseApi.Partner.NOT_PARTNER));
             }
 
             // Verificar se produto existe pelo id, e pegar os valores como nome, valor_unt
             const compraData:compraInterface[] = [];
 
             for(const pd of productData) {
-                const produto:productInterface = await this.produtoModel.getProductExists(pd.id_produto, pd.id_fornecedor);
+                const produto:productInterface = await this.produtoModel.getProductExists(pd.id_compra, pd.id_fornecedor);
 
                 if(!produto) {
-                    return res.status(404).send(errorResponse("Algum produto foi deletado ou não existe"));
+                    return res.status(404).send(errorResponse(ResponseApi.Product.NOT_FOUND));
                 }
 
                 const compra: compraInterface = {
@@ -212,7 +218,7 @@ class ProdutoController {
                 acc[item.id_fornecedor].push({
                     nome_produto: item.nome_produto,
                     id_fornecedor: item.id_fornecedor,
-                    id_produto: item.id_produto,
+                    id_compra: item.id_compra,
                     quantidade: item.quantidade,
                     prazo: item.prazo
                 });
@@ -246,17 +252,214 @@ class ProdutoController {
                     data
                 );
             };
-            return res.status(200).send(successResponse("Compra solicitada com sucesso"));
+            return res.status(200).send(successResponse(ResponseApi.Purchace.PURCHACE_REQUEST_SENT));
         } catch(e) {
             console.log("Erro ao efeturar compra >>> ", e);
 
             if(Array.isArray(e))
-                return res.status(404).send(errorResponse("Erro com dados recebidos", e));
+                return res.status(404).send(errorResponse(ResponseApi.Validation.INVALID_DATA, e));
         
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         } 
     }
 
+    public async shopList(req: FastifyRequest, res: FastifyReply, userType: UserType):Promise<void> {
+        try{
+            const fromUserId = await getTokenIdFromRequest(req);
+            const param = (req.params as {toUser?: string}).toUser;
+            const {...filterOpt} = req.query as queryFilter;
+
+            const toUser:number | undefined = param ? Number(param) : undefined;
+
+            filterOpt.filterList =  ["Mais Recente", 
+                                    "Mais Antigo", 
+                                    "Quitado", 
+                                    "Pendente", 
+                                    "Retirado", 
+                                    "Aguardando Retirada", 
+                                    "Aceito", 
+                                    "Recusado", 
+                                    "Em Analise",
+                                    "Cancelados"] as FilterListShop[];
+
+            if(!filterOpt.filter)
+                filterOpt.filter = "Mais Recente" as FilterListShop;
+
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER, {list: [], pagination: filterOpt}));
+            
+            const listProd:compraInterface[] = await this.produtoModel.getShopList(fromUserId, userType, filterOpt, toUser);
+
+            return res.status(200).send(successResponse(ResponseApi.Purchace.LIST_SUCCESS, {list: listProd, pagination: filterOpt}));
+        }catch(e) {
+            console.log("Erro ao listar compras: ", e);
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+    }
+
+    public async acceptOrRefucePurchaces(req: FastifyRequest, res: FastifyReply, accept: boolean):Promise<void> {
+        try{
+            const idsData = req.body as number[];
+            const idUser = await getTokenIdFromRequest(req);
+            
+            // Verificação dos dados
+            if(
+                !Array.isArray(idsData) || 
+                !idsData.length ||
+                !idsData.every(id => Number.isInteger(id) && id > 0)
+            ) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }
+
+            // Verificar se numeros se repeten, e remover
+            const ids:number[] = [...new Set(idsData)];
+
+            
+            // Verificar se compra existe
+            const existentes = await this.produtoModel.getManyPurchases(ids, idUser, "fornecedor");
+            if(existentes.length !== ids.length || existentes.some(e => e.retirado === true))
+                return res.status(400).send(errorResponse(ResponseApi.Purchace.NOT_EXIST));
+
+
+            // Salvar no banco de dados
+            await this.produtoModel.acceptOrRefuseManyPurchaces(ids, idUser, accept);
+    
+            // Notifica a desgraça do usuario
+            const notificationService = req.server.notificationService;
+            const fornecedorData = await this.fornecedorModel.findUserById(idUser);
+            const clientesUk = [...new Set(existentes.map(e => e.id_cliente))];            
+
+            for(const cliente of clientesUk) {
+                console.log(cliente);
+                const data:NotificationInput = {
+                    toId: cliente!.toString(),
+                    created_at: new Date(),
+                    fromUserType: "fornecedor",
+                    toUserType: "cliente",
+                    user: {
+                        id: idUser,
+                        nome: fornecedorData.nome,
+                        apelido: fornecedorData.apelido
+                    }
+                };
+
+                const notification = accept ? Notifications.aceitarCompra(data) : Notifications.recusarCompra(data);
+
+                await notificationService.saveAndSendPrepared(
+                    notification,
+                    data
+                )
+            }
+
+            return res.status(200).send(successResponse(ResponseApi.Purchace.UPDATE_STATUS));
+        }catch(e) {
+            console.log("Erro ao listar compras: ", e);
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+    }
+
+    public async cancelPurchaces(req: FastifyRequest, res: FastifyReply):Promise<void> {
+        try{
+            const idsData = req.body as number[];
+            const idUser = await getTokenIdFromRequest(req);
+
+            console.log(idsData, idUser);
+
+            // Verificação dos dados
+            if(
+                !Array.isArray(idsData) || 
+                !idsData.length ||
+                !idsData.every(id => Number.isInteger(id) && id > 0)
+            ) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }
+
+            // Verificar se numeros se repeten, e remover
+            const ids:number[] = [...new Set(idsData)];
+            
+            // Verificar se compra existe
+            const existentes = await this.produtoModel.getManyPurchases(ids, idUser, "cliente");
+            if(existentes.length !== ids.length || existentes.some(e => e.retirado === true || existentes.some(e => e.cancelado === true)))
+                return res.status(400).send(errorResponse(ResponseApi.Purchace.NOT_EXIST));
+
+            // Salvar no banco de dados
+            await this.produtoModel.cancelManyPurchaces(ids, idUser);
+    
+            return res.status(200).send(successResponse(ResponseApi.Purchace.CANCELL_PURCHACE));
+        }catch(e) {
+            console.log("Erro ao cancelar compras: ", e);
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+    }
+
+    public async updatePurchaces(req: FastifyRequest, res: FastifyReply):Promise<void> {
+        try{
+            let comprasData = req.body as compraInterface[]; // id_produto/quitado/retirado/coletado_em
+            const idUser = await getTokenIdFromRequest(req); 
+
+            console.log(comprasData, idUser);
+
+            // Verificar tipo
+            if(!comprasData.length || !Array.isArray(comprasData)) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }
+
+            // Verificar dados
+            comprasData = await this.compraUpdateValidate(comprasData);
+
+            if(comprasData.some(c => !c.id_compra)) {
+                return res.status(400).send(errorResponse(ResponseApi.Purchace.NOT_FOUND));
+            }
+
+            // verificar se produto existe
+            const ids:number[] = comprasData.map(c => c.id_compra);
+
+            const existentes = await this.produtoModel.getManyPurchases(ids, idUser, "fornecedor");
+
+            if(existentes.length !== comprasData.length) {
+                return res.status(400).send(errorResponse(ResponseApi.Purchace.NOT_EXIST));
+            }
+
+            // atualizar
+            await this.produtoModel.updateManyPurchaces(comprasData, idUser);
+
+            // Mandar notificação
+            // Notifica a desgraça do usuario
+            const notificationService = req.server.notificationService;
+            const fornecedorData = await this.fornecedorModel.findUserById(idUser);
+            const clientesUk = [...new Set(existentes.map(e => e.id_cliente))];            
+
+            for(const cliente of clientesUk) {
+                // console.log(cliente);
+                const data:NotificationInput = {
+                    toId: cliente!.toString(),
+                    created_at: new Date(),
+                    fromUserType: "fornecedor",
+                    toUserType: "cliente",
+                    user: {
+                        id: idUser,
+                        nome: fornecedorData.nome,
+                        apelido: fornecedorData.apelido
+                    }
+                };
+
+                await notificationService.saveAndSendPrepared(
+                    Notifications.atualizarCompra(data),
+                    data
+                )
+            }
+
+
+            return res.status(200).send(successResponse(ResponseApi.Purchace.UPDATE_PURCHACE));
+        }catch(e) {
+            console.log("Erro ao cancelar compras: ", e);
+            
+            if(Array.isArray(e))
+                return res.status(404).send(errorResponse(ResponseApi.Validation.INVALID_DATA, e));
+
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+    }
     
 
     private async productShemaValidate(dataProd: productInterface[]): Promise<productInterface[]>{
@@ -289,7 +492,7 @@ class ProdutoController {
             const totalDate = new Date((today.getFullYear() + 100).toString());
 
             const compraSchema = z.object({
-                id_produto: z.number().nonnegative("Insira um valor valido"), 
+                id_compra: z.number().nonnegative("Insira um valor valido"), 
                 id_fornecedor: z.number().nonnegative("Insira um valor valido"),
                 prazo: z.coerce.date().min(today, "Data tem que ser maior do que a data de hoje").max(totalDate, "Diminua a quantidade de tempo"),
                 quantidade: z.number().min(1, "Insira um valor valido")
@@ -309,6 +512,35 @@ class ProdutoController {
             throw new Error("Erro ao validar dados");
         }
     }
+
+
+    private async compraUpdateValidate(dataProd: compraInterface[]): Promise<compraInterface[]>{
+        try {
+            const today = new Date();
+            
+
+            const compraSchema = z.object({
+                id_compra: z.number().nonnegative("Insira um valor valido"),
+                quitado: z.boolean(),
+                retirado: z.boolean(),
+                coletado_em: z.coerce.date(),
+            });
+            const compraArraySchema = z.array(compraSchema);
+            
+            return compraArraySchema.parse(dataProd) as compraInterface[];
+        } catch(e) {
+            if(e instanceof z.ZodError){
+                const formatted = e.errors.map(err => ({
+                    path: err.path,
+                    message: err.message
+                }));
+
+                throw formatted
+            }
+            throw new Error("Erro ao validar dados");
+        }
+    }
 }
+
 
 export {ProdutoController}

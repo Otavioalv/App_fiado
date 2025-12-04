@@ -8,6 +8,9 @@ export type NotificationsMap = {
     novaSolicitacaoParceria: NotificationFn<NotificationInput, NotifierToUserParams>;
     parceriaAceita: NotificationFn<NotificationInput, NotifierToUserParams>;
     solicitarCompra: NotificationFn<NotificationCompraInput, NotifierToUserParams>;
+    aceitarCompra: NotificationFn<NotificationInput, NotifierToUserParams>;
+    recusarCompra: NotificationFn<NotificationInput, NotifierToUserParams>;
+    atualizarCompra: NotificationFn<NotificationInput, NotifierToUserParams>;
 };
 
 export interface NotificationCompraInput extends NotificationInput {
@@ -70,7 +73,10 @@ export type MessageFn<TInput, TOutput> = (input: TInput) => TOutput;
 export type MessageMap = {
     novaSolicitacaoParceria: MessageFn<UserDataNotfy, string>;
     parceriaAceita: MessageFn<UserDataNotfy, string>
-    novaSolicitacaoCompra: MessageFn<MessageCompraInterface, string>
+    novaSolicitacaoCompra: MessageFn<MessageCompraInterface, string>,
+    aceitarCompra: MessageFn<UserDataNotfy, string>,
+    recusarCompra: MessageFn<UserDataNotfy, string>,
+    atualizarCompra: MessageFn<UserDataNotfy, string>,
 }
 
 // Tipo da função notify

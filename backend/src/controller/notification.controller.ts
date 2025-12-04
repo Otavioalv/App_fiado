@@ -5,6 +5,7 @@ import { MessageInterface, UserType } from "../shared/interfaces/notifierInterfa
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import { NotificationModel } from "../models/notification.model";
+import { ResponseApi } from "../shared/consts/responseApi";
 
 export class NotificationController {
     private notificationModel: NotificationModel = new NotificationModel();
@@ -19,21 +20,21 @@ export class NotificationController {
                 filterOpt.search = "";
 
             if(!await verifyQueryOptList(filterOpt))
-                return res.status(400).send(errorResponse("Um ou mais valores do filtro estão invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
             if(!id) {
-                return res.status(404).send(errorResponse("Erro ao coletar lista de parcerias"));
+                return res.status(404).send(errorResponse(ResponseApi.Messages.LIST_ERROR));
             }
 
             const listMsg: MessageInterface[] = await this.notificationModel.getNotification(id, userType, filterOpt);
             
 
             // return res.status(200).send(successResponse("Listado com sucesso", {list: listPartner, pagination: filterOpt}));
-            return res.status(200).send(successResponse("Listado com sucesso", {list: listMsg, paginetion: filterOpt}));
+            return res.status(200).send(successResponse(ResponseApi.Messages.LIST_SUCCESS, {list: listMsg, paginetion: filterOpt}));
 
         } catch(e) {
             console.error(e);
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
 
@@ -43,23 +44,23 @@ export class NotificationController {
             const idUser: number = await getTokenIdFromRequest(req);
 
             if (!Array.isArray(dataIds) || dataIds.length === 0) {
-                return res.status(400).send(errorResponse("Parametros invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
             }
 
             if (!dataIds.every(id => Number.isInteger(id) && id > 0)) {
-                return res.status(400).send(errorResponse("Lista Invalida"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FORMAT));
             }
 
             const result = await this.notificationModel.deleteManyMessages(dataIds, idUser, userType);
             
             if (!result) {
-                return res.status(400).send(errorResponse("Nenhuma mensagem encontrada para deletar"));
+                return res.status(400).send(errorResponse(ResponseApi.Messages.NOT_FOUND));
             }
 
-            return res.status(200).send(successResponse("Mensagens deletadas com sucesso"));
+            return res.status(200).send(successResponse(ResponseApi.Messages.DELETE_SUCCESS));
         } catch(e) {
             console.error(e);
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
 }

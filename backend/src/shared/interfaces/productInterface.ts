@@ -7,12 +7,17 @@ export interface productInterface {
     quantidade: number;
 }
 
+
+
+
 export interface compraInterface {
-    id_produto: number;
+    id_compra: number;
     id_fornecedor: number;
     quantidade: number; 
     
     prazo: Date; 
+    created_at?: Date;
+    coletado_em?: Date; 
 
     nome_produto?: string;
     
@@ -21,4 +26,7 @@ export interface compraInterface {
     
     quitado?: boolean;
     retirado?: boolean;
+    aceito?: boolean;
+    
+    cancelado?:boolean;
 }

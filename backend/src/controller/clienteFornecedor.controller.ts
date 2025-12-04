@@ -7,19 +7,14 @@ import { ClienteFornecedorModel } from "../models/clienteFornecedor.model";
 import { ClienteModel } from "../models/cliente.model";
 import { Notifications } from "../common/messages/notifications";
 import { NotificationInput } from "../shared/interfaces/notifierInterfaces";
-import { NotificationService } from "../services/notification.service";
+import { ResponseApi } from "../shared/consts/responseApi";
 
 
 class ClienteFornecedorController {
     private fornecedorModel: FornecedorModel = new FornecedorModel();
     private clienteModel: ClienteModel = new ClienteModel();
     private clienteFornecedorModel: ClienteFornecedorModel = new ClienteFornecedorModel();
-    // private notificationService: NotificationService;
-
-    // constructor(app: FastifyInstance){
-    //     this.notificationService = new NotificationService(app);
-    // }
-
+  
 
     public async associarComFornecedor(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply>{
         try {
@@ -27,7 +22,7 @@ class ClienteFornecedorController {
             const id_cliente: number = await getTokenIdFromRequest(req);
 
             if(!ids || !ids.ids.length || !ids.ids.every((elem) => typeof elem === 'number')) {
-                return res.status(400).send(errorResponse("Dados invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
             }
 
             // Remove elementos duplicados da array
@@ -39,7 +34,7 @@ class ClienteFornecedorController {
             // Verifica se encontrou todos os fornecedores
             if(listFornecedor.length < ids.ids.length) {
                 // verifica quais Ids nao existem no listFornecedor e os retornam
-                return res.status(400).send(errorResponse("Um ou mais fornecedores não existem"));
+                return res.status(400).send(errorResponse(ResponseApi.Partner.SUPPLIER_NOT_FOUND));
             }
 
             // Procura associações existentes com basse na array de ids de fornecedores, e id do cliente
@@ -53,7 +48,7 @@ class ClienteFornecedorController {
                 ids.ids = ids.ids.filter(id => !foundIds.has(id)); 
                 
                 if(!ids.ids.length) {
-                    return res.status(400).send(errorResponse("Todos estes fornecedores ja receberam solicitação de parceria"))
+                    return res.status(400).send(errorResponse(ResponseApi.Partner.SUPPLIER_ALREADY_REQUESTED))
                 }
             }
 
@@ -82,9 +77,9 @@ class ClienteFornecedorController {
                 );
             };
 
-            return res.status(201).send(successResponse("Solicitações enviadas com sucesso"));
+            return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_REQUEST_SENT));
         } catch(e) {
-            return res.status(500).send(errorResponse("Erro interno no servidor", e));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }
     }
 
@@ -96,7 +91,7 @@ class ClienteFornecedorController {
             // console.log("id_fornecedor: ", id_fornecedor);
 
             if(!ids || !ids.ids.length || !ids.ids.every((elem) => typeof elem === 'number')) {
-                return res.status(400).send(errorResponse("Dados invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
             }
 
             // Remove elementos duplicados da array
@@ -105,7 +100,7 @@ class ClienteFornecedorController {
             const listCliente: clienteInterface[] = await this.clienteModel.findMultUsersByIds(ids);
 
             if(listCliente.length < ids.ids.length) {
-                return res.status(400).send(errorResponse("Um ou mais clientes não existem"));
+                return res.status(400).send(errorResponse(ResponseApi.Partner.CLIENT_NOT_FOUND));
             }
 
 
@@ -121,7 +116,7 @@ class ClienteFornecedorController {
                 ids.ids = ids.ids.filter(id => !foundIds.has(id)); 
                 
                 if(!ids.ids.length) {
-                    return res.status(400).send(errorResponse("Todos estes clientes ja receberam solicitação de parceria"))
+                    return res.status(400).send(errorResponse(ResponseApi.Partner.CLIENT_ALREADY_REQUESTED))
                 }
             }
     
@@ -151,10 +146,10 @@ class ClienteFornecedorController {
                 );
             };
 
-            return res.status(201).send(successResponse("Solicitações enviadas com sucesso"));
+            return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_REQUEST_SENT));
         }catch(e) {
             console.log(e);
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
 
     }
@@ -167,11 +162,11 @@ class ClienteFornecedorController {
 
 
             if(!idPartner || typeof idPartner !== 'number') {
-                return res.status(400).send(errorResponse("Dados invalidos"));
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
             }   
 
             if(!await this.clienteFornecedorModel.findPartnerCliente(idPartner, id_fornecedor)) {
-                return res.status(400).send(errorResponse("Cliente invalido"));
+                return res.status(400).send(errorResponse(ResponseApi.Users.CLIENT_INVALID));
             }
 
         
@@ -199,10 +194,10 @@ class ClienteFornecedorController {
                 data
             );
             
-            return res.status(201).send(successResponse("Parceria aceita com sucesso"));
+            return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_ACCEPT));
         }catch(e) {
             console.log("aceitarParceriaCliente >>> ", e);
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
 
@@ -212,11 +207,11 @@ class ClienteFornecedorController {
             const id_cliente: number = await getTokenIdFromRequest(req);
 
             if(!idPartner || typeof idPartner !== 'number') {
-                return res.status(404).send(errorResponse("Dados invalidos"));
+                return res.status(404).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
             }   
 
             if(!await this.clienteFornecedorModel.findPartnerFornecedor(idPartner, id_cliente)) {
-                return res.status(404).send(errorResponse("Cliente invalido"));
+                return res.status(404).send(errorResponse(ResponseApi.Users.SUPPLIER_INVALID));
             }
 
             await this.clienteFornecedorModel.aceitarParceriaFornecedor(id_cliente, idPartner);
@@ -242,10 +237,10 @@ class ClienteFornecedorController {
             );
 
             
-            return res.status(201).send(successResponse("Parceria aceita com sucesso"));
+            return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_ACCEPT));
         }catch(e) {
             console.log("aceitarParceriaCliente >>> ", e);
-            return res.status(500).send(errorResponse("Erro interno no servidor"));
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
 }

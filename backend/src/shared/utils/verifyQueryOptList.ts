@@ -11,6 +11,11 @@ export async function verifyQueryOptList(queryOpt: queryFilter): Promise<boolean
             const search = String(queryOpt.search).trim();
             const {filterList, filter} = queryOpt;
 
+            
+            if(!queryOpt.search)
+                queryOpt.search = "";
+
+            
             if(
                 (isNaN(pagination) || isNaN(size)) ||
                 (pagination <= 0 || size <= 0) || 

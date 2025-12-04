@@ -50,14 +50,22 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
     router.post("/partner/list/accepted", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.partnerList(req, res, "accepted");
     }); 
-
+    
+    router.post("/product/buy", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.buyProducts(req, res);
+    }); 
+    
     router.post("/product/list/:idFornecedor", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.listProductsByIdFornecedor(req, res);
     }); 
 
-    router.post("/product/buy", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await produtoController.buyProducts(req, res);
-    }); 
+    router.post('/product/buy/list/:toUser?', authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.shopList(req, res, "cliente");        
+    });
+
+    router.post("/product/cancel", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await produtoController.cancelPurchaces(req, res);
+    });
 
     router.post("/message/list", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await notificationController.listMessages(req, res, "cliente");

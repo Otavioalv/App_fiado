@@ -209,7 +209,7 @@ class ClienteModel extends UserModel<clienteInterface>{
             else if(typeList === "accepted") 
                 sqlOpt = "AND cf.fornecedor_check = TRUE AND cf.cliente_check = TRUE";
             
-            console.log(id, sqlOpt);
+            // console.log(id, sqlOpt);
 
             
             
@@ -248,6 +248,8 @@ class ClienteModel extends UserModel<clienteInterface>{
                 WHERE 
                     cf.fk_fornecedor_id = $1 ${sqlOpt}
             `;
+
+            console.log(SQL_LIST, id, typeList);
 
             const result:clienteInterface[] = (await client.query(SQL_LIST, [id, limit, offset])).rows;  
             const {total} = ((await client.query(SQL_TOTAL, [id])).rows)[0] as {total:number}; 

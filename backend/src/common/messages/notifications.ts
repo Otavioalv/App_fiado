@@ -37,4 +37,34 @@ export const Notifications: NotificationsMap = {
             user: data.user
         }        
     }), 
+    aceitarCompra: (data) => ({
+        toId: data.toId,
+        event: cliEventNames.newMessage,
+        payload: {
+            message: Messages.aceitarCompra(data.user),
+            created_at: data.created_at,
+            type: typeNotificationList.newPartner,
+            user: data.user
+        }        
+    }), 
+    recusarCompra: (data) => ({
+        toId: data.toId,
+        event: cliEventNames.newMessage,
+        payload: {
+            message: Messages.recusarCompra(data.user),
+            created_at: data.created_at,
+            type: typeNotificationList.newPartner,
+            user: data.user
+        }        
+    }), 
+    atualizarCompra: (data) => ({
+        toId: data.toId,
+        event: cliEventNames.newMessage,
+        payload: {
+            message: Messages.atualizarCompra(data.user),
+            created_at: data.created_at,
+            type: typeNotificationList.newPartner,
+            user: data.user
+        }        
+    }),
 };

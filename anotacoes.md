@@ -1,7 +1,21 @@
 # App fiado
 
+Listar compras fornecedor e cliente
+
+- [x] fornecedor => listar todas as compras, 
+- [x] fornecedor => listar compra por id do cliente
+- [x] fornecedor => aceitar/recusar compras (notificar cliente)
+- [x] fornecedor => editar opções de compra, quitado/retirado/data coletado (notifica cliete)
+
+- [x] cliente => listar todas compras
+- [x] cliente => listar por id do fornecedor
+- [x] cliente => cancelar o pedido, por ids.
+
+- [x] cliente/fornecedor => filtrar listar compra por nome/apelido E
+- [x] cliente/fornecedor => filtrar listar compra quitada(S/N)/retirado(S/N)/aceito(S/N)
 
 
+Adicionei campo "cancelado", pra verificar se foi cancelado em compras
 
 # Anotações
 ## Banco de dados (POSTGRES)

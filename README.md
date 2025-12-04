@@ -12,16 +12,24 @@ Nessa aplicação, fornecedores adicionam seus produtos, e somente clientes parc
 ## Estrutura
 ```
 src/
+ ├── app.ts
+ ├── common
  ├── config
  ├── controller
  ├── database
- ├── interface
  ├── models
  ├── public
  ├── routers
- ├── sockets
- ├── utils
- └── validators
+ ├── router.ts
+ ├── server.bkp.ts
+ ├── server.ts
+ ├── services
+ ├── shared
+ │   ├── consts
+ │   ├── interfaces
+ │   ├── utils
+ │   └── validators
+ └── sockets
 ```
 ## Rodar
 npm install  
@@ -77,6 +85,24 @@ npm start
 * **Deletar Produto**
     * Tipo: **POST**
     * end-point: ```/product/delete```
+* **Lista Compras com filtros, ou apartir de id de Cliente**
+    * Tipo: **POST**
+    * end-point: ```/product/buy/list/:toUser?```
+* **Aceita compra(s)**
+    * Tipo: **POST**
+    * end-point: ```/product/accept```
+* **Recusa compra(s)**
+    * Tipo: **POST**
+    * end-point: ```/product/refuse```
+* **Atualiza status da(s) compra(s)**
+    * Tipo: **POST**
+    * end-point: ```/product/purchace/update```
+* **Lista Menssagens**
+    * Tipo: **POST**
+    * end-point: ```/message/list```
+* **Deleta Menssagens**
+    * Tipo: **POST**
+    * end-point: ```/message/delete```
 
 
 
@@ -92,8 +118,8 @@ npm start
     * end-point: ```/login```
 * **Listar Fornecedores**
     * Tipo: **POST**
-    * end-point: ```/list-fornecedores```
-* **Solicitar parceria com Fornecedor**
+    * end-point: ```/list-fornecdores```
+* **Solicitar parceria com Forneceedor**
     * Tipo: **POST**
     * end-point: ```/partner```
 * **Aceitar parceria com Fornecedor**
@@ -117,3 +143,15 @@ npm start
 * **Listar Produto de um Fornecedor parceiro**
     * Tipo **POST**
     * end-point: ```/product/list/:idFornecedor```
+* **Lista Compras com filtros, ou apartir de id de Fornecedor**
+    * Tipo: **POST**
+    * end-point: ```/product/buy/list/:toUser?```
+* **Cancela compra(s)**
+    * Tipo: **POST**
+    * end-point: ```/product/cancel```
+* **Lista Menssagens**
+    * Tipo: **POST**
+    * end-point: ```/message/list```
+* **Deleta Menssagens**
+    * Tipo: **POST**
+    * end-point: ```/message/delete```
