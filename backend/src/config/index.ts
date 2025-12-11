@@ -19,17 +19,17 @@ interface apiConfigInterface {
 }
 
 export const databaseConfig: databaseConfigInterface = {
-    user: String(process.env.PSQL_USER),
-    database: String(process.env.PSQL_DATABASE),
-    host: String(process.env.PSQL_HOST),
-    password: String(process.env.PSQL_PASSWORD),
-    port: parseInt(String(process.env.PSQL_PORT)),
-    stringServer: String(process.env.PSQL_SERVER_STRING)
+    user: process.env.PSQL_USER || "",
+    database: process.env.PSQL_DATABASE || "",
+    host: process.env.PSQL_HOST || "0.0.0.0",
+    password: process.env.PSQL_PASSWORD || "",
+    port: Number(process.env.PSQL_PORT) || 5432,
+    stringServer: process.env.DATABASE_URL || ""
 }
 
 export const apiConfig: apiConfigInterface = {
-    host: String(process.env.API_HOST),
-    port: parseInt(String(process.env.API_PORT))
+    host: process.env.API_HOST || "0.0.0.0",
+    port: Number(process.env.PORT || process.env.API_PORT || 8090)
 }
 
 

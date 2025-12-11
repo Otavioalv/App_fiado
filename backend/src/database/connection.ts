@@ -11,7 +11,16 @@ import { databaseConfig } from '../config';
 // })
 
 const connection = new Pool({
-    connectionString: databaseConfig.stringServer, 
+
+    connectionString: databaseConfig.stringServer ? databaseConfig.stringServer : undefined,  
+     
+    // se nao tiver connectionString, conecta por outros dados
+    user: databaseConfig.user,
+    password: databaseConfig.password, 
+    host: databaseConfig.host,
+    port:  databaseConfig.port, 
+    database: databaseConfig.database,
+
     ssl: {
         rejectUnauthorized: false
     }
