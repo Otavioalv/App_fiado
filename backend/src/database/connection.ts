@@ -11,8 +11,7 @@ import { databaseConfig } from '../config';
 // })
 
 const connection = new Pool({
-    connectionString: "conection", 
-    // connectionString: databaseConfig.connectionString,
+    connectionString: databaseConfig.stringServer, 
     ssl: {
         rejectUnauthorized: false
     }

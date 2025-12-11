@@ -6,6 +6,7 @@ interface databaseConfigInterface {
     host: string,
     port: number, 
     database: string,
+    stringServer: string
 }
 
 interface authJwtInterface {
@@ -22,7 +23,8 @@ export const databaseConfig: databaseConfigInterface = {
     database: String(process.env.PSQL_DATABASE),
     host: String(process.env.PSQL_HOST),
     password: String(process.env.PSQL_PASSWORD),
-    port: parseInt(String(process.env.PSQL_PORT))
+    port: parseInt(String(process.env.PSQL_PORT)),
+    stringServer: String(process.env.PSQL_SERVER_STRING)
 }
 
 export const apiConfig: apiConfigInterface = {
