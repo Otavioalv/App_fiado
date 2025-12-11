@@ -337,9 +337,9 @@ class ValidateDatasUser {
 
         if(apelido && 
             (
-                !validator.isLength(apelido, {min: 1}) || 
-                /\s\s/.test(apelido) || 
-                !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(apelido)
+                !validator.isLength(apelido, {min: 1}) 
+                // || /\s\s/.test(apelido) 
+                // || !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(apelido)
             )
         ) {
             arrMenssage.push("Apelido invalido");
