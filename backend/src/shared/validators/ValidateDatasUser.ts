@@ -299,7 +299,6 @@ class ValidateDatasUser {
 
         if(!/[[@\-_]/.test(senha))
             arrMenssage.push("Senha deve conter pelo menos um desses caracteres especiais (@, -, _)");
-
         if(!/[0-9]/.test(senha))
             arrMenssage.push("Senha deve conter pelo menos um numero");
 
