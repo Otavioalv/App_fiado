@@ -45,6 +45,7 @@ export const ResponseApi = {
         LIST_SUCCESS: "Lista de usuários carregada com sucesso",
         CLIENT_INVALID: "Cliente Invalido",
         SUPPLIER_INVALID: "Fornecedor Invalido",
+        LIST_USER_DATA: "Dados do usuario listados com sucesso"
     },
     General: {
         LIST_SUCCESS: "Lista carregada com sucesso",

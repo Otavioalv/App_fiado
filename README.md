@@ -55,6 +55,9 @@ npm start
 * **Listar Clientes**
     * Tipo: **POST**
     * end-point: ```/list-clientes```
+* **Listar Dados do usuario**
+    * Tipo: **POST**
+    * end-point: ```/me```
 * **Solicitar parceria com Cliente**
     * Tipo: **POST**
     * end-point: ```/partner```
@@ -119,6 +122,9 @@ npm start
 * **Listar Fornecedores**
     * Tipo: **POST**
     * end-point: ```/list-fornecdores```
+* **Listar Dados do usuario**
+    * Tipo: **POST**
+    * end-point: ```/me```
 * **Solicitar parceria com Forneceedor**
     * Tipo: **POST**
     * end-point: ```/partner```

@@ -98,6 +98,18 @@ class FornecedorController extends UserController{
         }
     }
 
+    public async me(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+        try {
+            const id:number = await getTokenIdFromRequest(req);
+
+            const {senha, ...data} = await this.fornecedorModel.findUserById(id);
+
+            return res.status(200).send(successResponse(ResponseApi.Users.LIST_USER_DATA, data));
+        } catch(e) {
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
+        }
+    }
+
     public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: "all" | "received" | "sent" | "accepted" = "all"): Promise<FastifyReply> { 
         try {
             const {...filterOpt} = req.query as queryFilter;

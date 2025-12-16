@@ -99,3 +99,26 @@ export async function register(userData: DefaultRegisterSchema) {
             console.log("Erro de conexão: ", err.message);
     }
 }   
+
+
+export async function me(){
+    try {
+        const endPoint = defaultEndPoint + "/me";
+
+        const response = await api.post(endPoint);
+
+        console.log("RESPOSTA: ", response.data.data);
+
+        console.log(response.data.data);
+    }catch(error){
+        const err = error as errorAxiosInterface
+
+        if(err.response){
+            const dataErr = err.response?.data;
+            
+            console.log("houve um erro: ", JSON.stringify(dataErr, null, 2));
+        }
+        else
+            console.log("Erro de conexão: ", err.message);
+    }
+}

@@ -24,6 +24,10 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
         return await fornecedorController.login(req, res);
     });
 
+    router.post('/me', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await fornecedorController.me(req, res);
+    });
+
     router.post("/list-clientes", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteControler.listAll(req, res);
     });
