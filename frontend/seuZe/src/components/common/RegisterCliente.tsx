@@ -6,21 +6,28 @@ import Button from "../ui/Button";
 import { useForm, Controller } from "react-hook-form"
 import { defaultRegisterSchema, DefaultRegisterSchema } from "@/src/schemas/DefaultRegisterSchema";
 import { zodResolver } from '@hookform/resolvers/zod'
+import Loading from "../ui/Loading";
+import { useState } from "react";
+import { register } from "@/src/services/clienteService";
 
 export default function RegisterCliente() {
-    
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const {control, handleSubmit} = useForm<DefaultRegisterSchema>({
         resolver: zodResolver(defaultRegisterSchema)
     });
 
-    const onSubmit = (data: DefaultRegisterSchema) => {
-        console.log("dados enviados: ", data);
+    const onSubmit = async (data: DefaultRegisterSchema) => {
+        setIsLoading(true);
+        await register(data);
+        setIsLoading(false);
     }
 
     return (
         <View
             style={style.container}
         >
+            <Loading visible={isLoading}/>
             {/* CRIAR COMPONENTE EXPECIFICO PRA BACK */}
             <ReturnButton/>
 
@@ -107,7 +114,7 @@ export default function RegisterCliente() {
                 
                 <Button 
                     placeholder="CADASTRAR" 
-                    onPress={handleSubmit(onSubmit, (err) => console.log("erro: ", err))}
+                    onPress={handleSubmit(onSubmit)}
                 />
             </View>
         </View>

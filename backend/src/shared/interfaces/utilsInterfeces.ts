@@ -15,7 +15,6 @@ export type queryFilter = {
 export type FilterListShop = "Mais Recente"| "Mais Antigo"| "Quitado"| "Pendente"| "Retirado"| "Aguardando Retirada"| "Aceito" | "Recusado" |"Em Analise" | "Cancelados";
 
 
-
 export interface payloadInterface extends JwtPayload {
     id: number,
     nome: string,

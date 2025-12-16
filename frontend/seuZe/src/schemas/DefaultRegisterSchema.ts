@@ -4,6 +4,7 @@ export const defaultRegisterSchema = z.object({
     nome: z
         .string({message: "Campo obrigatório"})
         .nonempty({message: "Campo obrigatório"})
+        .regex(/^[a-zA-Z\s]+$/, "O nome não pode ter acentos, números ou caracteres especiais")
         .min(2, "Nome muito curto"),
     telefone: z
         .string({message: "Campo obrigatório"})

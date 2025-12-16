@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import InputForm from "@/src/components/ui/InputForm";
 import Button from "@/src/components/ui/Button";
 import { useRouter } from "expo-router";
@@ -6,7 +6,11 @@ import { theme } from "@/src/theme";
 import { Controller, useForm } from "react-hook-form";
 import { loginSchema, LoginSchema } from "@/src/schemas/LoginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import {login as loginCliente} from "@/src/services/clienteService"
+import {login as loginFornecedor} from "@/src/services/fornecedorService";
+import { useState } from "react";
+import Loading from "../ui/Loading";
+import { useSession } from "@/src/context/authContext";
 
 export type LoginFormProps = {
     title: string
@@ -14,18 +18,43 @@ export type LoginFormProps = {
 
 export default function LoginForm({ title }:LoginFormProps) {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const { signIn } = useSession();
 
     const {control, handleSubmit} = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema)
     });
 
-    const onSubmit = (data: LoginSchema) => {
-        console.log("Dados enviados: ", data);
+    const onSubmitCliente = async (data: LoginSchema) => {
+        setIsLoading(true);
+        
+        const token = await loginCliente(data);
+        if(token) {
+            signIn(token, "cliente");
+            Alert.alert("TESTE: ", "token salvo na memoria privada");
+        }
+
+        setIsLoading(false);
+    }
+
+    const onSubmitFornecedor = async (data: LoginSchema) => {
+        setIsLoading(true);
+        
+        const token = await loginFornecedor(data);
+        if(token){ 
+            signIn(token, "fornecedor");
+            Alert.alert("TESTE: ", "token salvo na memoria privada");
+        }
+
+        setIsLoading(false);
     }
 
     // secureTextEntry
     return (
         <View style={style.container}>
+            
+            <Loading visible={isLoading}/>
+
             <Text style={style.title}>
                 {title}
             </Text>
@@ -65,8 +94,8 @@ export default function LoginForm({ title }:LoginFormProps) {
                     ENTRAR COMO
                 </Text>
 
-                <Button placeholder="COMPRADOR" onPress={handleSubmit(onSubmit)}/>
-                <Button placeholder="FORNECEDOR" onPress={handleSubmit(onSubmit)}/>
+                <Button placeholder="COMPRADOR" onPress={handleSubmit(onSubmitCliente)}/>
+                <Button placeholder="FORNECEDOR" onPress={handleSubmit(onSubmitFornecedor)}/>
             </View>
 
             <Text style={style.title}>
@@ -80,11 +109,11 @@ export default function LoginForm({ title }:LoginFormProps) {
                 
                 <Button 
                     placeholder="COMPRADOR" 
-                    onPress={() => router.push("/(cliente)/register")}
+                    onPress={() => router.push("/(auth)/registerCliente")}
                 />
                 <Button 
                     placeholder="FORNECEDOR"
-                    onPress={() => router.push("/(fornecedor)/register")}
+                    onPress={() => router.push("/(auth)/registerFornecedor")}
                 />
             </View>
         </View>

@@ -1,14 +1,14 @@
 import { Stack } from "expo-router";
 
 
-export default function AuthLayout() {
+export default function ClienteLayout() {
     return (
         <Stack 
             screenOptions={{
                 headerShown: false,
-                animation: "none"
+                animation: 'none'
             }} 
-            initialRouteName="login"
+            initialRouteName="home"
         />
     )
 }

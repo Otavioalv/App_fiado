@@ -9,10 +9,12 @@ export type LogoGProps = {
 }
 
 export default function LogoG({text}: LogoGProps) {
+    const logoPng = require("@/assets/images/logo.png");
+
     return (
         <View style={styles.container}> 
             <Image 
-                source={require("../../../assets/images/logo.png")} 
+                source={logoPng} 
                 style={styles.image}
             />
             <Text style={styles.text}>

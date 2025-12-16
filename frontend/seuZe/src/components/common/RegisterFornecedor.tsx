@@ -6,21 +6,30 @@ import Button from "../ui/Button";
 import { Controller, useForm } from "react-hook-form";
 import { fornecedorRegisterSchema, FornecedorRegisterSchema } from "@/src/schemas/FornecedorRegisterSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { register } from "@/src/services/fornecedorService";
+import Loading from "../ui/Loading";
+import { useState } from "react";
 
 export default function RegisterFornecedor() {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    
     const {control, handleSubmit} = useForm<FornecedorRegisterSchema>({
         resolver: zodResolver(fornecedorRegisterSchema),
     })
 
-    const onSubmit = (data: FornecedorRegisterSchema) => {
-        console.log('dados enviados: ', data);
+    const onSubmit = async (data: FornecedorRegisterSchema) => {
+        // console.log('dados enviados: ', data);
+        setIsLoading(true);
+        await register(data);
+        setIsLoading(false);
     }
 
     return (
         <View
             style={style.container}
         >
-            {/* CRIAR COMPONENTE EXPECIFICO PRA BACK */}
+            <Loading visible={isLoading}/>
+
             <ReturnButton/>
 
             {/* Formulario */}
@@ -208,7 +217,7 @@ export default function RegisterFornecedor() {
                     }
                 />
 
-                <Button placeholder="CADASTRAR" onPress={handleSubmit(onSubmit, (err) => console.log("erro: ", err))}/>
+                <Button placeholder="CADASTRAR" onPress={handleSubmit(onSubmit)}/>
             </View>
         </View>
     );

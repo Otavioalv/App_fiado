@@ -8,19 +8,31 @@
       "developmentClient": true,
       "distribution": "internal"
     },
+
     "preview": {
       "distribution": "internal",
       // edit
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://influential-mockingbird-otavioalv-68f9de22.koyeb.app/",
+        "EXPO_PUBLIC_TESTE": "variavel de teste"
       }
       // ------
     },
+
     "production": {
       "autoIncrement": true,
+      
       // edit
       "android": {
         "buildType": "apk"
+      },
+
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://influential-mockingbird-otavioalv-68f9de22.koyeb.app/",
+        "EXPO_PUBLIC_TESTE": "variavel de teste"
       }
       // ----------
     }
