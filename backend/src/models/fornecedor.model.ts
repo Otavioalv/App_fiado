@@ -308,7 +308,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             console.error(e);
             throw new Error("Erro ao coletar parcerias");
         } finally {
-            client?.release;
+            client?.release();
         }
     }
 

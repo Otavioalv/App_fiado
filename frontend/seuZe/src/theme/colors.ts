@@ -6,10 +6,14 @@ export const colors = {
 
  
   orange: "#FD5300",
+  orangeOpacity: "#FD530011",
   bgBttDefault: "#000000",
+  
   lightGray: "#D4D4D4",
   darkGray: "#878787",
-  pseudoLightGray: "#DEE1E6"
+  pseudoLightGray: "#DEE1E6",
+  
+  textNeutral900: "#171a1f"
 //   dark: "#121212",
 //   light: "#FFFFFF",
 } as const;

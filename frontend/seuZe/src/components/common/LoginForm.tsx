@@ -42,6 +42,7 @@ export default function LoginForm({ title }:LoginFormProps) {
         
         const token = await loginFornecedor(data);
         if(token){ 
+            Alert.alert("TESTE", "Salvando token na memoria");
             signIn(token, "fornecedor");
             Alert.alert("TESTE: ", "token salvo na memoria privada");
         }

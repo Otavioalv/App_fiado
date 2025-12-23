@@ -3,22 +3,31 @@ import { StyleSheet, Text, View } from "react-native";
 import Feather from '@expo/vector-icons/Feather';
 
 
-export function UserHeader() {
+type UserHeaderProps = {
+    nome: string,
+    apelido?: string
+}
+
+export function UserHeader({apelido, nome}: UserHeaderProps) {
     return (
         <View style={styles.container}>
             <View>
                 <Text style={styles.textName}>
-                    Olá, joao silva!
+                    Olá, {nome}!
                 </Text>
-                <Text style={styles.textSubName}>
-                    Apelido: J.S.
-                </Text>
+
+                {apelido && (
+                    <Text style={styles.textSubName}>
+                        Apelido: {apelido}
+                    </Text>
+                )}
+
             </View>
 
 
             {/* Fazer um boatao */}
             <View style={styles.bellNotify}>
-                <Feather name="bell" size={24} color="black" />
+                <Feather name="bell" size={24} color={theme.colors.textNeutral900} />
                 
                 <View style={styles.notifyCounter}>
                     <Text style={styles.textCounter}>
@@ -39,16 +48,19 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: "100%",
         borderBottomWidth: 1,
+        backgroundColor: "#ffffff",
         borderColor: theme.colors.pseudoLightGray,
         paddingHorizontal: theme.padding.md,
-        paddingBottom: theme.padding.sm,
+        paddingVertical: theme.padding.sm,
     }, 
     textName: {
         fontSize: theme.typography.textLG.fontSize,
-        fontWeight: 'bold'
+        color: theme.colors.textNeutral900,
+        fontWeight: 'bold',
     },
     textSubName: {
-        fontSize: theme.typography.textMD.fontSize
+        fontSize: theme.typography.textMD.fontSize,
+        color: theme.colors.textNeutral900,
     },
     
     bellNotify: {

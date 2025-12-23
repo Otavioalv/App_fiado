@@ -2,15 +2,6 @@ import { apiConfig } from "./config";
 import { buildApp } from "./app";
 
 
-// const PORT:number = 8090;
-// const HOST:string = "0.0.0.0";
-
-// declare module 'fastify' {
-//     interface FastifyInstance {
-//         io: SocketIOServer;
-//     }
-// };
-
 async function start() {
     const app = await buildApp()
     

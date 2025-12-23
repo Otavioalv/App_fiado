@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, Theme } from "@react-navigation/native";
+import { theme } from "../theme";
 
 
 const customDefaultBG = "#FFFFFF";
@@ -10,7 +11,7 @@ export const MyDefaultTheme: Theme = {
     colors: {
         ...DefaultTheme.colors,
         background: customDefaultBG,
-        text: "#ffffff"
+        text: theme.colors.textNeutral900
     }
 }
 

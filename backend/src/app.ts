@@ -11,10 +11,6 @@ import { NotifierBroadcastParams, NotifierToUserParams } from "./shared/interfac
 import { NotificationService } from "./services/notification.service";
 
 
-
-
-
-// NotifierClass
 declare module 'fastify' {
     interface FastifyInstance {
         notifier: {
@@ -25,23 +21,11 @@ declare module 'fastify' {
     }
 }
 
-// const PORT:number = 8090;
-// const HOST:string = "0.0.0.0";
-
 
 export async function buildApp() {
     const app = Fastify({logger: false});
-    // const {host, port} = apiConfig;
-    
-    await app.register(cors);
 
-    // teste (DELETAR FUTURAMENTE) ----------
-    // await app.register(fastifyStatic, {
-    //     root: path.join(__dirname, 'public'),
-    //     prefix: '/frontend',
-    //     index: ['index.html']
-    // });
-    // --------------------------------------
+    await app.register(cors);
     
     await app.register(fastifySocketIO);
     await socketIO(app);

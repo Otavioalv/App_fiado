@@ -1,21 +1,33 @@
 # App fiado
 
-Listar compras fornecedor e cliente
-
-- [x] fornecedor => listar todas as compras, 
-- [x] fornecedor => listar compra por id do cliente
-- [x] fornecedor => aceitar/recusar compras (notificar cliente)
-- [x] fornecedor => editar opções de compra, quitado/retirado/data coletado (notifica cliete)
-
-- [x] cliente => listar todas compras
-- [x] cliente => listar por id do fornecedor
-- [x] cliente => cancelar o pedido, por ids.
-
-- [x] cliente/fornecedor => filtrar listar compra por nome/apelido E
-- [x] cliente/fornecedor => filtrar listar compra quitada(S/N)/retirado(S/N)/aceito(S/N)
+no getShopList, retorna dados a mais como nome, apelido e telefone, so que nao ta tipado no retorno, tipar isso. No mesmo , valor_unit retorna tipo string, e nao number, e pra ser number
 
 
-Adicionei campo "cancelado", pra verificar se foi cancelado em compras
+na interface, o problema de n carregar a primeira vez, pode se ra falta de token, corrigir isso com isso ()
+const { session } = useSession();
+
+useEffect(() => {
+  if (!session) return;
+
+  fetchShoppingList();
+}, [session]);
+fazer teste: o erro deve acontecer prq o token n carregou, api sem header, contexto ainda em defined. Muito provavel
+remover calback depois disso, e testar, editar na parte de token, nao ali
+
+fazer isso nas chamadas ()
+try {
+  setLoading(true);
+  await fetchShoppingList();
+} finally {
+  setLoading(false);
+}
+
+
+remover textNeutral, definir cor fonte global
+
+api ta com problema, trava, quando dou varias requisições seguidas, testar local
+
+acontece uns travamentos na api, talvez o problema seja prq esqueci () depois de release nos models (client?.release();). verificar cada model e testar
 
 # Anotações
 ## Banco de dados (POSTGRES)

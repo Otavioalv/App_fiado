@@ -14,11 +14,11 @@
     },
     "androidStatusBar": {
       "backgroundColor": "#FFFFFF",
-      "barStyle": "light-content"
-    },
-    "androidNavigationBar": {
-      "backgroundColor": "#FFFFFF",
+      "translucent": true,
       "barStyle": "dark-content"
+    },
+    "splash": {
+      "backgroundColor": "#FFFFFF"
     },
     "android": {
       "adaptiveIcon": {
@@ -55,6 +55,13 @@
         {
           "configureAndroidBackup": true,
           "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "backgroundColor": "#ffffff",
+          "barStyle": "dark"
         }
       ]
     ],

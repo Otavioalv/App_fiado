@@ -18,7 +18,7 @@ export default function RootLayout() {
       {/* Autenticação */}
       <SessionProvider>
         <SafeAreaProvider>
-          <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top', 'bottom']}>
+          <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
             
             <SplashScreenController/>
             
@@ -66,7 +66,7 @@ function RootNavigator() {
 
       {/* Telas de cliente */}
       <Stack.Protected guard={!!session && (userType as UserType) === "cliente"}>
-        <Stack.Screen name="(cliente)"/>
+        <Stack.Screen name="(cliente)" options={{headerShown: false}}/>
       </Stack.Protected>
 
       {/* Telas de fornecedor */}
