@@ -263,7 +263,7 @@ class ClienteModel extends UserModel<clienteInterface>{
             console.error(e);
             throw new Error("Erro ao coletar parcerias");
         } finally {
-            client?.release;
+            client?.release();
         }
     }
 }
