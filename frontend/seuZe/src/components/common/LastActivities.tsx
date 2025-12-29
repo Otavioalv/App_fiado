@@ -1,70 +1,39 @@
 import { FlatList, Text, View, StyleSheet, Dimensions } from "react-native";
-import { SectionContainer } from "./SectionContainer";
-import { BasicInfoCardProps,  BasicInfoCard, BasicInfoCardSkeleton} from "./BasicInfoCard";
+import { BasicInfoCardProps, BasicInfoCardSkeleton, MemoBasicInfoCard} from "./BasicInfoCard";
 import { theme } from "@/src/theme";
-import { useCallback, useEffect, useState } from "react";
-import { shoppingList } from "@/src/services/clienteService";
-import { PaginationType } from "@/src/types/responseServiceTypes";
-import NoPurchases from "./NoPurchases";
+import {ReactNode, useCallback} from "react";
 
+export type InfoType = BasicInfoCardProps & {id: string};
 
-export type LastActivitiesProps = {
-    title: string,
-    infos: BasicInfoCardProps[],
-    isLoading: boolean
+export interface LastActivitiesProps {
+    title: string;
+    infos: InfoType[];
+    isLoading: boolean;
+    emptyStateComponent?: ReactNode;
 }
 
-export default function LastActivities({title, infos, isLoading}: LastActivitiesProps) {
-    // const [infos, setInfos] = useState<BasicInfoCardProps[]>([]);
-    // const [isLoading, setIsLoaging] = useState<boolean>(true);
-    
+export default function LastActivities({title, infos, isLoading, emptyStateComponent}: LastActivitiesProps) {
+    const isEmpty = !isLoading && infos.length === 0;
 
-    // Remover callback
-    // const fetchShoppingList = useCallback(async () => {
-    //     try {
-    //         setIsLoaging(true);
-
-    //         const pagination: PaginationType = {
-    //             page: 1,
-    //             size: 10, 
-    //             filter: "Mais Recente"
-    //         }
-
-    //         // chama a api
-    //         const result = await shoppingList(pagination);
-            
-    //         if(result.length){
-    //             const infoData:BasicInfoCardProps[] = result.map(r => {
-    //                 const dataObj = new Date(r.coletado_em);
-    //                 const day = String(dataObj.getDate()).padStart(2, "0");
-    //                 const month = String(dataObj.getMonth() + 1).padStart(2, "0");
-    //                 return {
-    //                     title: r.nome_produto,
-    //                     info: `Coletado em ${day}/${month}`
-    //                 }
-    //             });
-
-    //             setInfos(infoData);
-    //         }
-    //     }finally {
-    //         setIsLoaging(false);
-    //     }
-    // }, []);
-
-    // useEffect(() => {
-    //     fetchShoppingList()
-    // }, [fetchShoppingList]);
+    const renderItem = useCallback(
+        ({item}: {item: InfoType}) => (
+            <View style={styles.cardContainer}>
+                <MemoBasicInfoCard title={item.title} info={item.info}/>
+            </View>
+        ),
+        []
+    );
 
     return (
-        <View>
+        <View style={styles.container}>
             <Text style={styles.textSubtitle}>
                 {title}
             </Text>
-            
-            {isLoading ? (
+
+            {isLoading && (
                 <FlatList
-                    data={[1, 2]}
-                    keyExtractor={(_, index) => index.toString()}
+                    data={["1", "2"]}
+                    keyExtractor={(item) => item}
                     horizontal={true}
                     contentContainerStyle={styles.listContainer}
                     renderItem={() => (
@@ -73,23 +42,22 @@ export default function LastActivities({title, infos, isLoading}: LastActivities
                         </View>
                     )}
                 />
-            ) : infos.length ? (
+            )}
+
+            
+            {isEmpty && emptyStateComponent}
+
+            {!isLoading && !isEmpty && (
                 <FlatList
                     data={infos}
-                    keyExtractor={(_, index) => index.toString()}
+                    keyExtractor={(item) => item.id}
                     initialNumToRender={3}
                     windowSize={3}
                     horizontal={true}
                     maxToRenderPerBatch={3}
                     contentContainerStyle={styles.listContainer}
-                    renderItem={({item}) => (
-                        <View style={styles.cardContainer}>
-                            <BasicInfoCard title={item.title} info={item.info}/>
-                        </View>
-                    )}
+                    renderItem={renderItem}
                 />
-            ) : (
-                <NoPurchases/>
             )}
         </View>
     );
@@ -102,6 +70,9 @@ const cardMinWidth = screenWidth * 0.50;
 const cardMaxWidth = screenWidth * 0.80;
 
 const styles = StyleSheet.create({
+    container: {
+        gap: theme.gap.sm
+    },
     listContainer: {
         padding: theme.padding.sm,
         gap: theme.gap.md,

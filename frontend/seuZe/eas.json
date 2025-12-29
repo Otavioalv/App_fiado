@@ -16,7 +16,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://influential-mockingbird-otavioalv-68f9de22.koyeb.app/",
+        "EXPO_PUBLIC_API_URL": "https://influential-mockingbird-otavioalv-68f9de22.koyeb.app",
         "EXPO_PUBLIC_TESTE": "variavel de teste"
       }
       // ------
@@ -31,7 +31,7 @@
       },
 
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://influential-mockingbird-otavioalv-68f9de22.koyeb.app/",
+        "EXPO_PUBLIC_API_URL": "https://influential-mockingbird-otavioalv-68f9de22.koyeb.app",
         "EXPO_PUBLIC_TESTE": "variavel de teste"
       }
       // ----------

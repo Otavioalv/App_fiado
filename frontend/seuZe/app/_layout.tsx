@@ -1,7 +1,8 @@
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Stack } from "expo-router";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
+// import { StatusBar } from "expo-status-bar";
+import {SystemBars} from "react-native-edge-to-edge";
 import { ThemeProvider } from "@react-navigation/native";
 import { MyDefaultTheme } from "@/src/constants/theme";
 import Toast from "react-native-toast-message";
@@ -27,8 +28,9 @@ export default function RootLayout() {
               behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
               <RootNavigator/>
-              <StatusBar style="dark"/>   
-
+              {/* <StatusBar style="dark"/>    */}
+              <SystemBars style={"dark"}/>
+              
             </KeyboardAvoidingView>
             <Toast/>
           </SafeAreaView>

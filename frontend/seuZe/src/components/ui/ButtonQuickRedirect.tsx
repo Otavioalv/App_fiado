@@ -1,5 +1,5 @@
 import { theme } from "@/src/theme";
-import { ReactNode, useRef } from "react";
+import { ReactNode, useRef, memo } from "react";
 import { Animated, Pressable, PressableProps, StyleSheet, Text, View } from "react-native";
 
 
@@ -46,6 +46,8 @@ export function ButtonQuickRedirect({title, icon, ...rest}: ButtonQuickRedirectP
         </Pressable>
     );
 }
+
+export const MemoButtonQuickRedirect = memo(ButtonQuickRedirect);
 
 const styles = StyleSheet.create({
     button: {   

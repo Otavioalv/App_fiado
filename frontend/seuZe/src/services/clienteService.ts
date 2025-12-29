@@ -4,10 +4,8 @@ import { LoginSchema } from "../schemas/LoginSchema";
 import { api } from "./api";
 import { errorAxiosInterface, responseAxiosInterfaces } from "./typesApi";
 
-
 import Toast from "react-native-toast-message";
-import { DefaultUserDataType, PaginationResponseType, PaginationType, PartnerFornecedorType, ShoppingData } from "../types/responseServiceTypes";
-
+import { DefaultUserDataType, PaginationResponseType, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData } from "../types/responseServiceTypes";
 
 
 const defaultEndPoint:string = "/cliente"
@@ -32,7 +30,6 @@ export async function login(userData: LoginSchema): Promise<string | null>{
 
         console.log(response.data.data);
         return response.data.data!.token;
-
     }catch(error){
         const err = error as errorAxiosInterface
 
@@ -43,22 +40,28 @@ export async function login(userData: LoginSchema): Promise<string | null>{
             console.log("houve um erro: ", JSON.stringify(dataErr, null, 2));
             
             
-            if(status <= 400) {
+            if(status >= 400 && status < 500) {
                 Toast.show({
                     type: "error",
                     text1: "Erro ao efetuar login",
                     text2: dataErr.message
-                })
+                });
             } else if(status >= 500) {
                 Toast.show({
                     type: dataErr.status,
                     text1: dataErr.message,
                     text2: "Tente novamente mais tarde"
-                })
+                });
             }
-        }
-        else
+        }else{ 
+            Toast.show({
+                type: "error",
+                text1: "Erro desconhecido",
+                text2: "Verifique sua conexão com a internet"
+            });
+
             console.log("Erro de conexão: ", err.message);
+        }
 
         return null;
     }
@@ -92,7 +95,7 @@ export async function register(userData: DefaultRegisterSchema) {
 
 
 
-            if(status <= 400) {
+            if(status >= 400 && status < 500) {
                 Toast.show({
                     type: dataErr.status,
                     text1: dataErr.message,
@@ -105,9 +108,15 @@ export async function register(userData: DefaultRegisterSchema) {
                     text2: "Tente novamente mais tarde"
                 })
             }
-        }
-        else
+        }else{ 
+            Toast.show({
+                type: "error",
+                text1: "Erro desconhecido",
+                text2: "Verifique sua conexão com a internet"
+            });
+            
             console.log("Erro de conexão: ", err.message);
+        }
     }
 }   
 
@@ -121,15 +130,28 @@ export async function me(): Promise<DefaultUserDataType>{
         return response.data.data!;
     }catch(error){
         const err = error as errorAxiosInterface;
-        
+
+
+        console.log("[cliente ME] Inicion catch");
+        // Erro de codigo
+        if(!err.isAxiosError){
+            console.log(`[cliente ME] Erro interno do APP`);
+            console.log(`[cliente ME] Menssagem Axios: `, err.message);
+            console.log(`[cliente ME] Stack: `, err.stack);
+            return {nome: "", telefone: ""}
+        }
+
+        // Erro do axios
         if(err.response){
+            console.log(`[cliente ME] Backend Respondeu`);
+            console.log(`[cliente ME] Status: `, err.response.status);
+            console.log(`[cliente ME] Detalhes do erro: `, JSON.stringify(err.response.data, null, 2));
+
             const dataErr = err.response?.data;
             const {status} = err.response;
-            
-            console.log("houve um erro: ", JSON.stringify(dataErr, null, 2));
-            console.log(status);
 
-            if(status <= 400) {
+            if(status >= 400 && status < 500) {
+                console.log("entrou no toast");
                 Toast.show({
                     type: dataErr.status,
                     text1: dataErr.message,
@@ -143,8 +165,26 @@ export async function me(): Promise<DefaultUserDataType>{
                 });
             }
         }
-        else
+        // Erro de rede
+        else if(err.request){ 
+            console.log(`[cliente ME] requisição saiu mas servidor não respondeu`);
+            console.log(`[cliente ME] Menssagem Erro: `, err.message);
+
+            Toast.show({
+                type: "error",
+                text1: "Erro desconhecido",
+                text2: "Verifique sua conexão com a internet"
+            });
+            
             console.log("Erro de conexão: ", err.message);
+        }
+        // Erro na configuração requisição
+        else {
+            console.log(`[cliente ME] Erro ao configurar requisição antes de enviar.`);
+            console.log(`[cliente ME] Menssagem de erro: `, err.message);
+        }
+
+        console.log(`[cliente ME] Fim catch \n`);
 
         return {nome: "", telefone: ""};
     }
@@ -152,7 +192,7 @@ export async function me(): Promise<DefaultUserDataType>{
 
 
 
-export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}): Promise<{list: ShoppingData[]} & PaginationResponseType>{
+export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}): Promise<ResultsWithPagination<ShoppingData[]>>{
     try {
         const endPoint = defaultEndPoint + "/product/buy/list";
         
@@ -175,7 +215,7 @@ export async function shoppingList(pagination: PaginationType = {page: 1, size: 
             console.error("houve um erro: ", JSON.stringify(dataErr, null, 2));
             console.log(status);
 
-            if(status <= 400) {
+            if(status >= 400 && status < 500) {
                 console.error(dataErr.message);
             } else if(status >= 500) {
                 Toast.show({
@@ -184,16 +224,21 @@ export async function shoppingList(pagination: PaginationType = {page: 1, size: 
                     text2: "Tente novamente mais tarde"
                 });
             }
-        }
-
-        else
+        }else{ 
+            Toast.show({
+                type: "error",
+                text1: "Erro desconhecido",
+                text2: "Verifique sua conexão com a internet"
+            });
+            
             console.log("Erro de conexão: ", err.message);
+        }
 
         return {list: []};
     }
 }
 
-export async function partnarSent(pagination: PaginationType = {page: 1, size: 10}): Promise<{list: PartnerFornecedorType[]} & PaginationResponseType>{
+export async function partnarSent(pagination: PaginationType = {page: 1, size: 10}): Promise<ResultsWithPagination<PartnerFornecedorType[]>>{
     try {
         const endPoint = defaultEndPoint + "/partner/list/sent";
         
@@ -216,7 +261,7 @@ export async function partnarSent(pagination: PaginationType = {page: 1, size: 1
             console.error("houve um erro: ", JSON.stringify(dataErr, null, 2));
             console.log(status);
 
-            if(status <= 400) {
+            if(status >= 400 && status < 500) {
                 console.error(dataErr.message);
             } else if(status >= 500) {
                 Toast.show({
@@ -225,10 +270,15 @@ export async function partnarSent(pagination: PaginationType = {page: 1, size: 1
                     text2: "Tente novamente mais tarde"
                 });
             }
-        }
-
-        else
+        }else{ 
+            Toast.show({
+                type: "error",
+                text1: "Erro desconhecido",
+                text2: "Verifique sua conexão com a internet"
+            });
+            
             console.log("Erro de conexão: ", err.message);
+        }
 
         return {list: []};
     }

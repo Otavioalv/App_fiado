@@ -72,3 +72,8 @@ export type PartnerDefaultType = DefaultUserDataType & PartnerStatusType;
 
 export type PartnerClienteType = PartnerDefaultType;
 export type PartnerFornecedorType = PartnerDefaultType & AddressDataType;
+
+export type ResultsWithPagination<T> = {
+   list: T,
+   pagination?: PaginationType
+}

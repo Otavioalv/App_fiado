@@ -1,33 +1,45 @@
 # App fiado
 
-no getShopList, retorna dados a mais como nome, apelido e telefone, so que nao ta tipado no retorno, tipar isso. No mesmo , valor_unit retorna tipo string, e nao number, e pra ser number
+- [ ] no getShopList, retorna dados a mais como nome, apelido e telefone, so que nao ta tipado no retorno, tipar isso. No mesmo , valor_unit retorna tipo string, e nao number, e pra ser number
 
 
-na interface, o problema de n carregar a primeira vez, pode se ra falta de token, corrigir isso com isso ()
+- [ ] na interface, o problema de n carregar a primeira vez, pode se ra falta de token, corrigir isso com isso ()
 const { session } = useSession();
+* ```
+    useEffect(() => {
+    if (!session) return;
 
-useEffect(() => {
-  if (!session) return;
+    fetchShoppingList();
+    }, [session]);
+    fazer teste: o erro deve acontecer prq o token n carregou, api sem header, contexto ainda em defined. Muito provavel
+    remover calback depois disso, e testar, editar na parte de token, nao ali
 
-  fetchShoppingList();
-}, [session]);
-fazer teste: o erro deve acontecer prq o token n carregou, api sem header, contexto ainda em defined. Muito provavel
-remover calback depois disso, e testar, editar na parte de token, nao ali
-
-fazer isso nas chamadas ()
-try {
-  setLoading(true);
-  await fetchShoppingList();
-} finally {
-  setLoading(false);
-}
+    fazer isso nas chamadas ()
+    try {
+    setLoading(true);
+    await fetchShoppingList();
+    } finally {
+    setLoading(false);
+    }```
 
 
-remover textNeutral, definir cor fonte global
+- [ ] remover textNeutral, definir cor fonte global
 
-api ta com problema, trava, quando dou varias requisições seguidas, testar local
+- [ ] api ta com problema, trava, quando dou varias requisições seguidas, testar local
 
-acontece uns travamentos na api, talvez o problema seja prq esqueci () depois de release nos models (client?.release();). verificar cada model e testar
+- [ ] acontece uns travamentos na api, talvez o problema seja prq esqueci () depois de release nos models (client?.release();). verificar cada model e testar
+
+- [ ] fazer algumas alterações em interfaces e types, usar interfaces para definir estruturas de objetos, o resto e type
+
+- [ ] adicionar health na api
+ 
+- [X] colocar id no flatlist, pre
+
+- [ ] Adicionar refreshControl em flatlists
+
+- [x] corrigir problema visual tabbar
+
+- [ ] Adicionar estado de erro em flatlists
 
 # Anotações
 ## Banco de dados (POSTGRES)

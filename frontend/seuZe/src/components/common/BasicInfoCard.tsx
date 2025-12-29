@@ -1,7 +1,6 @@
 import { theme } from "@/src/theme";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, memo } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
-import { opacity } from "react-native-reanimated/lib/typescript/Colors";
 
 
 export type BasicInfoCardProps = {
@@ -24,6 +23,7 @@ export function BasicInfoCard({info, title}: BasicInfoCardProps) {
     );
 }
 
+export const MemoBasicInfoCard = memo(BasicInfoCard);
 
 export function BasicInfoCardSkeleton() {
     const anmOpacity = useRef(new Animated.Value(.5)).current;
@@ -55,8 +55,6 @@ export function BasicInfoCardSkeleton() {
     );
 }
 
-
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -83,7 +81,6 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.textSM.fontSize, 
         color: theme.colors.textNeutral900
     },
-
     skeletonTitle: {
         height: 10, 
         width: "95%", 

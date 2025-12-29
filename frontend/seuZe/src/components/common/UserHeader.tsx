@@ -1,14 +1,20 @@
 import { theme } from "@/src/theme";
-import { StyleSheet, Text, View } from "react-native";
+import { Animated, StyleSheet, Text, View } from "react-native";
 import Feather from '@expo/vector-icons/Feather';
+import { useEffect, useRef } from "react";
 
-
-type UserHeaderProps = {
+interface UserHeaderProps {
     nome: string,
-    apelido?: string
+    apelido?: string,
+    isLoading?:boolean,
 }
 
-export function UserHeader({apelido, nome}: UserHeaderProps) {
+export function UserHeader({apelido, nome, isLoading=false}: UserHeaderProps) {
+    if(isLoading) {
+        return <UserHeaderSkeleton/>
+    }
+        
+
     return (
         <View style={styles.container}>
             <View>
@@ -23,8 +29,6 @@ export function UserHeader({apelido, nome}: UserHeaderProps) {
                 )}
 
             </View>
-
-
             {/* Fazer um boatao */}
             <View style={styles.bellNotify}>
                 <Feather name="bell" size={24} color={theme.colors.textNeutral900} />
@@ -39,9 +43,44 @@ export function UserHeader({apelido, nome}: UserHeaderProps) {
     );
 }
 
+export function UserHeaderSkeleton() {
+    const anmOpacity = useRef(new Animated.Value(.5)).current;
+
+    useEffect(() => {
+        const animation = Animated.loop(
+            Animated.sequence([
+                Animated.timing(anmOpacity, {
+                    toValue: 1,
+                    duration: 800,
+                    useNativeDriver: true
+                }),
+                Animated.timing(anmOpacity, {
+                    toValue: .5,
+                    duration: 800,
+                    useNativeDriver: true
+                })
+            ])
+        );
+
+        animation.start();
+    }, [anmOpacity])
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.textContainerSkeleton}>
+                <Animated.View style={[styles.skeletonTextName, {opacity: anmOpacity}]}/>
+                <Animated.View style={[styles.skeletonTextSubName, {opacity: anmOpacity}]}/>
+            </View>
+
+            <View style={styles.bellNotify}>
+                <Feather name="bell" size={24} color={theme.colors.textNeutral900} />
+            </View>
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
     container: {
-        // backgroundColor: "red",
         flex: 1,
         flexDirection: "row",
         justifyContent: "space-between",
@@ -53,6 +92,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: theme.padding.md,
         paddingVertical: theme.padding.sm,
     }, 
+    textContainerSkeleton: {
+        flex: 1, 
+        gap: theme.gap.xs
+    },
     textName: {
         fontSize: theme.typography.textLG.fontSize,
         color: theme.colors.textNeutral900,
@@ -62,10 +105,8 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.textMD.fontSize,
         color: theme.colors.textNeutral900,
     },
-    
     bellNotify: {
     },
-
     notifyCounter: {
         position: "absolute",
         alignItems: "center",
@@ -82,5 +123,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "bold",
         textAlign: "center"
-    }
+    },
+    skeletonTextName: {
+        height: 15, 
+        width: "45%", 
+        backgroundColor: theme.colors.pseudoLightGray, 
+        borderRadius: theme.radius.sm
+    },
+    skeletonTextSubName: {
+        height: 15, 
+        width: "60%", 
+        backgroundColor: theme.colors.pseudoLightGray, 
+        borderRadius: theme.radius.sm
+    },
 });

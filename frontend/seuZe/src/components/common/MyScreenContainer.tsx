@@ -22,6 +22,7 @@ const style = StyleSheet.create({
         flex: 1,
         gap: theme.gap.xs,
         paddingHorizontal: theme.padding.md,
+        paddingVertical: theme.padding.lg,
         // paddingBottom: theme.padding.md
     }
 })

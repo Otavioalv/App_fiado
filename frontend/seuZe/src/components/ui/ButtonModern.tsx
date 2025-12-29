@@ -68,9 +68,9 @@ const styles = StyleSheet.create({
         borderColor: theme.colors.lightGray
     },
     textBase: {
-        ...theme.typography.title
+        ...theme.typography.textLG,
+        fontWeight: "bold"
     },
-
     textPrimary: {
         color: "white",
     },

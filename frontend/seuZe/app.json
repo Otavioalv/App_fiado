@@ -12,11 +12,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.seuZeApp"
     },
-    "androidStatusBar": {
-      "backgroundColor": "#FFFFFF",
-      "translucent": true,
-      "barStyle": "dark-content"
-    },
     "splash": {
       "backgroundColor": "#FFFFFF"
     },
@@ -39,6 +34,15 @@
       "expo-router",
       "expo-font",
       [
+        "react-native-edge-to-edge",
+        {
+          "android": {
+            "parentTheme": "Default",
+            "enforceNavigationBarContrast": false
+          }
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
@@ -51,19 +55,13 @@
         }
       ],
       [
-        "expo-secure-store", 
+        "expo-secure-store",
         {
           "configureAndroidBackup": true,
           "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
         }
       ],
-      [
-        "expo-navigation-bar",
-        {
-          "backgroundColor": "#ffffff",
-          "barStyle": "dark"
-        }
-      ]
+      "react-native-edge-to-edge"
     ],
     "experiments": {
       "typedRoutes": true,

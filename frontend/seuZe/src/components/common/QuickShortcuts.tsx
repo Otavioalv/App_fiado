@@ -1,48 +1,50 @@
 import { StyleSheet, View, FlatList } from "react-native";
-import { SectionContainer } from "./SectionContainer";
-import { ButtonQuickRedirect, ButtonQuickRedirectProps } from "../ui/ButtonQuickRedirect";
+import { ButtonQuickRedirectProps, MemoButtonQuickRedirect } from "../ui/ButtonQuickRedirect";
 import { theme } from "@/src/theme";
+import { useCallback } from "react";
 
-export type QuickShortcutsProps = {
-    shortcuts: ButtonQuickRedirectProps[]
+export type ShortcutsType = ButtonQuickRedirectProps & {idSh: string};
+
+export interface QuickShortcutsProps {
+    shortcuts: ShortcutsType[]
 };
 
 export function QuickShortcuts({shortcuts}: QuickShortcutsProps) {
+    // console.log(shortcuts[0]);
+
+    const renderItem = useCallback(
+        ({item}: {item: ButtonQuickRedirectProps}) => (
+            <View style={styles.quickButtonsContainer}>
+                <MemoButtonQuickRedirect title={item.title} icon={item.icon} onPress={item.onPress}/>
+            </View>
+        ),
+        []
+    );
 
     return(
-        <SectionContainer title="Atalhos Rápidos">
-            <FlatList
-                data={shortcuts}
-                keyExtractor={((item, index) => index.toString())}
-                scrollEnabled={false}
-                numColumns={2}
+        <FlatList
+            data={shortcuts}
+            keyExtractor={((item) => item.idSh)}
+            scrollEnabled={false}
+            numColumns={2}
+            
+            initialNumToRender={8}
+            windowSize={10}
+            maxToRenderPerBatch={10}
 
-                contentContainerStyle={{gap: theme.gap.md, paddingVertical: theme.padding.sm}}
-                columnWrapperStyle={{justifyContent: "space-between"}}
+            contentContainerStyle={{gap: theme.gap.md, paddingVertical: theme.padding.sm}}
+            columnWrapperStyle={{justifyContent: "space-between"}}
 
-                renderItem={({item}) => (
-                    <View style={styles.quickButtonsContainer}>
-                        <ButtonQuickRedirect title={item.title} icon={item.icon} onPress={item.onPress}/>
-                    </View>    
-                )}
-            />
-        </SectionContainer>
+            renderItem={renderItem}
+        />
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        // backgroundColor: "red",
-        // width: "100%",
-        // flex: 1
-    },
     quickButtonsList: {
     },
     quickButtonsContainer: {
         width: "48%",
         height: "100%",
-        // backgroundColor: "red",
-        // position: "relative",
     }
-
 });

@@ -1,76 +1,74 @@
-import { BasicInfoCardProps } from "@/src/components/common/BasicInfoCard";
-import LastActivities from "@/src/components/common/LastActivities";
+import EmptyState from "@/src/components/common/EmptyState";
+import LastActivities, { InfoType } from "@/src/components/common/LastActivities";
 import MyScreenContainer from "@/src/components/common/MyScreenContainer";
-import { QuickShortcuts } from "@/src/components/common/QuickShortcuts";
+import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShortcuts";
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
-import Button from "@/src/components/ui/Button";
-import { ButtonQuickRedirectProps } from "@/src/components/ui/ButtonQuickRedirect";
 import Loading from "@/src/components/ui/Loading";
-import { useSession } from "@/src/context/authContext";
 import { me, partnarSent, shoppingList } from "@/src/services/clienteService";
 import { theme } from "@/src/theme";
-import { DefaultUserDataType, PaginationType, PartnerFornecedorType } from "@/src/types/responseServiceTypes";
+import { DefaultUserDataType, PaginationType } from "@/src/types/responseServiceTypes";
 import {Feather, FontAwesome} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView } from "react-native";
+import { Alert, RefreshControl, ScrollView } from "react-native";
 
 
 export default function Home() {
-    const {session, signOut} = useSession();
     const [userData, setUserData] = useState<DefaultUserDataType>({nome: "", telefone: ""});
     const [isLoading, setIsLoading] = useState<boolean>(false)
     
-    const [lastPuschases, setLastPuschases] = useState<BasicInfoCardProps[]>([]);
+    const [lastPuschases, setLastPuschases] = useState<InfoType[]>([]);
     const [purchaceLoad, setPurchaceLoad] = useState<boolean>(true);
 
-    const [lastPartnerSent, setLastPartnerSent] = useState<BasicInfoCardProps[]>([]);
+    const [lastPartnerSent, setLastPartnerSent] = useState<InfoType[]>([]);
     const [lastPartnerLoad, setLastPartnerLoad] = useState<boolean>(true);
+
+    const [refreshing, setRefreshing] = useState<boolean>(false);
 
     const router = useRouter();
     
-    const shortcuts: ButtonQuickRedirectProps[] = [
-        {
+    const shortcuts: ShortcutsType[] = [
+        {   
+            idSh: "1",
             title: "Fornecedores", 
             icon: <Feather name="truck" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/(cliente)/fornecedores")
 
         }, 
         {
+            idSh: "2",
             title: "Minhas Parcerias", 
             icon: <FontAwesome name="handshake-o" size={32} color={theme.colors.orange}/>,
             onPress: () => Alert.alert("Teste", "Vai para menu de parcerias, em fornecedores")
 
         }, 
         {
+            idSh: "3",
             title: "Produtos", 
             icon: <Feather name="package" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/(cliente)/produtos")
         }, 
         {
+            idSh: "4",
             title: "Minhas Compras", 
             icon: <Feather name="shopping-cart" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/(cliente)/compras")
 
         }, 
         {
+            idSh: "5",
             title: "Notificações", 
             icon: <Feather name="bell" size={32} color={theme.colors.orange}/>,
             onPress: () => Alert.alert("Teste", "Vai para lista de notificações")
         }, 
         {
+            idSh: "6",
             title: "Meu Perfil", 
             icon: <Feather name="user" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/(cliente)/perfil")
         }  
     ];
-    
-
-
-    const logOut = () => {
-        signOut();
-    }
     
     const fetchMe = useCallback(async () => {
         setIsLoading(true);
@@ -94,20 +92,23 @@ export default function Home() {
 
             // chama a api
             const result = await shoppingList(pagination);
-            
+
             if(result.list.length){
-                const infoData:BasicInfoCardProps[] = result.list.map(r => {
+                const infoData:InfoType[] = result.list.map((r, i) => {
                     const dataObj = new Date(r.coletado_em);
                     const day = String(dataObj.getDate()).padStart(2, "0");
                     const month = String(dataObj.getMonth() + 1).padStart(2, "0");
                     return {
                         title: r.nome_produto,
-                        info: `Coletado em ${day}/${month}`
+                        info: `Coletado em ${day}/${month}`,
+                        id: i.toString()
                     }
                 });
 
-                setLastPuschases(infoData);
+                setLastPuschases([...infoData]);
             }
+        } catch(err) {
+            console.log("ERRO: ", err);
         }finally {
             setPurchaceLoad(false);
         }
@@ -126,43 +127,119 @@ export default function Home() {
             // console.log(JSON.stringify(result, null, "  "));
 
             if(result.list.length) {
-                const infoData:BasicInfoCardProps[] = result.list.map(r => {
+                const infoData:InfoType[] = result.list.map((r, i) => {
                     const dataObj = new Date(r.created_at);
                     const day = String(dataObj.getDate()).padStart(2, "0");
                     const month = String(dataObj.getMonth() + 1).padStart(2, "0");
 
                     return {
                         title: r.nome,
-                        info: `Enviado em ${day}/${month}`
+                        info: `Enviado em ${day}/${month}`,
+                        id: i.toString()
                     }
                 });
 
                 setLastPartnerSent(infoData);
             }
-        } finally {
+        } catch(err) {
+            console.log("ERRO: ", err);
+        }finally {
             setLastPartnerLoad(false);
         }
     }, []);
 
-    useEffect(() => {
-        fetchMe();
-        fetchShoppingList();
-        fetchPartnerSent();
+    const loadData = useCallback(async () => {
+        await Promise.all([
+            fetchMe(),
+            fetchShoppingList(),
+            fetchPartnerSent(),
+        ]);
     }, [fetchMe, fetchShoppingList, fetchPartnerSent]);
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        
+        try {
+            await loadData();
+        } catch(err) {
+            console.log("ERRO: ", err);
+        }finally {
+            setRefreshing(false);
+        }
+    }
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
     return (
-        <ScrollView>
-            <Loading visible={isLoading}/>
-            <UserHeader nome={userData.nome} apelido={userData.apelido}/>
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    tintColor={theme.colors.orange}
+                    onRefresh={onRefresh}
+                    colors={[theme.colors.orange]}
+                    progressBackgroundColor={"#FFFFFF"}
+                />
+            }   
+        >
+            {/* <Loading visible={isLoading}/> */}
+            <UserHeader 
+                nome={userData.nome} 
+                apelido={userData.apelido}
+                isLoading={isLoading}
+            />
             <MyScreenContainer>
-                <QuickShortcuts shortcuts={shortcuts}/>
                 
-                <SectionContainer title="Últimas Atividades">
-                    <LastActivities title={"Últimas Compras"} infos={lastPuschases} isLoading={purchaceLoad}/>
+                <SectionContainer title="Atalhos Rápidos">
+                    <QuickShortcuts shortcuts={shortcuts}/>
                 </SectionContainer>
 
-                <Button placeholder="teste" onPress={() => Alert.alert("TESTE", `Token: ${session}`)}/>
-                <Button placeholder="LogOut" onPress={logOut}/>
+                <SectionContainer title="Últimas Atividades">
+                    <LastActivities 
+                        title={"Últimas Compras"} 
+                        infos={lastPuschases} 
+                        // infos={[]} 
+                        isLoading={purchaceLoad}
+                        emptyStateComponent={
+                            <EmptyState
+                                title={"Você ainda não fez compras"}
+                                description={"Suas compras aparecerão aqui quando vocẽ coletar um produto."}
+                                iconName={"package"}
+                                primaryAction={{
+                                    label: "Ver Produtos",
+                                    onPress: () => router.push("/(cliente)/produtos")
+                                }}
+                                secondaryAction={{
+                                    label: "Explorar Fornecedores",
+                                    onPress: () => router.push("/(cliente)/fornecedores")
+                                }}
+                            />
+                        }
+                    />
+                    <LastActivities 
+                        title={"Últimas parcerias pendentes"} 
+                        infos={lastPartnerSent} 
+                        // infos={[]} 
+                        isLoading={lastPartnerLoad}
+                        emptyStateComponent={
+                            <EmptyState
+                                title={"Você não tem parcerias pendentes"}
+                                description={"Suas parcerias pendentes aparecerão aqui quando você solicitar uma parceria."}
+                                iconName={"truck"}
+                                primaryAction={{
+                                    label: "Fornecedores",
+                                    onPress: () => router.push("/(cliente)/fornecedores")
+                                }}
+                                secondaryAction={{
+                                    label: "Explorar Compras",
+                                    onPress: () => router.push("/(cliente)/compras")
+                                }}
+                            />
+                        }
+                    />
+                </SectionContainer>
             </MyScreenContainer>
         </ScrollView>
     );
