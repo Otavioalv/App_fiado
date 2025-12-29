@@ -10,6 +10,7 @@ import { SessionProvider, useSession } from "@/src/context/authContext";
 import { UserType } from "@/src/types/userType";
 import { SplashScreenController } from "@/src/components/common/SplashScreenController";
 import { useEffect } from "react";
+import { NetworkProvider, useNetwork } from "@/src/context/networkContext";
 
 
 export default function RootLayout() {
@@ -18,23 +19,27 @@ export default function RootLayout() {
     <ThemeProvider value={MyDefaultTheme}>
       {/* Autenticação */}
       <SessionProvider>
-        <SafeAreaProvider>
-          <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
-            
-            <SplashScreenController/>
-            
-            <KeyboardAvoidingView
-              style={{ flex: 1}}
-              behavior={Platform.OS === "ios" ? "padding" : undefined}
-            >
-              <RootNavigator/>
-              {/* <StatusBar style="dark"/>    */}
-              <SystemBars style={"dark"}/>
+        <NetworkProvider>
+
+          <SafeAreaProvider>
+            <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
               
-            </KeyboardAvoidingView>
-            <Toast/>
-          </SafeAreaView>
-        </SafeAreaProvider>
+              <SplashScreenController/>
+              
+              <KeyboardAvoidingView
+                style={{ flex: 1}}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+              >
+                <RootNavigator/>
+                {/* <StatusBar style="dark"/>    */}
+                <SystemBars style={"dark"}/>
+                
+              </KeyboardAvoidingView>
+              <Toast/>
+            </SafeAreaView>
+          </SafeAreaProvider>
+          
+        </NetworkProvider>
       </SessionProvider>
     </ThemeProvider>
   );
@@ -44,7 +49,6 @@ export default function RootLayout() {
 // Seguindo documentação, muda automaticamente pra tela, ao loga, ou ao abri o app se tiver logado
 function RootNavigator() {
   const {session, userType, isLoading} = useSession();
-
 
   useEffect(() => {
     Alert.alert("Teste: ", `session: ${session}\n\nuserType: ${userType}`)

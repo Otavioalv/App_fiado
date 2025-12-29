@@ -9,10 +9,11 @@ Alert.alert("Teste: ", process.env.EXPO_PUBLIC_TESTE);
 
 let authToken: string | null = null;
 let logoutAction: () => void = () => {}; 
+let apiCnn: boolean = true;
 
 export const api = axios.create({
     baseURL,
-    timeout: 15000,
+    timeout: 100000,
     // headers: {"Content-Type": "application/json"}
 });
 
@@ -23,6 +24,10 @@ export const setAuthToken = (token: string | null) => {
 export const registerLogoutAction = (fn: () => void) => {
     logoutAction = fn;
 }
+
+export const setApiCnn = (cnn: boolean) => {
+    apiCnn = cnn;
+};
 
 // gancho q age de forma automatica a toda requisição
 api.interceptors.request.use(
@@ -46,14 +51,6 @@ api.interceptors.request.use(
             console.log(`[Interceptor] ERRO FATAL AO CONFIGURAR: `, err);
             throw err;
         }
-        
-        
-        // const token = await SecureStore.getItemAsync("user_token");
-        // if(authToken) {
-        //     config.headers.Authorization = `Bearer ${authToken}`;
-        // }
-        // return config;
-
     }, 
     // Fazer verificação melhor
     (error) => {
@@ -65,7 +62,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.log(`[Interceptor Response] Reparando resposta de erro...`);
+        console.log(`[Interceptor Response] Houve um erro...`);
+        
+        // Erro de rede
+        if(!error?.response) {
+            console.log(`[Interceptor Response] Error sem resposta (timeout ou rede)...`);
+            console.log(`[Interceptor Response] Erro: `, error)
+
+            return Promise.reject(error); 
+        }
+
         const status = error?.response.status;
 
         console.log("[Interceptor Response] Status: ", status);
@@ -83,6 +89,31 @@ api.interceptors.response.use(
                 text2: "Você não tem permissão para essa ação",
            }); 
         }
+
+        /* 
+    const dataErr = errorAxios.response?.data;
+                const {status} = errorAxios.response;
+    
+                if(status === 401)
+                    throw new UnauthorizedError();
+    
+                if(status >= 400 && status < 500) {
+                    // Toast.show({
+                    //     type: dataErr.status,
+                    //     text1: dataErr.message,
+                    //     // text2: "Mensagem de erro"
+                    // });
+                    throw new AppError(dataErr.message, "CLIENT");
+    
+                } else if(status >= 500) {
+                    // Toast.show({
+                    //     type: dataErr.status,
+                    //     text1: dataErr.message,
+                    //     text2: "Tente novamente mais tarde"
+                    // });
+                    throw new ServerError();
+                }    
+         */
             
         return Promise.reject(error);
     }

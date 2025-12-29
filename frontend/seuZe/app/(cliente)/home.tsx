@@ -5,6 +5,7 @@ import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShor
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
 import Loading from "@/src/components/ui/Loading";
+import { AppError } from "@/src/errors/AppError";
 import { me, partnarSent, shoppingList } from "@/src/services/clienteService";
 import { theme } from "@/src/theme";
 import { DefaultUserDataType, PaginationType } from "@/src/types/responseServiceTypes";
@@ -71,12 +72,17 @@ export default function Home() {
     ];
     
     const fetchMe = useCallback(async () => {
-        setIsLoading(true);
-        
-        const result:DefaultUserDataType = await me();   
-
-        setUserData(result);
-        setIsLoading(false);
+        try {
+            setIsLoading(true);
+            const result:DefaultUserDataType = await me();   
+            setUserData(result);
+        }catch(err: any) {
+            const error = err as AppError;
+            
+            console.log("ME: ", error.message);
+        }finally{
+            setIsLoading(false);
+        }
     }, []);
 
 

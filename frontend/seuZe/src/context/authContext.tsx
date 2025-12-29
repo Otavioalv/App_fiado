@@ -42,13 +42,9 @@ export function SessionProvider({children}: PropsWithChildren) {
     const [[isLoadingSession, session], setSession] = useStorageState("user_token");
     const [[isLoadingType, userType], setUserType] = useStorageState("user_type");
 
-
     // Testar
     const [isReady, setIsReady] = useState<boolean>(false);
     
-    // if(!isLoadingSession)
-    //     setAuthToken(session);
-
     const signOut = useCallback(() => {
         // Define como 
         setAuthToken(null);
@@ -65,23 +61,14 @@ export function SessionProvider({children}: PropsWithChildren) {
         if(!isLoadingSession) {
             setAuthToken(session); // Interessa
             setIsReady(true); // Interessa
-            
-            // setTimeout(() => {
-            //     setAuthToken(session);
-            //     setIsReady(true);
-            // }, 10000);
-            console.log("Token setado: ", session);
         }
         
-
         console.log("[Session provider] Token setado");
         console.log("[Session provider] Token: ", session);
         const end = performance.now();
         const duration = end - start;
         console.log("[Session provider] Time: ", duration);
         console.log("\n");
-        // console.log("COLOCA SESSAO");
-
     }, [session, isLoadingSession]);
 
     useEffect(() => {

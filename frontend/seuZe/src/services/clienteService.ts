@@ -6,6 +6,11 @@ import { errorAxiosInterface, responseAxiosInterfaces } from "./typesApi";
 
 import Toast from "react-native-toast-message";
 import { DefaultUserDataType, PaginationResponseType, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData } from "../types/responseServiceTypes";
+import { AppError } from "../errors/AppError";
+import { NetworkError } from "../errors/NetworkError";
+import { UnauthorizedError } from "../errors/UnauthorizedError";
+import { ServerError } from "../errors/ServerError";
+import { UnknownError } from "../errors/UnknownError";
 
 
 const defaultEndPoint:string = "/cliente"
@@ -124,69 +129,56 @@ export async function register(userData: DefaultRegisterSchema) {
 export async function me(): Promise<DefaultUserDataType>{
     try {
         const endPoint = defaultEndPoint + "/me";
-        
+        // await api.get("/user/delay_test/20000");
         const response = await api.post(endPoint) as responseAxiosInterfaces<DefaultUserDataType>;
-
         return response.data.data!;
-    }catch(error){
-        const err = error as errorAxiosInterface;
-
-
+    }catch(err:any){
+        // const err = error as errorAxiosInterface;
         console.log("[cliente ME] Inicion catch");
+        
         // Erro de codigo
         if(!err.isAxiosError){
             console.log(`[cliente ME] Erro interno do APP`);
             console.log(`[cliente ME] Menssagem Axios: `, err.message);
             console.log(`[cliente ME] Stack: `, err.stack);
-            return {nome: "", telefone: ""}
+            
+            throw new AppError("Erro interno na aplicação", "INTERNAL");
         }
+        // Erro do axios, api trata o erro
+        else if (err.isAxiosError){
+            const errorAxios = err as errorAxiosInterface
 
-        // Erro do axios
-        if(err.response){
-            console.log(`[cliente ME] Backend Respondeu`);
-            console.log(`[cliente ME] Status: `, err.response.status);
-            console.log(`[cliente ME] Detalhes do erro: `, JSON.stringify(err.response.data, null, 2));
+            console.log(`[cliente ME] Chamou backend`);
+            console.log(err);
+            console.log(`[cliente ME] Status: `, errorAxios.response.status);
+            console.log(`[cliente ME] Detalhes do erro: `, JSON.stringify(errorAxios.response.data, null, 2));
 
-            const dataErr = err.response?.data;
-            const {status} = err.response;
-
-            if(status >= 400 && status < 500) {
-                console.log("entrou no toast");
-                Toast.show({
-                    type: dataErr.status,
-                    text1: dataErr.message,
-                    // text2: "Mensagem de erro"
-                });
-            } else if(status >= 500) {
-                Toast.show({
-                    type: dataErr.status,
-                    text1: dataErr.message,
-                    text2: "Tente novamente mais tarde"
-                });
-            }
         }
         // Erro de rede
         else if(err.request){ 
             console.log(`[cliente ME] requisição saiu mas servidor não respondeu`);
             console.log(`[cliente ME] Menssagem Erro: `, err.message);
 
-            Toast.show({
-                type: "error",
-                text1: "Erro desconhecido",
-                text2: "Verifique sua conexão com a internet"
-            });
+            // Toast.show({
+            //     type: "error",
+            //     text1: "Erro desconhecido",
+            //     text2: "Verifique sua conexão com a internet"
+            // });
             
             console.log("Erro de conexão: ", err.message);
+            throw new NetworkError();
         }
         // Erro na configuração requisição
         else {
             console.log(`[cliente ME] Erro ao configurar requisição antes de enviar.`);
             console.log(`[cliente ME] Menssagem de erro: `, err.message);
+            throw new AppError("Erro interno na aplicação", "INTERNAL");
         }
 
         console.log(`[cliente ME] Fim catch \n`);
 
-        return {nome: "", telefone: ""};
+        // return {nome: "", telefone: ""};
+        throw new UnknownError();
     }
 }
 
@@ -218,20 +210,20 @@ export async function shoppingList(pagination: PaginationType = {page: 1, size: 
             if(status >= 400 && status < 500) {
                 console.error(dataErr.message);
             } else if(status >= 500) {
-                Toast.show({
-                    type: dataErr.status,
-                    text1: dataErr.message,
-                    text2: "Tente novamente mais tarde"
-                });
+                // Toast.show({
+                //     type: dataErr.status,
+                //     text1: dataErr.message,
+                //     text2: "Tente novamente mais tarde"
+                // });
             }
         }else{ 
-            Toast.show({
-                type: "error",
-                text1: "Erro desconhecido",
-                text2: "Verifique sua conexão com a internet"
-            });
+            // Toast.show({
+            //     type: "error",
+            //     text1: "Erro desconhecido",
+            //     text2: "Verifique sua conexão com a internet"
+            // });
             
-            console.log("Erro de conexão: ", err.message);
+            // console.log("Erro de conexão: ", err.message);
         }
 
         return {list: []};
@@ -264,18 +256,18 @@ export async function partnarSent(pagination: PaginationType = {page: 1, size: 1
             if(status >= 400 && status < 500) {
                 console.error(dataErr.message);
             } else if(status >= 500) {
-                Toast.show({
-                    type: dataErr.status,
-                    text1: dataErr.message,
-                    text2: "Tente novamente mais tarde"
-                });
+                // Toast.show({
+                //     type: dataErr.status,
+                //     text1: dataErr.message,
+                //     text2: "Tente novamente mais tarde"
+                // });
             }
         }else{ 
-            Toast.show({
-                type: "error",
-                text1: "Erro desconhecido",
-                text2: "Verifique sua conexão com a internet"
-            });
+            // Toast.show({
+            //     type: "error",
+            //     text1: "Erro desconhecido",
+            //     text2: "Verifique sua conexão com a internet"
+            // });
             
             console.log("Erro de conexão: ", err.message);
         }

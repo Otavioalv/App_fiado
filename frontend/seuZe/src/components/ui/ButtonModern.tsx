@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     outlineContainer: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: theme.colors.lightGray
+        borderColor: theme.colors.orange
     },
     textBase: {
         ...theme.typography.textLG,
@@ -75,6 +75,6 @@ const styles = StyleSheet.create({
         color: "white",
     },
     textOutline: {
-        color: theme.colors.darkGray,
+        color: theme.colors.orange,
     }
 });
