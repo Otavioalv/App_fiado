@@ -1,20 +1,24 @@
-import axios from 'axios';
-import { Alert } from 'react-native';
-import Toast from 'react-native-toast-message';
+import axios, { isAxiosError } from 'axios';
+import { NetworkError } from '../errors/NetworkError';
+import { UnknownError } from '../errors/UnknownError';
+import { UnauthorizedError } from '../errors/UnauthorizedError';
+import { ForbiddenError } from '../errors/ForbidenError';
+import { ServerError } from '../errors/ServerError';
+import { InternalError } from '../errors/InternalError';
 
 const baseURL: string = process.env.EXPO_PUBLIC_API_URL || "";
 
-Alert.alert("conexao da api Teste: ", baseURL);
-Alert.alert("Teste: ", process.env.EXPO_PUBLIC_TESTE);
+// Alert.alert("conexao da api Teste: ", baseURL);
+// Alert.alert("Teste: ", process.env.EXPO_PUBLIC_TESTE);
 
 let authToken: string | null = null;
-let logoutAction: () => void = () => {}; 
-let apiCnn: boolean = true;
+let logoutAction: () => void;
+let forbiddenAction: () => void;
 
 export const api = axios.create({
     baseURL,
-    timeout: 100000,
-    // headers: {"Content-Type": "application/json"}
+    timeout: 10000,
+    headers: {"Content-Type": "application/json"}
 });
 
 export const setAuthToken = (token: string | null) => {
@@ -25,9 +29,11 @@ export const registerLogoutAction = (fn: () => void) => {
     logoutAction = fn;
 }
 
-export const setApiCnn = (cnn: boolean) => {
-    apiCnn = cnn;
-};
+export const registerForbiddenAction = (fn: () => void) => {
+    forbiddenAction = fn;
+}
+
+
 
 // gancho q age de forma automatica a toda requisição
 api.interceptors.request.use(
@@ -41,6 +47,8 @@ api.interceptors.request.use(
             if(authToken) {
                 console.log(`[Interceptor] Token encontrado. Injetando...`);
                 config.headers.Authorization = `Bearer ${authToken}`;
+                // config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTE4LCJub21lIjoibm9tZSIsInVzdWFyaW8iOiJmb3JuZWNlZG9yIiwiaWF0IjoxNzY3MTI1MDgxfQ.jTfm2qlIWiUd-ba-ZGODNId7qbxZmwUHVi7VTCpmxro`;
+                config.headers.Authorization = `Bearer sdfsdafsdf`;
             } else {
                 console.log("[Interceptor] AVISO: Token é NULL/Vazio nesta requisição");
             }
@@ -61,60 +69,60 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    (error: unknown) => {
         console.log(`[Interceptor Response] Houve um erro...`);
+
+        if(isAxiosError(error)) {
+            if(error.response) {
+                const {status} = error.response;
+
+                console.log(`[Interceptor Response] Requisição enviada, mas o servidor retornou erro`);
+                console.log(`[Interceptor Response] Erro: `, JSON.stringify(error.response.data, null, "  "));
+                
+                console.log("\n");
+
+                switch(status){
+                    case 400:
+                    case 422:
+                        return Promise.reject(error);
+                    case 403: // 401
+                        logoutAction();
+                        return Promise.reject(new UnauthorizedError());
+                    case 401: // 403
+                        forbiddenAction();
+                        return Promise.reject(new ForbiddenError());
+                    default: 
+                        if(status >= 500)
+                            return Promise.reject(new ServerError());
+
+                        // Qualquer erro 4xx, (agr n tratar)
+                        return Promise.reject(new UnknownError());
+                }
+            } 
+            // Nenhuma resposta recebida do servidor
+            else if (error.request) {
+                console.log(`[Interceptor Response] Requisição enviada, mas serivdor não retornou resposta`);
+                console.log(`[Interceptor Response] Erro: `, error.request.code);
+                console.log(`[Interceptor Response] Cause: `, error.request.status);
+
+                console.log("\n");
+                /* ERR_NETWORK */
+
+                return Promise.reject(new NetworkError()); 
+            } 
+            // Configuração da requisição/codigo
+            else {
+                console.log(`[Interceptor Response] Erro de configuração ao enviar requisição, ou erro no codigo interno`);
+                console.log(`[Interceptor Response] Erro: `, error);
+                console.log("\n");
+                return Promise.reject(new InternalError());
+            }
+        }
         
-        // Erro de rede
-        if(!error?.response) {
-            console.log(`[Interceptor Response] Error sem resposta (timeout ou rede)...`);
-            console.log(`[Interceptor Response] Erro: `, error)
-
-            return Promise.reject(error); 
-        }
-
-        const status = error?.response.status;
-
-        console.log("[Interceptor Response] Status: ", status);
-
-        if(status === 401) {
-            console.log("[Interceptor Response] Token expirado ou invalido, Realizando logout");
-            logoutAction();
-        }
-
-        if(status === 403) {
-            console.log("[Interceptor Response] Acesso negado, token invalido ou não fornecido");
-           Toast.show({
-                type: "error",
-                text1: "Acesso negado",
-                text2: "Você não tem permissão para essa ação",
-           }); 
-        }
-
-        /* 
-    const dataErr = errorAxios.response?.data;
-                const {status} = errorAxios.response;
-    
-                if(status === 401)
-                    throw new UnauthorizedError();
-    
-                if(status >= 400 && status < 500) {
-                    // Toast.show({
-                    //     type: dataErr.status,
-                    //     text1: dataErr.message,
-                    //     // text2: "Mensagem de erro"
-                    // });
-                    throw new AppError(dataErr.message, "CLIENT");
-    
-                } else if(status >= 500) {
-                    // Toast.show({
-                    //     type: dataErr.status,
-                    //     text1: dataErr.message,
-                    //     text2: "Tente novamente mais tarde"
-                    // });
-                    throw new ServerError();
-                }    
-         */
-            
-        return Promise.reject(error);
+        // Erro do codigo
+        console.log(`[Interceptor Response] Erro em alguma parte do codigo`);
+        console.log(`[Interceptor Response] Erro: `, error);
+        console.log("\n");
+        return Promise.reject(new UnknownError());
     }
 );

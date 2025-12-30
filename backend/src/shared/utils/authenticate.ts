@@ -36,7 +36,7 @@ export const authorize = (user: "fornecedor" | "cliente") => {
             
             done();   
         } catch (e) {
-            res.status(401).send(errorResponse(ResponseApi.Auth.FORBIDDEN, e))
+            res.status(403).send(errorResponse(ResponseApi.Auth.FORBIDDEN, e))
         }
     };
 }

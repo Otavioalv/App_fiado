@@ -1,9 +1,9 @@
-export type ErroTypes = "NETWORK" | "UNAUTHORIZED" | "SERVER" | "UNKNOWN" | "INTERNAL" | "CLIENT";
+export type ErroTypes = "NETWORK" | "UNAUTHORIZED" | "SERVER" | "UNKNOWN" | "INTERNAL" | "CLIENT" | "FORBIDDEN";
 
 export class AppError extends Error {
     constructor(
         message: string,
-        public types: ErroTypes,
+        public type: ErroTypes,
         public status?: number
     ){
         super(message);

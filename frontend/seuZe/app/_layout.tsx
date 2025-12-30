@@ -1,5 +1,5 @@
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 // import { StatusBar } from "expo-status-bar";
 import {SystemBars} from "react-native-edge-to-edge";
@@ -11,6 +11,7 @@ import { UserType } from "@/src/types/userType";
 import { SplashScreenController } from "@/src/components/common/SplashScreenController";
 import { useEffect } from "react";
 import { NetworkProvider, useNetwork } from "@/src/context/networkContext";
+import { registerForbiddenAction } from "@/src/services/api";
 
 
 export default function RootLayout() {
@@ -49,10 +50,15 @@ export default function RootLayout() {
 // Seguindo documentação, muda automaticamente pra tela, ao loga, ou ao abri o app se tiver logado
 function RootNavigator() {
   const {session, userType, isLoading} = useSession();
+  const router = useRouter();
 
   useEffect(() => {
-    Alert.alert("Teste: ", `session: ${session}\n\nuserType: ${userType}`)
-  }, [session, userType]);
+    registerForbiddenAction(() => router.replace("/forbidden"));
+  }, [router]);
+  
+  // useEffect(() => {
+  //   Alert.alert("Teste: ", `session: ${session}\n\nuserType: ${userType}`)
+  // }, [session, userType]);
 
   if(isLoading) return null;
 

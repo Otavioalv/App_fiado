@@ -1,16 +1,8 @@
-import { Alert } from "react-native";
 import { DefaultRegisterSchema } from "../schemas/DefaultRegisterSchema";
 import { LoginSchema } from "../schemas/LoginSchema";
 import { api } from "./api";
-import { errorAxiosInterface, responseAxiosInterfaces } from "./typesApi";
-
-import Toast from "react-native-toast-message";
+import { responseAxiosInterfaces } from "./typesApi";
 import { DefaultUserDataType, PaginationResponseType, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData } from "../types/responseServiceTypes";
-import { AppError } from "../errors/AppError";
-import { NetworkError } from "../errors/NetworkError";
-import { UnauthorizedError } from "../errors/UnauthorizedError";
-import { ServerError } from "../errors/ServerError";
-import { UnknownError } from "../errors/UnknownError";
 
 
 const defaultEndPoint:string = "/cliente"
@@ -20,55 +12,10 @@ export async function login(userData: LoginSchema): Promise<string | null>{
         console.log("CLIENTE");
         
         const endPoint = defaultEndPoint + "/login"
-        
-        Alert.alert("login cliente endpoint: ", endPoint);
-
         const response = await api.post(endPoint, userData) as responseAxiosInterfaces<{token: string}>;
-
-        console.log("RESPOSTA: ", response.data.data);
-
-        Toast.show({
-            type: "success",
-            text1: "Bem-vindo(a)!",
-            text2: "Login realizado com sucesso"
-        });
-
-        console.log(response.data.data);
         return response.data.data!.token;
     }catch(error){
-        const err = error as errorAxiosInterface
-
-        if(err.response){
-            const dataErr = err.response?.data;
-            const {status} = err.response
-
-            console.log("houve um erro: ", JSON.stringify(dataErr, null, 2));
-            
-            
-            if(status >= 400 && status < 500) {
-                Toast.show({
-                    type: "error",
-                    text1: "Erro ao efetuar login",
-                    text2: dataErr.message
-                });
-            } else if(status >= 500) {
-                Toast.show({
-                    type: dataErr.status,
-                    text1: dataErr.message,
-                    text2: "Tente novamente mais tarde"
-                });
-            }
-        }else{ 
-            Toast.show({
-                type: "error",
-                text1: "Erro desconhecido",
-                text2: "Verifique sua conexão com a internet"
-            });
-
-            console.log("Erro de conexão: ", err.message);
-        }
-
-        return null;
+        throw error;
     }
 }
 
@@ -82,46 +29,8 @@ export async function register(userData: DefaultRegisterSchema) {
 
         console.log("RESPOSTA: ", response.data);
 
-        Toast.show({
-            type: "success",
-            text1: "Bem-vindo(a)!",
-            text2: "Login realizado com sucesso (fazer login automatico)"
-        });
-
     }catch(error){
-        const err = error as errorAxiosInterface
-
-        if(err.response){
-            const dataErr = err.response?.data;
-            const {status} = err.response;
-
-            console.log("houve um erro: ", JSON.stringify(dataErr, null, 2));
-            console.log(status);
-
-
-
-            if(status >= 400 && status < 500) {
-                Toast.show({
-                    type: dataErr.status,
-                    text1: dataErr.message,
-                    // text2: "Mensagem de erro"
-                })
-            } else if(status >= 500) {
-                Toast.show({
-                    type: dataErr.status,
-                    text1: dataErr.message,
-                    text2: "Tente novamente mais tarde"
-                })
-            }
-        }else{ 
-            Toast.show({
-                type: "error",
-                text1: "Erro desconhecido",
-                text2: "Verifique sua conexão com a internet"
-            });
-            
-            console.log("Erro de conexão: ", err.message);
-        }
+        throw error
     }
 }   
 
@@ -129,56 +38,13 @@ export async function register(userData: DefaultRegisterSchema) {
 export async function me(): Promise<DefaultUserDataType>{
     try {
         const endPoint = defaultEndPoint + "/me";
+        
         // await api.get("/user/delay_test/20000");
         const response = await api.post(endPoint) as responseAxiosInterfaces<DefaultUserDataType>;
+        
         return response.data.data!;
     }catch(err:any){
-        // const err = error as errorAxiosInterface;
-        console.log("[cliente ME] Inicion catch");
-        
-        // Erro de codigo
-        if(!err.isAxiosError){
-            console.log(`[cliente ME] Erro interno do APP`);
-            console.log(`[cliente ME] Menssagem Axios: `, err.message);
-            console.log(`[cliente ME] Stack: `, err.stack);
-            
-            throw new AppError("Erro interno na aplicação", "INTERNAL");
-        }
-        // Erro do axios, api trata o erro
-        else if (err.isAxiosError){
-            const errorAxios = err as errorAxiosInterface
-
-            console.log(`[cliente ME] Chamou backend`);
-            console.log(err);
-            console.log(`[cliente ME] Status: `, errorAxios.response.status);
-            console.log(`[cliente ME] Detalhes do erro: `, JSON.stringify(errorAxios.response.data, null, 2));
-
-        }
-        // Erro de rede
-        else if(err.request){ 
-            console.log(`[cliente ME] requisição saiu mas servidor não respondeu`);
-            console.log(`[cliente ME] Menssagem Erro: `, err.message);
-
-            // Toast.show({
-            //     type: "error",
-            //     text1: "Erro desconhecido",
-            //     text2: "Verifique sua conexão com a internet"
-            // });
-            
-            console.log("Erro de conexão: ", err.message);
-            throw new NetworkError();
-        }
-        // Erro na configuração requisição
-        else {
-            console.log(`[cliente ME] Erro ao configurar requisição antes de enviar.`);
-            console.log(`[cliente ME] Menssagem de erro: `, err.message);
-            throw new AppError("Erro interno na aplicação", "INTERNAL");
-        }
-
-        console.log(`[cliente ME] Fim catch \n`);
-
-        // return {nome: "", telefone: ""};
-        throw new UnknownError();
+        throw err
     }
 }
 
@@ -193,40 +59,9 @@ export async function shoppingList(pagination: PaginationType = {page: 1, size: 
                 ...pagination
             }
         }) as responseAxiosInterfaces<{list: ShoppingData[]} & PaginationResponseType>;
-
-        // console.log(JSON.stringify(response.data?.data, null, 2));
-        
         return response.data.data!;
-    }catch(error){
-        const err = error as errorAxiosInterface;
-        
-        if(err.response){
-            const dataErr = err.response?.data;
-            const {status} = err.response;
-            
-            console.error("houve um erro: ", JSON.stringify(dataErr, null, 2));
-            console.log(status);
-
-            if(status >= 400 && status < 500) {
-                console.error(dataErr.message);
-            } else if(status >= 500) {
-                // Toast.show({
-                //     type: dataErr.status,
-                //     text1: dataErr.message,
-                //     text2: "Tente novamente mais tarde"
-                // });
-            }
-        }else{ 
-            // Toast.show({
-            //     type: "error",
-            //     text1: "Erro desconhecido",
-            //     text2: "Verifique sua conexão com a internet"
-            // });
-            
-            // console.log("Erro de conexão: ", err.message);
-        }
-
-        return {list: []};
+    }catch(err:any){
+        throw err
     }
 }
 
@@ -239,39 +74,8 @@ export async function partnarSent(pagination: PaginationType = {page: 1, size: 1
                 ...pagination
             }
         }) as responseAxiosInterfaces<{list: PartnerFornecedorType[]} & PaginationResponseType>;
-
-        // console.log(JSON.stringify(response.data?.data, null, 2));
-        
         return response.data.data!;
-    }catch(error){
-        const err = error as errorAxiosInterface;
-        
-        if(err.response){
-            const dataErr = err.response?.data;
-            const {status} = err.response;
-            
-            console.error("houve um erro: ", JSON.stringify(dataErr, null, 2));
-            console.log(status);
-
-            if(status >= 400 && status < 500) {
-                console.error(dataErr.message);
-            } else if(status >= 500) {
-                // Toast.show({
-                //     type: dataErr.status,
-                //     text1: dataErr.message,
-                //     text2: "Tente novamente mais tarde"
-                // });
-            }
-        }else{ 
-            // Toast.show({
-            //     type: "error",
-            //     text1: "Erro desconhecido",
-            //     text2: "Verifique sua conexão com a internet"
-            // });
-            
-            console.log("Erro de conexão: ", err.message);
-        }
-
-        return {list: []};
+    }catch(err:any){
+        throw err
     }
 }

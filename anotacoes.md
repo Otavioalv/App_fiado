@@ -7,25 +7,27 @@
 const { session } = useSession();
 * ```
     useEffect(() => {
-    if (!session) return;
+        if (!session) return;
 
-    fetchShoppingList();
-    }, [session]);
-    fazer teste: o erro deve acontecer prq o token n carregou, api sem header, contexto ainda em defined. Muito provavel
-    remover calback depois disso, e testar, editar na parte de token, nao ali
+        fetchShoppingList();
+        }, [session]);
+        
+        
+        fazer teste: o erro deve acontecer prq o token n carregou, api sem header, contexto ainda em defined. Muito provavel
+        remover calback depois disso, e testar, editar na parte de token, nao ali
 
-    fazer isso nas chamadas ()
-    try {
-    setLoading(true);
-    await fetchShoppingList();
-    } finally {
-    setLoading(false);
+        fazer isso nas chamadas ()
+        try {
+            setLoading(true);
+            await fetchShoppingList();
+        } finally {
+            setLoading(false);
     }```
 
 
 - [ ] remover textNeutral, definir cor fonte global
 
-- [ ] api ta com problema, trava, quando dou varias requisições seguidas, testar local
+- [x] api ta com problema, trava, quando dou varias requisições seguidas, testar local
 
 - [ ] acontece uns travamentos na api, talvez o problema seja prq esqueci () depois de release nos models (client?.release();). verificar cada model e testar
 
@@ -40,6 +42,8 @@ const { session } = useSession();
 - [x] corrigir problema visual tabbar
 
 - [ ] Adicionar estado de erro em flatlists
+
+- [ ] Definir variaveis globais corretamente
 
 # Anotações
 ## Banco de dados (POSTGRES)

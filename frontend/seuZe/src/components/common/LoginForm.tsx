@@ -31,7 +31,7 @@ export default function LoginForm({ title }:LoginFormProps) {
         const token = await loginCliente(data);
         if(token) {
             signIn(token, "cliente");
-            Alert.alert("TESTE: ", "token salvo na memoria privada");
+            // Alert.alert("TESTE: ", "token salvo na memoria privada");
         }
 
         setIsLoading(false);
@@ -42,9 +42,9 @@ export default function LoginForm({ title }:LoginFormProps) {
         
         const token = await loginFornecedor(data);
         if(token){ 
-            Alert.alert("TESTE", "Salvando token na memoria");
+            // Alert.alert("TESTE", "Salvando token na memoria");
             signIn(token, "fornecedor");
-            Alert.alert("TESTE: ", "token salvo na memoria privada");
+            // Alert.alert("TESTE: ", "token salvo na memoria privada");
         }
 
         setIsLoading(false);
