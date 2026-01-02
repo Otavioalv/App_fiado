@@ -1,13 +1,24 @@
-import { Text, View } from "react-native";
-
+import FeedbackError from "@/src/components/common/FeedbackError";
+import MyScreenContainer from "@/src/components/common/MyScreenContainer";
+import { useSession } from "@/src/context/authContext";
+import { useRouter } from "expo-router";
 
 export default function Forbidden() {
-    console.log("==============================================");
+    const router = useRouter();
+    const { signOut } = useSession();
+    
+    const bttAction = () => {
+        signOut();
+        router.replace("/(auth)/login")
+    }
+
+
     return (
-        <View>
-            <Text>
-                Forbidden page
-            </Text>
-        </View>
+        <MyScreenContainer>
+            <FeedbackError
+                errorType="FORBIDDEN"
+                onAction={bttAction}
+            />
+        </MyScreenContainer>
     );
 }

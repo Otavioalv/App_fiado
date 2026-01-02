@@ -77,3 +77,5 @@ export type ResultsWithPagination<T> = {
    list: T,
    pagination?: PaginationType
 }
+
+export type ErrorTypes = "NETWORK" | "UNAUTHORIZED" | "SERVER" | "UNKNOWN" | "INTERNAL" | "CLIENT" | "FORBIDDEN";

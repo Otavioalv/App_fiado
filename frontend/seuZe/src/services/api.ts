@@ -1,10 +1,5 @@
 import axios, { isAxiosError } from 'axios';
-import { NetworkError } from '../errors/NetworkError';
-import { UnknownError } from '../errors/UnknownError';
-import { UnauthorizedError } from '../errors/UnauthorizedError';
-import { ForbiddenError } from '../errors/ForbidenError';
-import { ServerError } from '../errors/ServerError';
-import { InternalError } from '../errors/InternalError';
+import { NetworkError, UnknownError, UnauthorizedError, ForbiddenError, ServerError, InternalError } from '../errors/AppError';
 
 const baseURL: string = process.env.EXPO_PUBLIC_API_URL || "";
 
@@ -14,6 +9,7 @@ const baseURL: string = process.env.EXPO_PUBLIC_API_URL || "";
 let authToken: string | null = null;
 let logoutAction: () => void;
 let forbiddenAction: () => void;
+let serverErrorAction: () => void;
 
 export const api = axios.create({
     baseURL,
@@ -33,12 +29,26 @@ export const registerForbiddenAction = (fn: () => void) => {
     forbiddenAction = fn;
 }
 
+export const registerServerErrorAction = (fn: () => void) => {
+    serverErrorAction = fn;
+}
+
 
 
 // gancho q age de forma automatica a toda requisição
 api.interceptors.request.use(
     async (config) => {
         try {
+            // const fakeError = {
+            //     isAxiosError: true,
+            //     response: {
+            //         status: 500, // <--- O NÚMERO MÁGICO
+            //         data: { message: "Simulação de explosão no servidor" }
+            //     }
+            // };
+
+            // throw fakeError;
+
             console.log("[Interceptor] Preparando requisição...");
             // Coleta url
             const fullUrl = config.baseURL ? config.baseURL + config.url : config.url;
@@ -48,7 +58,7 @@ api.interceptors.request.use(
                 console.log(`[Interceptor] Token encontrado. Injetando...`);
                 config.headers.Authorization = `Bearer ${authToken}`;
                 // config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTE4LCJub21lIjoibm9tZSIsInVzdWFyaW8iOiJmb3JuZWNlZG9yIiwiaWF0IjoxNzY3MTI1MDgxfQ.jTfm2qlIWiUd-ba-ZGODNId7qbxZmwUHVi7VTCpmxro`;
-                config.headers.Authorization = `Bearer sdfsdafsdf`;
+                // config.headers.Authorization = `Bearer sdfsdafsdf`;
             } else {
                 console.log("[Interceptor] AVISO: Token é NULL/Vazio nesta requisição");
             }
@@ -78,6 +88,7 @@ api.interceptors.response.use(
 
                 console.log(`[Interceptor Response] Requisição enviada, mas o servidor retornou erro`);
                 console.log(`[Interceptor Response] Erro: `, JSON.stringify(error.response.data, null, "  "));
+                console.log(`[Interceptor Response] Status: `, status)
                 
                 console.log("\n");
 
@@ -85,15 +96,17 @@ api.interceptors.response.use(
                     case 400:
                     case 422:
                         return Promise.reject(error);
-                    case 403: // 401
+                    case 401: // 401
                         logoutAction();
                         return Promise.reject(new UnauthorizedError());
-                    case 401: // 403
+                    case 403: // 403
                         forbiddenAction();
                         return Promise.reject(new ForbiddenError());
                     default: 
-                        if(status >= 500)
+                        if(status >= 500) {
+                            // serverErrorAction()
                             return Promise.reject(new ServerError());
+                        }
 
                         // Qualquer erro 4xx, (agr n tratar)
                         return Promise.reject(new UnknownError());

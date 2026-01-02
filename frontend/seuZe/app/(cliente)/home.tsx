@@ -1,20 +1,18 @@
 import EmptyState from "@/src/components/common/EmptyState";
+import FeedbackError from "@/src/components/common/FeedbackError";
 import LastActivities, { InfoType } from "@/src/components/common/LastActivities";
 import MyScreenContainer from "@/src/components/common/MyScreenContainer";
-import NetworkOff from "@/src/components/common/NetworkOff";
 import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShortcuts";
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
-import Loading from "@/src/components/ui/Loading";
 import { AppError } from "@/src/errors/AppError";
 import { me, partnarSent, shoppingList } from "@/src/services/clienteService";
 import { theme } from "@/src/theme";
-import { DefaultUserDataType, PaginationType } from "@/src/types/responseServiceTypes";
+import { DefaultUserDataType, ErrorTypes, PaginationType } from "@/src/types/responseServiceTypes";
 import {Feather, FontAwesome} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, RefreshControl, ScrollView } from "react-native";
-import Toast from "react-native-toast-message";
 
 
 export default function Home() {
@@ -30,7 +28,9 @@ export default function Home() {
     const [lastPartnerLoad, setLastPartnerLoad] = useState<boolean>(true);
 
     const [refreshing, setRefreshing] = useState<boolean>(false);
-    const [isErrorNetwork, setIsErrorNetWork] = useState<boolean>(false);
+
+    const [errorType, setErrorType] = useState<ErrorTypes | null>(null);
+
 
     const router = useRouter();
     
@@ -132,7 +132,6 @@ export default function Home() {
             }
 
             const result = await partnarSent(pagination);
-            // console.log(JSON.stringify(result, null, "  "));
 
             if(result.list.length) {
                 const infoData:InfoType[] = result.list.map((r, i) => {
@@ -160,7 +159,7 @@ export default function Home() {
 
     const loadData = useCallback(async () => {
         try {
-            setIsErrorNetWork(false);
+            setErrorType(null);
             setRefreshing(true);
 
             // Fazer requsições pararem quando uma der erro;
@@ -176,13 +175,12 @@ export default function Home() {
                 console.log("[Load Data] Erro: ", message);
                 console.log("[Load Data] Type: ", type);
                 console.log("\n");
-                
-                if(type === "NETWORK")
-                    setIsErrorNetWork(true);
 
+                setErrorType(type);
             }
             else {
                 console.log("[Load Data] Erro Desconhecido: ", err, "\n");
+                setErrorType("UNKNOWN");
             }
         }  finally {
             setRefreshing(false);
@@ -190,22 +188,23 @@ export default function Home() {
     }, [fetchMe, fetchShoppingList, fetchPartnerSent]);
 
 
-    // const onRefresh = async () => {
-    //     setRefreshing(true);
-        
-    //     try {
-    //         await loadData();
-    //     } catch(err) {
-    //         console.log("ERRO: ", err);
-    //     }finally {
-    //         setRefreshing(false);
-    //     }
-    // }
-
-
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+
+    if(errorType) {
+        return (
+            <MyScreenContainer>
+                <FeedbackError
+                    errorType={errorType}
+                    onAction={() => loadData()}
+                />
+            </MyScreenContainer>
+        )
+    }
+    
+    
 
     return (
         <ScrollView
@@ -220,76 +219,62 @@ export default function Home() {
                 />
             }   
         >
-            {/* <Loading visible={isLoading}/> */}
-            {isErrorNetwork ? (
-                <MyScreenContainer>
-                    <NetworkOff
-                        buttonAction={{
-                            label: "Tentar Novamente",
-                            onPress: loadData
-                        }}
-                    />
-                </MyScreenContainer>
-            ) : (
-                <>
-                    <UserHeader 
-                        nome={userData.nome} 
-                        apelido={userData.apelido}
-                        isLoading={meLoad}
-                    />
-                    <MyScreenContainer>
-                        
-                        <SectionContainer title="Atalhos Rápidos">
-                            <QuickShortcuts shortcuts={shortcuts}/>
-                        </SectionContainer>
+            <UserHeader 
+                nome={userData.nome} 
+                apelido={userData.apelido}
+                isLoading={meLoad}
+            />
+            <MyScreenContainer>
+                
+                <SectionContainer title="Atalhos Rápidos">
+                    <QuickShortcuts shortcuts={shortcuts}/>
+                </SectionContainer>
 
-                        <SectionContainer title="Últimas Atividades">
-                            <LastActivities 
-                                title={"Últimas Compras"} 
-                                infos={lastPuschases} 
-                                // infos={[]} 
-                                isLoading={purchaceLoad}
-                                emptyStateComponent={
-                                    <EmptyState
-                                        title={"Você ainda não fez compras"}
-                                        description={"Suas compras aparecerão aqui quando vocẽ coletar um produto."}
-                                        iconName={"package"}
-                                        primaryAction={{
-                                            label: "Ver Produtos",
-                                            onPress: () => router.push("/(cliente)/produtos")
-                                        }}
-                                        secondaryAction={{
-                                            label: "Explorar Fornecedores",
-                                            onPress: () => router.push("/(cliente)/fornecedores")
-                                        }}
-                                    />
-                                }
+                <SectionContainer title="Últimas Atividades">
+                    <LastActivities 
+                        title={"Últimas Compras"} 
+                        infos={lastPuschases} 
+                        // infos={[]} 
+                        isLoading={purchaceLoad}
+                        emptyStateComponent={
+                            <EmptyState
+                                title={"Você ainda não fez compras"}
+                                description={"Suas compras aparecerão aqui quando vocẽ coletar um produto."}
+                                iconName={"package"}
+                                primaryAction={{
+                                    label: "Ver Produtos",
+                                    onPress: () => router.push("/(cliente)/produtos")
+                                }}
+                                secondaryAction={{
+                                    label: "Explorar Fornecedores",
+                                    onPress: () => router.push("/(cliente)/fornecedores")
+                                }}
                             />
-                            <LastActivities 
-                                title={"Últimas parcerias pendentes"} 
-                                infos={lastPartnerSent} 
-                                // infos={[]} 
-                                isLoading={lastPartnerLoad}
-                                emptyStateComponent={
-                                    <EmptyState
-                                        title={"Você não tem parcerias pendentes"}
-                                        description={"Suas parcerias pendentes aparecerão aqui quando você solicitar uma parceria."}
-                                        iconName={"truck"}
-                                        primaryAction={{
-                                            label: "Fornecedores",
-                                            onPress: () => router.push("/(cliente)/fornecedores")
-                                        }}
-                                        secondaryAction={{
-                                            label: "Explorar Compras",
-                                            onPress: () => router.push("/(cliente)/compras")
-                                        }}
-                                    />
-                                }
+                        }
+                    />
+                    <LastActivities 
+                        title={"Últimas parcerias pendentes"} 
+                        infos={lastPartnerSent} 
+                        // infos={[]} 
+                        isLoading={lastPartnerLoad}
+                        emptyStateComponent={
+                            <EmptyState
+                                title={"Você não tem parcerias pendentes"}
+                                description={"Suas parcerias pendentes aparecerão aqui quando você solicitar uma parceria."}
+                                iconName={"truck"}
+                                primaryAction={{
+                                    label: "Fornecedores",
+                                    onPress: () => router.push("/(cliente)/fornecedores")
+                                }}
+                                secondaryAction={{
+                                    label: "Explorar Compras",
+                                    onPress: () => router.push("/(cliente)/compras")
+                                }}
                             />
-                        </SectionContainer>
-                    </MyScreenContainer>
-                </>
-            )}
+                        }
+                    />
+                </SectionContainer>
+            </MyScreenContainer>
         </ScrollView>
     );
 }
