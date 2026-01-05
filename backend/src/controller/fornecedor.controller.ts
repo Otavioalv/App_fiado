@@ -65,7 +65,7 @@ class FornecedorController extends UserController{
             const hashedPass:string = await this.fornecedorModel.getPasswordUsingUser(datasLogin.nome);
             
             if(!await this.validateDatasUser.comparePassword(hashedPass, datasLogin.senha)) {
-                return res.status(401).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
+                return res.status(404).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
             }
 
             const token:string = await this.generateTokenUser(datasLogin);

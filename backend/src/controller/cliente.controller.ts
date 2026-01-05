@@ -55,13 +55,13 @@ class ClienteController extends UserController{
             }
 
             if(!await this.clienteModel.userExists(datasLogin.nome)) {
-                return res.status(400).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
+                return res.status(404).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
             }
 
             const hashedPass: string = await this.clienteModel.getPasswordUsingUser(datasLogin.nome);
 
             if(!await this.validateDatasUser.comparePassword(hashedPass, datasLogin.senha)){
-                return res.status(401).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
+                return res.status(404).send(errorResponse(ResponseApi.Auth.INVALID_CREDENTIALS));
             }
 
             const token: string = await this.generateTokenUser(datasLogin);

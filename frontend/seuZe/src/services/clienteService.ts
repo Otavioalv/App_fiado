@@ -15,6 +15,8 @@ export async function login(userData: LoginSchema): Promise<string | null>{
         const response = await api.post(endPoint, userData) as responseAxiosInterfaces<{token: string}>;
         return response.data.data!.token;
     }catch(error){
+        console.log("ERRO NO LOGIN AQUI ================");
+
         throw error;
     }
 }

@@ -11,6 +11,8 @@ import {login as loginFornecedor} from "@/src/services/fornecedorService";
 import { useState } from "react";
 import Loading from "../ui/Loading";
 import { useSession } from "@/src/context/authContext";
+import { AppError } from "@/src/errors/AppError";
+import Toast from "react-native-toast-message";
 
 export type LoginFormProps = {
     title: string
@@ -27,27 +29,65 @@ export default function LoginForm({ title }:LoginFormProps) {
 
     const onSubmitCliente = async (data: LoginSchema) => {
         setIsLoading(true);
-        
-        const token = await loginCliente(data);
-        if(token) {
-            signIn(token, "cliente");
-            // Alert.alert("TESTE: ", "token salvo na memoria privada");
+        try {
+            const token = await loginCliente(data);
+            if(token) {
+                signIn(token, "cliente");
+                // Alert.alert("TESTE: ", "token salvo na memoria privada");
+            }
+        }catch(err){
+            if(err instanceof AppError){
+                const {message, type} = err;
+                console.log("[LOGIN COMPRADOR] Erro: ", message);
+                console.log("[LOGIN COMPRADOR] Type: ", type);
+                console.log("\n");
+
+                Toast.show({
+                    type: "error",
+                    text1: "Nome de usuário ou senha incorreto!",
+                    text2: "Por favor tente novamente"
+
+                })
+                
+            }else {
+                console.log("[Load Data] Erro Desconhecido: ", err, "\n");
+            }
+        }finally{
+            setIsLoading(false);
         }
 
-        setIsLoading(false);
     }
 
     const onSubmitFornecedor = async (data: LoginSchema) => {
         setIsLoading(true);
-        
-        const token = await loginFornecedor(data);
-        if(token){ 
-            // Alert.alert("TESTE", "Salvando token na memoria");
-            signIn(token, "fornecedor");
-            // Alert.alert("TESTE: ", "token salvo na memoria privada");
+        // EDITAR
+        try {
+            const token = await loginFornecedor(data);
+            if(token){ 
+                signIn(token, "fornecedor");
+            }
+        }catch(err) {
+            if(err instanceof AppError){
+                const {message, type} = err;
+                console.log("[LOGIN FORNECEDOR] Erro: ", message);
+                console.log("[LOGIN FORNECEDOR] Type: ", type);
+                console.log("\n");
+
+                Toast.show({
+                    type: "error",
+                    text1: "Nome de usuário ou senha incorreto!",
+                    text2: "Por favor tente novamente"
+
+                })
+                
+            }else {
+                console.log("[Load Data] Erro Desconhecido: ", err, "\n");
+            }
+        }finally {
+            setIsLoading(false);
         }
 
-        setIsLoading(false);
+        
     }
 
     // secureTextEntry
