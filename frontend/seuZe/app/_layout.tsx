@@ -47,7 +47,7 @@ export default function RootLayout() {
 }
 
 
-// Seguindo documentação, muda automaticamente pra tela, ao loga, ou ao abri o app se tiver logado
+// Seguindo documentação, muda automaticamente pra tela, ao logar, ou ao abrir o app se tiver logado
 function RootNavigator() {
   const {session, userType, isLoading} = useSession();
   const router = useRouter();
@@ -55,14 +55,9 @@ function RootNavigator() {
   useEffect(() => {
     registerForbiddenAction(() => router.replace("/forbidden"));
   }, [router]);
-  
-  // useEffect(() => {
-  //   Alert.alert("Teste: ", `session: ${session}\n\nuserType: ${userType}`)
-  // }, [session, userType]);
 
   if(isLoading) return null;
 
-  // signOut();
   return (
     <Stack 
       screenOptions={{

@@ -70,7 +70,7 @@ class ClienteController extends UserController{
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));   
         }
     }
-
+    
      public async listAll(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             const {...filterOpt} = req.query as queryFilter;

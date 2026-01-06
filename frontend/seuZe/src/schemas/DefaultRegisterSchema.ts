@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import validator from "validator";
 
 export const defaultRegisterSchema = z.object({
     nome: z
@@ -10,7 +11,8 @@ export const defaultRegisterSchema = z.object({
         .string({message: "Campo obrigatório"})
         .nonempty({message: "Campo obrigatório"})
         .min(10, "Telefone inválido")
-        .max(15, "Telefone inválido"),
+        .max(15, "Telefone inválido")
+        .refine(tel => validator.isMobilePhone(tel, "pt-BR"), {message: "Telefone inválido"}),
     apelido: z
         .string()
         .min(2, {message: "Apelido muito curto"})

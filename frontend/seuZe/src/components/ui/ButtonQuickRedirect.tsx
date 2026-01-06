@@ -26,11 +26,11 @@ export function ButtonQuickRedirect({title, icon, ...rest}: ButtonQuickRedirectP
 
     return (
         <Pressable 
-                style={styles.button}
-                onPressIn={() => animationBtt(1)}
-                onPressOut={() => animationBtt(0)}
-                {...rest}
-            >
+            style={styles.button}
+            onPressIn={() => animationBtt(1)}
+            onPressOut={() => animationBtt(0)}
+            {...rest}
+        >
             <Animated.View style={[styles.container, {backgroundColor: backGroundColorBtt}]}>
                 {icon && (
                     <View style={styles.iconContainer}>

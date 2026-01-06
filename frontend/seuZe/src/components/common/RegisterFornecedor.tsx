@@ -6,22 +6,57 @@ import Button from "../ui/Button";
 import { Controller, useForm } from "react-hook-form";
 import { fornecedorRegisterSchema, FornecedorRegisterSchema } from "@/src/schemas/FornecedorRegisterSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { register } from "@/src/services/fornecedorService";
+import { login, register } from "@/src/services/fornecedorService";
 import Loading from "../ui/Loading";
 import { useState } from "react";
+import { AppError } from "@/src/errors/AppError";
+import Toast from "react-native-toast-message";
+import { useSession } from "@/src/context/authContext";
+import { LoginSchema } from "@/src/schemas/LoginSchema";
 
 export default function RegisterFornecedor() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    
+    const {signIn} = useSession();
+
     const {control, handleSubmit} = useForm<FornecedorRegisterSchema>({
         resolver: zodResolver(fornecedorRegisterSchema),
     })
 
     const onSubmit = async (data: FornecedorRegisterSchema) => {
-        // console.log('dados enviados: ', data);
-        setIsLoading(true);
-        await register(data);
-        setIsLoading(false);
+        try{
+            setIsLoading(true);
+            if(await register(data)){
+                Toast.show({
+                    type: "success",
+                    text1: "Usuário cadastrado com sucesso",
+                    text2: "Realizando login"
+                });
+
+                const loginData: LoginSchema = {nome: data.nome, senha: data.senha};
+                const token = await login(loginData);
+                
+                if(token) {
+                    signIn(token, "fornecedor");
+                }
+            }
+        }catch(err) {
+            if(err instanceof AppError){
+                const {message} = err;
+                Toast.show({
+                    type: "error",
+                    text1: message,
+                    text2: "Por favor tente novamente"
+                });
+            }else {
+                Toast.show({
+                    type: "error",
+                    text1: "Recurso não encontrado",
+                    text2: "Por favor tente novamente"
+                });
+            }
+        }finally {
+            setIsLoading(false);
+        }
     }
 
     return (

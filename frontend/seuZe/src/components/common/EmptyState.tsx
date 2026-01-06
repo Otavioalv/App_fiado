@@ -3,7 +3,7 @@ import FeedbackTemplate, { FeedbackTemplateProps } from "./FeedbackTemplate";
 export default function EmptyState({iconName, ...props}: FeedbackTemplateProps) {
     return (
         <FeedbackTemplate
-            iconName={"truck"}
+            iconName={iconName}
             {...props}
         />
     );

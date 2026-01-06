@@ -51,10 +51,10 @@ export default function LastActivities({title, infos, isLoading, emptyStateCompo
                 <FlatList
                     data={infos}
                     keyExtractor={(item) => item.id}
-                    initialNumToRender={3}
-                    windowSize={3}
+                    initialNumToRender={5}
+                    windowSize={10}
                     horizontal={true}
-                    maxToRenderPerBatch={3}
+                    maxToRenderPerBatch={10}
                     contentContainerStyle={styles.listContainer}
                     renderItem={renderItem}
                 />

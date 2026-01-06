@@ -187,7 +187,13 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                     f.cep,
                     f.uf,
                     COALESCE(cf.cliente_check, FALSE) AS cliente_check,
-                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
+                    CASE 
+                        WHEN cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE THEN 'ACCEPTED'
+                        WHEN cf.cliente_check = TRUE THEN 'SENT'
+                        WHEN cf.fornecedor_check = TRUE THEN 'RECEIVED'
+                        ELSE 'NONE'
+                    END as relationship_status
                 FROM 
                     fornecedor AS f
                 LEFT JOIN 

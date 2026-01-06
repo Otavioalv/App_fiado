@@ -37,13 +37,21 @@ const { session } = useSession();
  
 - [X] colocar id no flatlist, pre
 
-- [ ] Adicionar refreshControl em flatlists
+- [x] Adicionar refreshControl em flatlists
 
 - [x] corrigir problema visual tabbar
 
-- [ ] Adicionar estado de erro em flatlists
+- [x] Adicionar estado de erro em flatlists
 
-- [ ] Definir variaveis globais corretamente
+- [x] Definir variaveis globais corretamente
+
+- [x] Igualar verificação de numero de telefone em cadastro
+
+- [x] No list-sent retorna a data, no listAll nao retorna (cliente)
+
+- [x] Fazer api retornar status de relacionamento
+
+- [ ] Adiiconar relationship_status onde necessario em API
 
 # Anotações
 ## Banco de dados (POSTGRES)

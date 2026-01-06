@@ -7,7 +7,6 @@ import { ClienteController } from "../controller/cliente.controller";
 import { NotificationController } from "../controller/notification.controller";
 
 
-
 export const fornecedorRouter = async (router: FastifyInstance, options: FastifyPluginOptions) => {
     
     const fornecedorController:FornecedorController = new FornecedorController();

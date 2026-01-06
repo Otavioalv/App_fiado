@@ -8,7 +8,7 @@ import { UserHeader } from "@/src/components/common/UserHeader";
 import { AppError } from "@/src/errors/AppError";
 import { me, partnarSent, shoppingList } from "@/src/services/clienteService";
 import { theme } from "@/src/theme";
-import { DefaultUserDataType, ErrorTypes, PaginationType } from "@/src/types/responseServiceTypes";
+import { ClienteDataType, ErrorTypes, PaginationType } from "@/src/types/responseServiceTypes";
 import {Feather, FontAwesome} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -17,9 +17,8 @@ import { Alert, RefreshControl, ScrollView } from "react-native";
 
 export default function Home() {
     
-    const [userData, setUserData] = useState<DefaultUserDataType>({nome: "", telefone: ""});
+    const [userData, setUserData] = useState<ClienteDataType>({nome: "", telefone: "", id_cliente: 0});
     const [meLoad, setMeLoad] = useState<boolean>(true);
-    
     
     const [lastPuschases, setLastPuschases] = useState<InfoType[]>([]);
     const [purchaceLoad, setPurchaceLoad] = useState<boolean>(true);
@@ -79,7 +78,7 @@ export default function Home() {
     const fetchMe = useCallback(async () => {
         try {
             setMeLoad(true);
-            const result:DefaultUserDataType = await me();   
+            const result:ClienteDataType = await me();   
             setUserData(result);
         }catch(err: any) {
             throw err;
@@ -204,8 +203,6 @@ export default function Home() {
         )
     }
     
-    
-
     return (
         <ScrollView
             contentContainerStyle={{flexGrow: 1}}
@@ -224,8 +221,8 @@ export default function Home() {
                 apelido={userData.apelido}
                 isLoading={meLoad}
             />
-            <MyScreenContainer>
-                
+
+            <MyScreenContainer>    
                 <SectionContainer title="Atalhos Rápidos">
                     <QuickShortcuts shortcuts={shortcuts}/>
                 </SectionContainer>
@@ -233,8 +230,8 @@ export default function Home() {
                 <SectionContainer title="Últimas Atividades">
                     <LastActivities 
                         title={"Últimas Compras"} 
-                        infos={lastPuschases} 
-                        // infos={[]} 
+                        // infos={lastPuschases} 
+                        infos={[]} 
                         isLoading={purchaceLoad}
                         emptyStateComponent={
                             <EmptyState

@@ -1,13 +1,8 @@
- 
-export type DefaultUserDataType = {
+interface DefaultUserDataType {
     nome: string, 
     telefone: string,
-
     apelido?: string
-    id_cliente?: number, 
- }
-
-
+}
 
 export type PaginationType = {
    page: number,
@@ -68,14 +63,25 @@ export type PaginationResponseType = {
    pagination?: PaginationType
 }
 
-export type PartnerDefaultType = DefaultUserDataType & PartnerStatusType;
+export type ClienteDataType = DefaultUserDataType & {id_cliente: number}
+export type FornecedorDataType = DefaultUserDataType & AddressDataType & {id_fornecedor: number};
 
-export type PartnerClienteType = PartnerDefaultType;
-export type PartnerFornecedorType = PartnerDefaultType & AddressDataType;
+
+export type PartnerClienteType = ClienteDataType & PartnerStatusType;
+export type PartnerFornecedorType = FornecedorDataType & PartnerStatusType;
 
 export type ResultsWithPagination<T> = {
    list: T,
    pagination?: PaginationType
 }
 
-export type ErrorTypes = "NETWORK" | "UNAUTHORIZED" | "SERVER" | "UNKNOWN" | "INTERNAL" | "CLIENT" | "FORBIDDEN";
+export type ErrorTypes = 
+   "NETWORK" | 
+   "UNAUTHORIZED" | 
+   "SERVER" | 
+   "UNKNOWN" | 
+   "INTERNAL" | 
+   "CLIENT" | 
+   "FORBIDDEN" |
+   "NOTFOUND" |
+   "BADREQUEST";

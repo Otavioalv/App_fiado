@@ -5,14 +5,8 @@ import { theme } from "@/src/theme";
 
 export default function ClienteLayout() {
     return (
-        // <Stack 
-        //     screenOptions={{
-        //         headerShown: false,
-        //         animation: 'none'
-        //     }} 
-        //     initialRouteName="home"
-        // />
         <Tabs
+            initialRouteName="fornecedores" 
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: theme.colors.orange,

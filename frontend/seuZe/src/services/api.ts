@@ -1,5 +1,5 @@
 import axios, { isAxiosError } from 'axios';
-import { NetworkError, UnknownError, UnauthorizedError, ForbiddenError, ServerError, InternalError } from '../errors/AppError';
+import { NetworkError, UnknownError, UnauthorizedError, ForbiddenError, ServerError, InternalError, NotFoundError, BadRequestError } from '../errors/AppError';
 
 const baseURL: string = process.env.EXPO_PUBLIC_API_URL || "";
 
@@ -9,7 +9,6 @@ const baseURL: string = process.env.EXPO_PUBLIC_API_URL || "";
 let authToken: string | null = null;
 let logoutAction: () => void;
 let forbiddenAction: () => void;
-let serverErrorAction: () => void;
 
 export const api = axios.create({
     baseURL,
@@ -29,9 +28,7 @@ export const registerForbiddenAction = (fn: () => void) => {
     forbiddenAction = fn;
 }
 
-export const registerServerErrorAction = (fn: () => void) => {
-    serverErrorAction = fn;
-}
+
 
 
 
@@ -85,6 +82,7 @@ api.interceptors.response.use(
         if(isAxiosError(error)) {
             if(error.response) {
                 const {status} = error.response;
+                const msg:string|undefined = error.response.data?.message;
 
                 console.log(`[Interceptor Response] Requisição enviada, mas o servidor retornou erro`);
                 console.log(`[Interceptor Response] Erro: `, JSON.stringify(error.response.data, null, "  "));
@@ -94,14 +92,16 @@ api.interceptors.response.use(
 
                 switch(status){
                     case 400:
-                    case 422:
-                        return Promise.reject(error);
-                    case 401: // 401
+                    case 422: // Editar, pode retornar erro
+                        return Promise.reject(new BadRequestError(msg, status));
+                    case 401:
                         logoutAction();
                         return Promise.reject(new UnauthorizedError());
-                    case 403: // 403
+                    case 403:
                         forbiddenAction();
                         return Promise.reject(new ForbiddenError());
+                    case 404: 
+                        return Promise.reject(new NotFoundError(msg));
                     default: 
                         if(status >= 500) {
                             // serverErrorAction()

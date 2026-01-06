@@ -47,3 +47,18 @@ export class UnknownError extends AppError {
         super("Erro desconhecido", "UNKNOWN");
     }
 }
+
+export class NotFoundError extends AppError {
+    constructor(message?: string) {
+        super(message ?? "Recurso não encontrado", "NOTFOUND", 404);
+    }
+}
+
+export class BadRequestError extends AppError {
+    constructor(
+        message: string = "Algum parâmetro está incorreto", 
+        status:number = 400
+    ) {
+        super(message, "BADREQUEST", status);
+    }
+}

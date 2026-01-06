@@ -1,7 +1,8 @@
 import { StyleSheet, View, Text} from "react-native";
 import {Feather} from "@expo/vector-icons";
 import { theme } from "@/src/theme";
-import ButtonModern from "../ui/ButtonModern";
+import { ButtonModern } from "../ui/ButtonModern";
+
 
 export interface ActionButtonProps {
     label: string;
@@ -30,7 +31,7 @@ export default function FeedbackTemplate({description, iconName, title, primaryA
             {(primaryAction || secondaryAction) && (
                 <View style={styles.buttonContainer}>
                     {primaryAction && (
-                        <ButtonModern 
+                        <ButtonModern
                             placeholder={primaryAction.label} 
                             onPress={primaryAction.onPress}
                         />

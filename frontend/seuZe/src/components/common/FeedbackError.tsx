@@ -55,7 +55,19 @@ const errorConfig:FeedBackErrorconfigType = {
         title: "Algo deu errado",
         description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde",
         buttonText: "Voltar ao Início",
-    }
+    },
+    NOTFOUND: {
+        iconName: "meh",
+        title: "Algo deu errado",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde",
+        buttonText: "Voltar ao Início",
+    },
+    BADREQUEST: {
+        iconName: "meh",
+        title: "Algo deu errado",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde",
+        buttonText: "Voltar ao Início",
+    },
 }
 
 

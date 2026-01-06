@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, View } from "react-native";
+import {  StyleSheet, Text, View } from "react-native";
 import InputForm from "@/src/components/ui/InputForm";
 import Button from "@/src/components/ui/Button";
 import { useRouter } from "expo-router";
@@ -27,40 +27,37 @@ export default function LoginForm({ title }:LoginFormProps) {
         resolver: zodResolver(loginSchema)
     });
 
+    // Login cliente
     const onSubmitCliente = async (data: LoginSchema) => {
         setIsLoading(true);
         try {
             const token = await loginCliente(data);
             if(token) {
                 signIn(token, "cliente");
-                // Alert.alert("TESTE: ", "token salvo na memoria privada");
             }
         }catch(err){
             if(err instanceof AppError){
-                const {message, type} = err;
-                console.log("[LOGIN COMPRADOR] Erro: ", message);
-                console.log("[LOGIN COMPRADOR] Type: ", type);
-                console.log("\n");
-
+                const {message} = err;
                 Toast.show({
                     type: "error",
-                    text1: "Nome de usuário ou senha incorreto!",
+                    text1: message,
                     text2: "Por favor tente novamente"
-
                 })
-                
             }else {
-                console.log("[Load Data] Erro Desconhecido: ", err, "\n");
+                Toast.show({
+                    type: "error",
+                    text1: "Recurso não encontrado",
+                    text2: "Por favor tente novamente"
+                });
             }
         }finally{
             setIsLoading(false);
         }
-
     }
 
+    // Login fornecedor
     const onSubmitFornecedor = async (data: LoginSchema) => {
         setIsLoading(true);
-        // EDITAR
         try {
             const token = await loginFornecedor(data);
             if(token){ 
@@ -68,26 +65,22 @@ export default function LoginForm({ title }:LoginFormProps) {
             }
         }catch(err) {
             if(err instanceof AppError){
-                const {message, type} = err;
-                console.log("[LOGIN FORNECEDOR] Erro: ", message);
-                console.log("[LOGIN FORNECEDOR] Type: ", type);
-                console.log("\n");
-
+                const {message} = err;
                 Toast.show({
                     type: "error",
-                    text1: "Nome de usuário ou senha incorreto!",
+                    text1: message,
                     text2: "Por favor tente novamente"
-
                 })
-                
             }else {
-                console.log("[Load Data] Erro Desconhecido: ", err, "\n");
+                Toast.show({
+                    type: "error",
+                    text1: "Recurso não encontrado",
+                    text2: "Por favor tente novamente"
+                })
             }
         }finally {
             setIsLoading(false);
         }
-
-        
     }
 
     // secureTextEntry

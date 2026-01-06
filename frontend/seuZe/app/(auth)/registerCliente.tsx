@@ -2,8 +2,6 @@ import RegisterCliente from "@/src/components/common/RegisterCliente";
 import MyScreenContainer from "@/src/components/common/MyScreenContainer";
 import LogoG from "@/src/components/common/LogoG";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-// import LogoG from "@/components/common/LogoG";
-
 
 export default function Register() {
 

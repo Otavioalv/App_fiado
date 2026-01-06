@@ -8,19 +8,56 @@ import { defaultRegisterSchema, DefaultRegisterSchema } from "@/src/schemas/Defa
 import { zodResolver } from '@hookform/resolvers/zod'
 import Loading from "../ui/Loading";
 import { useState } from "react";
-import { register } from "@/src/services/clienteService";
+import { login, register } from "@/src/services/clienteService";
+import { AppError } from "@/src/errors/AppError";
+import Toast from "react-native-toast-message";
+import { LoginSchema } from "@/src/schemas/LoginSchema";
+import { useSession } from "@/src/context/authContext";
 
 export default function RegisterCliente() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const {signIn} = useSession();
 
     const {control, handleSubmit} = useForm<DefaultRegisterSchema>({
         resolver: zodResolver(defaultRegisterSchema)
     });
 
     const onSubmit = async (data: DefaultRegisterSchema) => {
-        setIsLoading(true);
-        await register(data);
-        setIsLoading(false);
+        try {
+            setIsLoading(true);
+            if(await register(data)) {
+                Toast.show({
+                    type: "success",
+                    text1: "Usuário cadastrado com sucesso",
+                    text2: "Realizando login"
+                })
+
+                const loginData: LoginSchema = {nome: data.nome, senha: data.senha}
+                const token = await login(loginData);
+                
+                if(token) {
+                    signIn(token, "cliente");
+                }
+            }
+        }catch(err) {    
+            if(err instanceof AppError){
+                const {message} = err;
+                // console.log("aaaaaaaaaaaaaaaAAAAAAAAAAAA");
+                Toast.show({
+                    type: "error",
+                    text1: message,
+                    text2: "Por favor tente novamente"
+                })
+            }else {
+                Toast.show({
+                    type: "error",
+                    text1: "Recurso não encontrado",
+                    text2: "Por favor tente novamente"
+                });
+            }
+        }finally {
+            setIsLoading(false);
+        }
     }
 
     return (
