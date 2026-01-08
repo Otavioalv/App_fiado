@@ -1,4 +1,4 @@
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { AppState, AppStateStatus, KeyboardAvoidingView, Platform } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 // import { StatusBar } from "expo-status-bar";
@@ -10,37 +10,44 @@ import { SessionProvider, useSession } from "@/src/context/authContext";
 import { UserType } from "@/src/types/userType";
 import { SplashScreenController } from "@/src/components/common/SplashScreenController";
 import { useEffect } from "react";
-import { NetworkProvider, useNetwork } from "@/src/context/networkContext";
 import { registerForbiddenAction } from "@/src/services/api";
+import { focusManager, onlineManager, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
+const client = new QueryClient({
+  queryCache: new QueryCache(), // verificar config
+})
 
 export default function RootLayout() {
+
   return (
     /* const colorScheme = useColorScheme(); / colorScheme === 'dark' ? MyDarkTheme : MyDefaultTheme */
     <ThemeProvider value={MyDefaultTheme}>
       {/* Autenticação */}
       <SessionProvider>
-        <NetworkProvider>
+          {/* Verificar a ordem disso */}
+          <QueryClientProvider client={client}>
 
-          <SafeAreaProvider>
-            <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
-              
-              <SplashScreenController/>
-              
-              <KeyboardAvoidingView
-                style={{ flex: 1}}
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
-              >
-                <RootNavigator/>
-                {/* <StatusBar style="dark"/>    */}
-                <SystemBars style={"dark"}/>
+            <SafeAreaProvider>
+              <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
                 
-              </KeyboardAvoidingView>
-              <Toast/>
-            </SafeAreaView>
-          </SafeAreaProvider>
-          
-        </NetworkProvider>
+                <SplashScreenController/>
+                
+                <KeyboardAvoidingView
+                  style={{ flex: 1}}
+                  behavior={Platform.OS === "ios" ? "padding" : undefined}
+                >
+                  <RootNavigator/>
+                  {/* <StatusBar style="dark"/>    */}
+                  <SystemBars style={"dark"}/>
+                  
+                </KeyboardAvoidingView>
+                <Toast/>
+              </SafeAreaView>
+            </SafeAreaProvider>
+
+        </QueryClientProvider>
+
       </SessionProvider>
     </ThemeProvider>
   );
@@ -52,6 +59,28 @@ function RootNavigator() {
   const {session, userType, isLoading} = useSession();
   const router = useRouter();
 
+
+  const onFocusRefetch = (status: AppStateStatus) => {
+    focusManager.setFocused(status === "active");
+  }
+
+  // Faz o react query verificar a rede
+  useEffect(() => {
+    onlineManager.setEventListener((setOnline) => {
+      return NetInfo.addEventListener((state) => {
+        setOnline(!!state.isConnected);
+      })
+    })}, 
+  []);
+
+  // Verifica status da aplicação
+  useEffect(() => {
+    const subscriber = AppState.addEventListener("change", onFocusRefetch);
+    
+    return () => subscriber.remove();
+  }, []);
+
+  // Se o usuario por algum acaso logar com token de outro tipo de usuario
   useEffect(() => {
     registerForbiddenAction(() => router.replace("/forbidden"));
   }, [router]);

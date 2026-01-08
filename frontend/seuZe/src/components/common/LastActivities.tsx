@@ -18,7 +18,12 @@ export default function LastActivities({title, infos, isLoading, emptyStateCompo
     const renderItem = useCallback(
         ({item}: {item: InfoType}) => (
             <View style={styles.cardContainer}>
-                <MemoBasicInfoCard title={item.title} info={item.info}/>
+                
+                <MemoBasicInfoCard 
+                    title={item.title} 
+                    info={item.info}
+                />
+                
             </View>
         ),
         []

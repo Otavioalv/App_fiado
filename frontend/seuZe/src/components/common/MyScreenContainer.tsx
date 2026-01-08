@@ -18,11 +18,11 @@ const style = StyleSheet.create({
         backgroundColor: MyDefaultTheme.colors.background,
         // backgroundColor: "red",
         // height: "100%",
-        alignItems: "center",
         flex: 1,
+        // width: "100%",
+        alignItems: "center",
         gap: theme.gap.xs,
         paddingHorizontal: theme.padding.md,
         paddingVertical: theme.padding.lg,
-        // paddingBottom: theme.padding.md
     }
 })

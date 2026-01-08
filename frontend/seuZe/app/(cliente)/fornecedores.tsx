@@ -1,54 +1,154 @@
-import MyScreenContainer from "@/src/components/common/MyScreenContainer";
-import { UserCard } from "@/src/components/common/UserCard";
+ import { ListUsers, ListUsersType } from "@/src/components/common/ListUsers";
 import { listAllFornecedores } from "@/src/services/clienteService";
-import { theme } from "@/src/theme";
-import { useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { PaginationType } from "@/src/types/responseServiceTypes";
+import { useRef, useState } from "react";
 
+
+const defaultPagination: PaginationType = {
+    page: 1, 
+    size: 20
+}
 
 export default function Fornecedores() {
     const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    
+    const [listUsers, setListUsers] = useState<ListUsersType[]>([]);
+    
+    // Pagination
+    const [myPagination, setMyPagination] = useState<PaginationType>(defaultPagination);
 
-    const loadData = async () => {
-        setRefreshing(true);
+    const isLoading = useRef<boolean>(false);
+
+    const loadInitialData = async () => {
+        if(isLoading.current) return;
+        
+        isLoading.current = true;
+        setLoading(true);
+
         try{
-            console.log("carregado...");
-            // const result = await listAllFornecedores();
+            setListUsers([]);
+            setHasMore(true);
 
+            const result = await listAllFornecedores(defaultPagination);
+            const {list, pagination} = result;
+            
+            setMyPagination((prev) => ({
+                ...prev,
+                page: pagination.page + 1, 
+                filter: pagination?.filter,
+                filterList: pagination?.filterList,
+                search: pagination?.search,
+                total: pagination?.total,
+                totalPages: pagination?.totalPages,
+            }));
+            
+            const listData:ListUsersType[] = list.map((u) => {
+                const description: string = `${u.nome}, ${u.uf}`;
 
-            // console.log(result);
+                return {
+                    title: u.nomeestabelecimento,
+                    description: description,
+                    id: u.id_fornecedor.toString(),
+                    relationshipType: u.relationship_status ?? "NONE"
+                }
+            });
+
+            setListUsers(listData);
         }catch(err) {
             console.log(err);
-        }finally {
-            setRefreshing(false);
+        } finally {
+            isLoading.current = false;
+            setLoading(false);
         }
     }
 
-    return(
-        <ScrollView
-            contentContainerStyle={{flexGrow: 1}}
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    tintColor={theme.colors.orange}
-                    onRefresh={loadData}
-                    colors={[theme.colors.orange]}
-                    progressBackgroundColor={"#FFFFFF"}
-                />
+
+    const loadMoreData = async () => {
+        if(isLoading.current || !hasMore) {console.log("Carregando"); return};
+        if(isLoading.current) return; // requisição em andamento
+        if(!hasMore) return; // acabou dados
+        setLoading(true);
+
+        try{
+            isLoading.current = true;
+
+            console.log("carregado...");
+
+            const result = await listAllFornecedores(myPagination);
+            // console.log(JSON.stringify(result, null, "  "));
+
+            const {list, pagination} = result;
+            
+            // Editar depois
+            setMyPagination((prev) => ({
+                ...prev,
+                page: pagination.page + 1, 
+                filter: pagination?.filter,
+                filterList: pagination?.filterList,
+                search: pagination?.search,
+                total: pagination?.total,
+                totalPages: pagination?.totalPages,
+            }));
+
+            if(list.length > 0) {
+                const {size} = myPagination;
+
+                const listData:ListUsersType[] = list.map((u) => {
+                    const description: string = `${u.nome}, ${u.uf}`;
+
+                    console.log(u.id_fornecedor,  pagination.total, listUsers.length, pagination.totalPages);
+
+                    return {
+                        title: u.nomeestabelecimento,
+                        description: description,
+                        id: u.id_fornecedor.toString(),
+                        relationshipType: u.relationship_status ?? "NONE"
+                    }
+                });
+
+                setListUsers(prev => [...prev, ...listData]);
+
+
+                if(list.length < size) 
+                    setHasMore(false);
+            } else {
+                setHasMore(false);
             }
-        >
-            <MyScreenContainer>
-                <View 
-                    style={{
-                        // backgroundColor: "blue", 
-                        flex: 1, 
-                        width: "100%",
-                        gap: 10
-                    }}
-                >   
-                    <UserCard title="Mercearia do joao" description="joao souza, AM"/>
-                </View>
-            </MyScreenContainer>
-        </ScrollView>
-    )
+        }catch(err) {
+            console.log(err);
+        }finally {
+
+
+            isLoading.current = false;
+
+
+
+            setLoading(false);
+        }
+    }
+
+    const handleEndReached = async() => {
+        if(hasMore)
+            await loadMoreData();
+    }
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await loadInitialData();
+        setRefreshing(false);
+    }
+
+    return(
+        <ListUsers
+            data={listUsers}
+            
+            // Refresh
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+            // Carregar mais dados
+            onEndReached={handleEndReached}
+        />
+    );
 }

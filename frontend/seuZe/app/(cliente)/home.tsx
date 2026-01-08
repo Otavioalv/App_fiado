@@ -230,8 +230,8 @@ export default function Home() {
                 <SectionContainer title="Últimas Atividades">
                     <LastActivities 
                         title={"Últimas Compras"} 
-                        // infos={lastPuschases} 
-                        infos={[]} 
+                        infos={lastPuschases} 
+                        // infos={[]} 
                         isLoading={purchaceLoad}
                         emptyStateComponent={
                             <EmptyState

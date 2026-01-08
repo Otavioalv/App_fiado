@@ -12,8 +12,8 @@ export type PaginationType = {
 	filter?: string,
 	
    filterList?: string|number[],
-	total?: string,
-	totalPages?: string,
+	total?: number,
+	totalPages?: number,
 }
 
 export type ShoppingData =  {
@@ -53,10 +53,13 @@ export type AddressDataType = {
    uf: string,
 }
 
-export type PartnerStatusType = {
+export type RelationshipStatusType = "ACCEPTED" | "SENT" | "RECEIVED" | "NONE";
+
+export interface PartnerStatusType {
    cliente_check: boolean,
    fornecedor_check: boolean,
    created_at: string,
+   relationship_status?: RelationshipStatusType,
 }
 
 export type PaginationResponseType = {
@@ -66,13 +69,12 @@ export type PaginationResponseType = {
 export type ClienteDataType = DefaultUserDataType & {id_cliente: number}
 export type FornecedorDataType = DefaultUserDataType & AddressDataType & {id_fornecedor: number};
 
-
 export type PartnerClienteType = ClienteDataType & PartnerStatusType;
 export type PartnerFornecedorType = FornecedorDataType & PartnerStatusType;
 
-export type ResultsWithPagination<T> = {
+export interface ResultsWithPagination<T> {
    list: T,
-   pagination?: PaginationType
+   pagination: PaginationType
 }
 
 export type ErrorTypes = 
@@ -85,3 +87,5 @@ export type ErrorTypes =
    "FORBIDDEN" |
    "NOTFOUND" |
    "BADREQUEST";
+
+export type AppDefaultSizes = "S" | "M" | "L";

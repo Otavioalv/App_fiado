@@ -1,11 +1,10 @@
 import { theme } from "@/src/theme";
+import { AppDefaultSizes } from "@/src/types/responseServiceTypes";
 import { Feather } from "@expo/vector-icons";
 import { useRef } from "react";
 import { Animated, Pressable, PressableProps, StyleSheet, Text,  TextStyle,  ViewStyle } from "react-native";
 
 type ButtonVariant = "primary" | "outline" | "disabled";
-type ButtonSize = "S" | "M" | "L";
-
 interface ComponentsStyles {
     container: ViewStyle,
     text: TextStyle,
@@ -13,13 +12,13 @@ interface ComponentsStyles {
 }
 
 type VariantStyle = Record<ButtonVariant, ComponentsStyles>;
-type SizeStyle = Record<ButtonSize, ComponentsStyles>;
+type SizeStyle = Record<AppDefaultSizes, ComponentsStyles>;
 
 export interface ButtonProps extends PressableProps {
     placeholder: string;
     style?: ViewStyle;
     variant?: ButtonVariant;
-    size?: ButtonSize; 
+    size?: AppDefaultSizes; 
     iconName?: keyof typeof Feather.glyphMap;
 };
 
@@ -76,6 +75,7 @@ export function ButtonModern({placeholder, variant = "primary", size = "L",style
 
     return (
         <Animated.View 
+            // key={variant} // Se der erro em produção, colocar isso
             style={[
                 styles.baseContainer,
                 currentVariant.container, 

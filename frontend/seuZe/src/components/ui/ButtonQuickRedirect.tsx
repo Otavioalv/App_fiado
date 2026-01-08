@@ -52,19 +52,11 @@ export const MemoButtonQuickRedirect = memo(ButtonQuickRedirect);
 const styles = StyleSheet.create({
     button: {   
         flex: 1,
-        // backgroundColor: "#ffffaa",
         borderRadius: theme.radius.sm,
         overflow: "hidden",
         backgroundColor: "#ffffff",
-
-        // ios
-        shadowColor: "#000000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 6,
-
-        // android
-        elevation: 2
+        borderWidth: 1,
+        borderColor: theme.colors.pseudoLightGray,
     },
     container: {
         flex: 1,
