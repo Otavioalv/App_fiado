@@ -1,5 +1,5 @@
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { MemoUserCard, UserCardProps } from "./UserCard";
+import { MemoUserCard, MemoUserCardSkeleton, UserCardProps } from "./UserCard";
 import { useCallback } from "react";
 import { theme } from "@/src/theme";
 
@@ -10,10 +10,11 @@ export interface ListUsersProps {
     data: ListUsersType[],
     onRefresh: () => void,
     refreshing: boolean,
+    isFetchingNextPage: boolean,
     onEndReached: () => void, 
 }
 
-export function ListUsers({data, onRefresh, refreshing, onEndReached}: ListUsersProps) {
+export function ListUsers({data, onRefresh, refreshing, onEndReached, isFetchingNextPage}: ListUsersProps) {
     
     const renderItem = useCallback(
         ({item}: {item: UserCardProps}) => (
@@ -26,6 +27,18 @@ export function ListUsers({data, onRefresh, refreshing, onEndReached}: ListUsers
             </View>
         ),
         []
+    );
+
+    const renderFooter = useCallback(
+        () => {
+            if(!isFetchingNextPage) return null;
+            return (
+                <View>
+                    <MemoUserCardSkeleton/>
+                </View>
+            );
+        },
+        [isFetchingNextPage]
     );
 
     return (
@@ -51,15 +64,30 @@ export function ListUsers({data, onRefresh, refreshing, onEndReached}: ListUsers
             
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
-
-            /* 
-                ListFooterComponent={renderFooter}
-                
-                // Mostra o spinner lá embaixo
-                ListFooterComponent={renderFooter}
-            */
+            ListFooterComponent={renderFooter}
         />
     );
+}
+
+export function ListUsersSkeleton() {
+    const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+
+    const renderItem = useCallback(() => (
+        <View>
+            <MemoUserCardSkeleton/>
+        </View>
+    ), []);
+
+    return (
+        <FlatList
+            data={data}
+            keyExtractor={(item) => item.toString()}
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+            renderItem={renderItem}
+        />
+    )
 }
 
 

@@ -1,15 +1,16 @@
 import { MyDefaultTheme } from "@/src/constants/theme";
 import { theme } from "@/src/theme";
 import { PropsWithChildren } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { SpacingScreenContainer } from "../ui/SpacingScreenContainer";
 
 export default function MyScreenContainer({children}: PropsWithChildren) {
     return (
-        <View
+        <SpacingScreenContainer
             style={style.container}
         >
             {children}
-        </View>
+        </SpacingScreenContainer>
     )
 }
 
@@ -22,7 +23,5 @@ const style = StyleSheet.create({
         // width: "100%",
         alignItems: "center",
         gap: theme.gap.xs,
-        paddingHorizontal: theme.padding.md,
-        paddingVertical: theme.padding.lg,
     }
 })

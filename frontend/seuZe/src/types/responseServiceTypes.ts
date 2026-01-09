@@ -4,12 +4,14 @@ interface DefaultUserDataType {
     apelido?: string
 }
 
-export type PaginationType = {
+export interface FilterType {
+   search?: string,
+   filter?: string
+}
+
+export type PaginationType = FilterType & {
    page: number,
 	size: number,
-	
-   search?: string,
-	filter?: string,
 	
    filterList?: string|number[],
 	total?: number,
@@ -63,7 +65,7 @@ export interface PartnerStatusType {
 }
 
 export type PaginationResponseType = {
-   pagination?: PaginationType
+   pagination: PaginationType
 }
 
 export type ClienteDataType = DefaultUserDataType & {id_cliente: number}

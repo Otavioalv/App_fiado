@@ -15,7 +15,13 @@ import { focusManager, onlineManager, QueryCache, QueryClient, QueryClientProvid
 import NetInfo from "@react-native-community/netinfo";
 
 const client = new QueryClient({
-  queryCache: new QueryCache(), // verificar config
+  // queryCache: new QueryCache(), // verificar config
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  }
 })
 
 export default function RootLayout() {

@@ -1,8 +1,9 @@
+import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
 import { AppDefaultSizes } from "@/src/types/responseServiceTypes";
 import { Feather } from "@expo/vector-icons";
 import { useRef } from "react";
-import { Animated, Pressable, PressableProps, StyleSheet, Text,  TextStyle,  ViewStyle } from "react-native";
+import { Animated, Pressable, PressableProps, StyleSheet, Text,  TextStyle,  View,  ViewStyle } from "react-native";
 
 type ButtonVariant = "primary" | "outline" | "disabled";
 interface ComponentsStyles {
@@ -113,10 +114,29 @@ export function ButtonModern({placeholder, variant = "primary", size = "L",style
     )
 }
 
+type ButtonModernSkeletonProps = {size: AppDefaultSizes};
+export function ButtonModernSkeleton({size}: ButtonModernSkeletonProps) {
+    const anmOpacity = useAnimationOpacitySkeleton();
+
+    const sizeStyle: Record<AppDefaultSizes, number> = {
+        S: 25,
+        M: 35,
+        L: 50,
+    }
+
+    const currentSize = sizeStyle[size];
+
+    return (
+        <Animated.View style={[{height: currentSize}, anmOpacity, styles.baseContainer]}/>
+    );
+
+}
+
 const styles = StyleSheet.create({
     baseContainer: {
         overflow: "hidden",
         borderRadius: theme.radius.sm,
+        flex: 1
     },
 
     // estilo botao
@@ -188,3 +208,4 @@ const styles = StyleSheet.create({
     }
     
 });
+

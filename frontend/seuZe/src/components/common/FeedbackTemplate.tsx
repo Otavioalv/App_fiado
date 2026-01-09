@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         gap: theme.gap.md,
         // backgroundColor: "red",
-        // flex: 1,
+        flex: 1,
         // width: "100%"
     },
     icon: {

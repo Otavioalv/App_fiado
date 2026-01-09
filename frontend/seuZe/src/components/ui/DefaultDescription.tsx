@@ -1,7 +1,7 @@
+import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
 import { AppDefaultSizes } from "@/src/types/responseServiceTypes";
-import { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, ViewStyle, TextStyle, Animated } from "react-native";
+import { View, Text, StyleSheet, TextStyle, Animated } from "react-native";
 
 
 export interface DefaultDescriptionProps {
@@ -55,26 +55,7 @@ export function DefaultDescription({text1, text2, size}: DefaultDescriptionProps
 
 type DefaultDescriptionSkeletonProps = {size: AppDefaultSizes}
 export function DefaultDescriptionSkeleton({size}: DefaultDescriptionSkeletonProps) {
-    const anmOpacity = useRef(new Animated.Value(.5)).current;
-    
-    useEffect(() => {
-        const animation = Animated.loop(
-            Animated.sequence([
-                Animated.timing(anmOpacity, {
-                    toValue: 1,
-                    duration: 800,
-                    useNativeDriver: true
-                }),
-                Animated.timing(anmOpacity, {
-                    toValue: .5,
-                    duration: 800,
-                    useNativeDriver: true
-                })
-            ])
-        );
-
-        animation.start();
-    }, [anmOpacity])
+    const anmOpacity = useAnimationOpacitySkeleton();
 
     const sizeStyle: Record<AppDefaultSizes, number> = {
         S: 10, 
@@ -87,8 +68,8 @@ export function DefaultDescriptionSkeleton({size}: DefaultDescriptionSkeletonPro
 
     return(
         <View style={styles.containerSkeleton}>
-            <Animated.View style={[styles.text1Skeleton, {opacity: anmOpacity, height: currentSize}]}/>
-            <Animated.View style={[styles.text2Skeleton, {opacity: anmOpacity, height: currentSize}]}/>
+            <Animated.View style={[styles.text1Skeleton, anmOpacity, {height: currentSize}]}/>
+            <Animated.View style={[styles.text2Skeleton, anmOpacity, {height: currentSize}]}/>
         </View>
     );
 }
@@ -122,7 +103,6 @@ const styles = StyleSheet.create({
     text1Skeleton: {
         // height: 15, 
         width: "40%", 
-        backgroundColor: theme.colors.pseudoLightGray, 
         borderRadius: 1000
     },
 
@@ -142,7 +122,6 @@ const styles = StyleSheet.create({
     text2Skeleton: {
         // height: 15, 
         width: "60%", 
-        backgroundColor: theme.colors.pseudoLightGray, 
         borderRadius: 1000
     }
 });

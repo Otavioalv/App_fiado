@@ -1,8 +1,9 @@
 import {RelationshipStatusType} from "@/src/types/responseServiceTypes"
 import { DefaultCard } from "../ui/DefaultCard";
-import { DefaultDescription } from "../ui/DefaultDescription";
-import { RelationshipActions } from "../ui/RelationshipActions";
+import { DefaultDescription, DefaultDescriptionSkeleton } from "../ui/DefaultDescription";
+import { RelationshipActions, RelationshipActionsSkeleton } from "../ui/RelationshipActions";
 import { memo } from "react";
+import { ButtonModernSkeleton } from "../ui/ButtonModern";
 
 export interface UserCardProps {
     title: string, 
@@ -23,4 +24,14 @@ export function UserCard({description, title, relationshipType}: UserCardProps) 
     );
 }
 
+export function UserCardSkeleton() {
+    return (
+        <DefaultCard>
+            <DefaultDescriptionSkeleton size="M"/>
+            <RelationshipActionsSkeleton/>
+        </DefaultCard>
+    )
+}
+
 export const MemoUserCard = memo(UserCard);
+export const MemoUserCardSkeleton = memo(UserCardSkeleton);

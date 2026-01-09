@@ -1,11 +1,12 @@
 import { RelationshipStatusType } from "@/src/types/responseServiceTypes";
 import { StyleSheet, View } from "react-native";
-import { ButtonModern } from "./ButtonModern";
+import { ButtonModern, ButtonModernSkeleton } from "./ButtonModern";
 import { theme } from "@/src/theme";
 
 type RelationshipActionsProps = {
     type: RelationshipStatusType
 }
+
 export function RelationshipActions({type}: RelationshipActionsProps) {
     return (
         <View 
@@ -31,6 +32,20 @@ export function RelationshipActions({type}: RelationshipActionsProps) {
             {type === "SENT"  && (
                 <ButtonModern placeholder="Aguardando Aprovação" size="M" variant="disabled"/>
             )}
+        </View>
+    );
+}
+
+export function RelationshipActionsSkeleton() {
+    return (
+        <View style={{
+            flex: 1,
+            gap: theme.gap.sm,
+            flexDirection: "row"
+        }}
+        >
+            <ButtonModernSkeleton size="M"/>
+            <ButtonModernSkeleton size="M"/>
         </View>
     );
 }
