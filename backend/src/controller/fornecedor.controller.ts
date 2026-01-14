@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { FornecedorModel } from "../models/fornecedor.model";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import { ValidateDatasUser } from "../shared/validators/ValidateDatasUser";
-import { payloadInterface, queryFilter } from "../shared/interfaces/utilsInterfeces";
+import { Cursor, payloadInterface, queryFilter } from "../shared/interfaces/utilsInterfeces";
 import { generateToken, getTokenIdFromRequest } from "../shared/utils/tokenUtils";
 import { UserController } from "../shared/interfaces/class/UserController";
 import { ClienteModel } from "../models/cliente.model";
@@ -93,6 +93,42 @@ class FornecedorController extends UserController{
             const list:fornecedorInterface[] = await this.fornecedorModel.listAll(idCliente, filterOpt);
 
             return res.status(200).send(successResponse(ResponseApi.Users.LIST_SUCCESS, {list: list, pagination: filterOpt}));
+        } catch(e) {
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
+        }
+    }
+
+    public async listAllCursor(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+        try {
+            const {...filterOpt} = req.query as queryFilter;
+            const idCliente:number = await getTokenIdFromRequest(req);
+            
+            filterOpt.filterList = ["Nome", "Apelido", "Estabelecimento"];
+
+            if(!filterOpt.filter)
+                filterOpt.filter = "Nome";
+            
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+
+            // teste
+            const {cursorValue, cursorId} = req.query as {cursorValue: string, cursorId: number};
+            
+            if(cursorValue && cursorId){
+                const cursor:Cursor = {
+                    id: cursorId,
+                    value: cursorValue
+                }
+
+                filterOpt.cursor = cursor;
+            }
+
+            // console.log(filterOpt);
+
+
+            const list = await this.fornecedorModel.listAllCursor(idCliente, filterOpt);
+
+            return res.status(200).send(successResponse(ResponseApi.Users.LIST_SUCCESS, {list}));
         } catch(e) {
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }

@@ -1,9 +1,13 @@
 import { ListUsers, ListUsersSkeleton, ListUsersType } from "@/src/components/common/ListUsers";
-import { SearchInputList } from "@/src/components/common/SearchInputList";
+import { OnSubmitSearchType, SearchInputList } from "@/src/components/common/SearchInputList";
 import { useListAllFornecedores } from "@/src/hooks/useClienteQueries";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Keyboard } from "react-native";
 
 export default function Fornecedores() {
+    const [search, setSearch] = useState<string>("");
+    const [filter, setFilter] = useState<string>("");
+
     const {
         data,
         fetchNextPage,
@@ -13,9 +17,12 @@ export default function Fornecedores() {
         isLoading,
         isRefetching
     } = useListAllFornecedores({
-        filter: "",
-        search: ""
+        search: search,
+        filter: filter,
     });
+
+    const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
+    const currentFilter: string | undefined = data?.pages[0].pagination.filter;
     
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
     // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
@@ -28,10 +35,11 @@ export default function Fornecedores() {
         data.pages.forEach(page => {
             page.list.forEach(u => {
                 const idString = u.id_fornecedor?.toString() || Math.random().toString();
+                const description: string = `${u.nome}${u.apelido ? ` - (${u.apelido})` : ""}, ${u.uf}`;
                 
                 map.set(idString, {
                     title: u.nomeestabelecimento,
-                    description: `${u.nome}, ${u.uf}`,
+                    description: description,
                     id: idString,
                     relationshipType: u.relationship_status ?? 'NONE',
                 });
@@ -42,31 +50,40 @@ export default function Fornecedores() {
     }, [data]);
 
 
-    const searchOnList = () => {
-        console.log("Pesquisar");
+    const searchOnList: OnSubmitSearchType = (txtSearch: string, txtFilter: string = "") => {
+        Keyboard.dismiss();
+        setSearch(txtSearch.trim())
+        setFilter(txtFilter.trim());
     }
-
-    if(isLoading) return <ListUsersSkeleton/>
 
     return(
         <>  
-            {/* <SearchInputList
-                hasFilter={false}
+            <SearchInputList
+                // hasFilter={!!currentFilterList}
+                filterList={currentFilterList}
                 onSubmit={searchOnList}
-                placeholder="Buscar por nome, apelido ou endereço"
+                inputValue={search}
+                setInputValue={setSearch}
+                filterValue={filter.length ? filter : currentFilter}
+                setFilterValue={setFilter}
+                placeholder="Buscar por nome, apelido ou endereço..."
 
-            /> */}
-            <ListUsers
-                data={listUsers}
-                refreshing={isRefetching}
-                onRefresh={refetch}
-                isFetchingNextPage={isFetchingNextPage}
-                onEndReached={() => {
-                    if (hasNextPage && !isFetchingNextPage) {
-                        fetchNextPage();
-                    }
-                }}
             />
+
+            {isLoading ? 
+                <ListUsersSkeleton/> : (
+                <ListUsers
+                    data={listUsers}
+                    refreshing={isRefetching}
+                    onRefresh={refetch}
+                    isFetchingNextPage={isFetchingNextPage}
+                    onEndReached={() => {
+                        if (hasNextPage && !isFetchingNextPage) {
+                            fetchNextPage();
+                        }
+                    }}
+                />
+            )}
         </>
     );
 }

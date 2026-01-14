@@ -13,7 +13,8 @@ export type PaginationType = FilterType & {
    page: number,
 	size: number,
 	
-   filterList?: string|number[],
+   // filterList?: string|number[],
+   filterList?: string[],
 	total?: number,
 	totalPages?: number,
 }

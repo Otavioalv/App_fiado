@@ -2,7 +2,7 @@ import { idsPartnerInterface, fornecedorInterface } from "../shared/interfaces/u
 import connection from "../database/connection";
 import { PoolClient } from "pg";
 import { UserModel } from "../shared/interfaces/class/UserModel";
-import { queryFilter } from "../shared/interfaces/utilsInterfeces";
+import { Cursor, queryFilter } from "../shared/interfaces/utilsInterfeces";
 
 class FornecedorModel extends UserModel<fornecedorInterface>{
 
@@ -237,6 +237,104 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             client?.release();
         }
     }  
+
+
+    public async listAllCursor( idCliente: number, filterOpt: queryFilter ): Promise<{data: fornecedorInterface[]; nextCursor?: Cursor}> {
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const { size, search, filter, cursor } = filterOpt;
+
+            const sqlFilterList: Record<string, string> = {
+                "Nome": "f.nome",
+                "Apelido": "LOWER(unaccent(f.apelido))",
+                "Estabelecimento": "LOWER(unaccent(f.nomeestabelecimento))"
+            };
+
+            const searchSql = `%${search}%`;
+            const orderColumn = sqlFilterList[filter];
+
+            const values: any[] = [idCliente, searchSql];
+            let cursorWhere = "";
+
+            if(cursor) {
+                values.push(cursor.value, cursor.id);
+                
+                cursorWhere = `
+                    AND (
+                        ${orderColumn} > $3
+                        OR (${orderColumn} = $3 AND f.id_fornecedor > $4)
+                    )
+                `;
+            }
+
+            values.push(size);
+
+            const SQL_LIST = `
+                SELECT  
+                    f.id_fornecedor,
+                    f.nome,
+                    f.apelido,
+                    f.telefone,
+                    f.nomeestabelecimento,
+                    f.numeroimovel,
+                    f.logradouro,
+                    f.bairro,
+                    f.complemento,
+                    f.cep,
+                    f.uf,
+                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
+                    CASE 
+                    WHEN cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE THEN 'ACCEPTED'
+                    WHEN cf.cliente_check = TRUE THEN 'SENT'
+                    WHEN cf.fornecedor_check = TRUE THEN 'RECEIVED'
+                    ELSE 'NONE'
+                    END AS relationship_status
+                FROM fornecedor f
+                LEFT JOIN cliente_fornecedor cf
+                    ON f.id_fornecedor = cf.fk_fornecedor_id
+                AND cf.fk_cliente_id = $1
+                WHERE (
+                    f.nome ILIKE $2 OR
+                    unaccent(f.apelido) ILIKE unaccent($2) OR
+                    unaccent(f.nomeestabelecimento) ILIKE unaccent($2)
+                )
+                ${cursorWhere}
+                ORDER BY ${orderColumn} ASC, f.id_fornecedor ASC
+                LIMIT $${values.length};
+            `;
+
+            const rows = (await client.query(SQL_LIST, values)).rows as fornecedorInterface[];
+
+            if (rows.length === 0) {
+            return { data: [] };
+            }
+
+            const last = rows[rows.length - 1];
+
+            return {
+                data: rows,
+                nextCursor: {
+                    value:
+                        filter === "Nome"
+                            ? last.nome
+                            : filter === "Apelido"
+                                ? last.apelido!
+                                : last.nomeEstabelecimento,
+                    id: last.id_fornecedor!,
+                },
+            };
+        } catch (e) {
+            console.error(e);
+            throw new Error("Erro interno no servidor");
+        } finally {
+            client?.release();
+        }
+        }
+
 
     public async getPartnerByIdCliente(id: number, typeList: "all" | "received" | "sent" | "accepted" = "all", filterOpt: queryFilter): Promise<fornecedorInterface[]>{
         let client: PoolClient | undefined;

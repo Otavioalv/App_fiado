@@ -99,6 +99,6 @@ const styles = StyleSheet.create({
     contentContainer: {
         flexGrow: 1,
         gap: theme.gap.sm,
-        padding: theme.padding.md
+        padding: theme.padding.sm
     }
 });

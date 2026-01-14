@@ -13,6 +13,8 @@ import { useEffect } from "react";
 import { registerForbiddenAction } from "@/src/services/api";
 import { focusManager, onlineManager, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetProvider } from "@/src/context/bottomSheetContext";
 
 const client = new QueryClient({
   // queryCache: new QueryCache(), // verificar config
@@ -33,24 +35,35 @@ export default function RootLayout() {
       <SessionProvider>
           {/* Verificar a ordem disso */}
           <QueryClientProvider client={client}>
+            {/* Verificar ordem */}
+            <GestureHandlerRootView style={{flex: 1}}>
+                
+                <SafeAreaProvider>
+                  <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
 
-            <SafeAreaProvider>
-              <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
-                
-                <SplashScreenController/>
-                
-                <KeyboardAvoidingView
-                  style={{ flex: 1}}
-                  behavior={Platform.OS === "ios" ? "padding" : undefined}
-                >
-                  <RootNavigator/>
-                  {/* <StatusBar style="dark"/>    */}
-                  <SystemBars style={"dark"}/>
+                    {/* Verificar ordem */}
+                    <BottomSheetProvider>
+      
+                        <SplashScreenController/>
+                        
+                        <KeyboardAvoidingView
+                          style={{ flex: 1}}
+                          behavior={Platform.OS === "ios" ? "padding" : undefined}
+                        >
+                          <RootNavigator/>
+                          {/* <StatusBar style="dark"/>    */}
+                          <SystemBars style={"dark"}/>
+                          
+                        </KeyboardAvoidingView>
+                        <Toast/>
+                    
+                    </BottomSheetProvider>
                   
-                </KeyboardAvoidingView>
-                <Toast/>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                  </SafeAreaView>
+
+                </SafeAreaProvider>
+
+            </GestureHandlerRootView>
 
         </QueryClientProvider>
 

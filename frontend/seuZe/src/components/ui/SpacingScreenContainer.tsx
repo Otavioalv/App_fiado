@@ -15,10 +15,7 @@ export function SpacingScreenContainer({children, style}: SpacingScreenContainer
 
 const defaultStyles = StyleSheet.create({
     container: {
-        padding: theme.padding.md,
-
-        // paddingHorizontal: theme.padding.md,
-        // paddingVertical: theme.padding.lg,
+        padding: theme.padding.sm,
     }
 });
 

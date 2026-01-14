@@ -2,6 +2,12 @@ import { JwtPayload } from "jsonwebtoken";
 
 // Tipos e interfaces que não consegui definir um tipo expecifico
 
+// Testar
+export type Cursor = {
+  value: string;
+  id: number;
+};
+
 export type queryFilter = {
     page: number;
     size: number;
@@ -9,7 +15,10 @@ export type queryFilter = {
     filter: string;
     totalPages?: number;
     search?: string;
-    filterList?: string[]
+    filterList?: string[];
+
+
+    cursor?: Cursor;
 };
 
 export type FilterListShop = "Mais Recente"| "Mais Antigo"| "Quitado"| "Pendente"| "Retirado"| "Aguardando Retirada"| "Aceito" | "Recusado" |"Em Analise" | "Cancelados";

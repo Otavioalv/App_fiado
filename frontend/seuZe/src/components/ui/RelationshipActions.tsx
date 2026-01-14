@@ -14,23 +14,23 @@ export function RelationshipActions({type}: RelationshipActionsProps) {
         >
             {type === "ACCEPTED" && (
                 <>
-                    <ButtonModern placeholder="Fazer Pedido" size="M"/>
-                    <ButtonModern placeholder="Cancelar" size="M" variant="outline"/>
+                    <ButtonModern placeholder="Fazer Pedido" size="M" style={{flex: 1}}/>
+                    <ButtonModern placeholder="Cancelar" size="M" variant="outline" style={{flex: 1}}/>
                 </>
             )}
 
             {type === "NONE" && (
-                <ButtonModern placeholder="Solicitar Parceria" size="M" variant="outline"/>
+                <ButtonModern placeholder="Solicitar Parceria" size="M" variant="outline" style={{flex: 1}}/>
             )}
 
             {type === "RECEIVED" && (
                 <>
-                    <ButtonModern placeholder="Aceitar" iconName="check" size="M"/>
-                    <ButtonModern placeholder="Recusar" iconName="x" size="M" variant="outline"/>
+                    <ButtonModern placeholder="Aceitar" iconName="check" size="M" style={{flex: 1}}/>
+                    <ButtonModern placeholder="Recusar" iconName="x" size="M" variant="outline" style={{flex: 1}}/>
                 </>
             )}
             {type === "SENT"  && (
-                <ButtonModern placeholder="Aguardando Aprovação" size="M" variant="disabled"/>
+                <ButtonModern placeholder="Aguardando Aprovação" size="M" variant="disabled" style={{flex: 1}}/>
             )}
         </View>
     );
@@ -44,8 +44,8 @@ export function RelationshipActionsSkeleton() {
             flexDirection: "row"
         }}
         >
-            <ButtonModernSkeleton size="M"/>
-            <ButtonModernSkeleton size="M"/>
+            <ButtonModernSkeleton size="M" style={{flex: 1}}/>
+            <ButtonModernSkeleton size="M" style={{flex: 1}}/>
         </View>
     );
 }
@@ -53,6 +53,7 @@ export function RelationshipActionsSkeleton() {
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        gap: theme.gap.sm
+        gap: theme.gap.sm,
+        // backgroundColor: "red"
     },
 });

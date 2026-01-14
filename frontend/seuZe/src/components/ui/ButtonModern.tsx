@@ -3,7 +3,7 @@ import { theme } from "@/src/theme";
 import { AppDefaultSizes } from "@/src/types/responseServiceTypes";
 import { Feather } from "@expo/vector-icons";
 import { useRef } from "react";
-import { Animated, Pressable, PressableProps, StyleSheet, Text,  TextStyle,  View,  ViewStyle } from "react-native";
+import { Animated, Pressable, PressableProps, StyleSheet, Text,  TextStyle,  ViewStyle } from "react-native";
 
 type ButtonVariant = "primary" | "outline" | "disabled";
 interface ComponentsStyles {
@@ -114,8 +114,11 @@ export function ButtonModern({placeholder, variant = "primary", size = "L",style
     )
 }
 
-type ButtonModernSkeletonProps = {size: AppDefaultSizes};
-export function ButtonModernSkeleton({size}: ButtonModernSkeletonProps) {
+interface ButtonModernSkeletonProps {
+    size: AppDefaultSizes,
+    style?: ViewStyle;
+};
+export function ButtonModernSkeleton({size, style}: ButtonModernSkeletonProps) {
     const anmOpacity = useAnimationOpacitySkeleton();
 
     const sizeStyle: Record<AppDefaultSizes, number> = {
@@ -127,7 +130,7 @@ export function ButtonModernSkeleton({size}: ButtonModernSkeletonProps) {
     const currentSize = sizeStyle[size];
 
     return (
-        <Animated.View style={[{height: currentSize}, anmOpacity, styles.baseContainer]}/>
+        <Animated.View style={[{height: currentSize}, anmOpacity, styles.baseContainer, style]}/>
     );
 
 }
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     baseContainer: {
         overflow: "hidden",
         borderRadius: theme.radius.sm,
-        flex: 1
+        // flex: 1, // Botao grande bug
     },
 
     // estilo botao
