@@ -53,6 +53,8 @@ const { session } = useSession();
 
 - [ ] Adiiconar relationship_status onde necessario em API
 
+- [ ] Tipar datas nas listas API
+
 # Anotações
 ## Banco de dados (POSTGRES)
 

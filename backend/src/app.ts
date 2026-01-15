@@ -1,11 +1,8 @@
 import Fastify from "fastify";
 import fastifySocketIO from "fastify-socket.io";
-import {Server as SocketIOServer } from "socket.io";
-import fastifyStatic from '@fastify/static';
 import { routers } from "./router";
 import cors from '@fastify/cors';
 import { socketIO } from "./sockets/socketIO";
-import path from "path";
 import { notify } from "./sockets/events/notify";
 import { NotifierBroadcastParams, NotifierToUserParams } from "./shared/interfaces/notifierInterfaces";
 import { NotificationService } from "./services/notification.service";

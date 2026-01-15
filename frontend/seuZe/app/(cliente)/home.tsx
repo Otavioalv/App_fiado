@@ -12,7 +12,7 @@ import { ClienteDataType, ErrorTypes, PaginationType } from "@/src/types/respons
 import {Feather, FontAwesome} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, RefreshControl, ScrollView, View } from "react-native";
+import { Alert, RefreshControl, ScrollView } from "react-native";
 
 
 export default function Home() {

@@ -75,7 +75,6 @@ export default function Fornecedores() {
             }
         }
     }, [isError, error]);
-    
 
     // useEffect(() => {
     //     console.log("teste");
