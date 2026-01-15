@@ -1,19 +1,17 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SpacingScreenContainer } from "../ui/SpacingScreenContainer";
 import { InputTextSearch } from "../ui/InputTextSearch";
 import { theme } from "@/src/theme";
 import { Feather } from "@expo/vector-icons";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import FilterButton from "./FilterButton";
 import { useBottomSheet } from "@/src/context/bottomSheetContext";
 import { FilterOptionsBottom } from "./FilterOptionsBottom";
+import { OnSubmitSearchType } from "@/src/types/responseServiceTypes";
 
-
-export type OnSubmitSearchType = (search: string, filter?: string) => void;
 
 export interface SearchInputListProps {
     placeholder: string,
-    // hasFilter: boolean,
     onSubmit: OnSubmitSearchType,
 
     inputValue: string, 
@@ -22,12 +20,10 @@ export interface SearchInputListProps {
     filterValue?: string,
     setFilterValue?: Dispatch<SetStateAction<string>>,
 
-
     filterList?: string[],
 }
 
 export function SearchInputList({
-    // hasFilter,
     onSubmit,
     placeholder,
     inputValue,
@@ -36,35 +32,42 @@ export function SearchInputList({
     setFilterValue,
     filterList,
 }: SearchInputListProps) {
-    const [search, setSearch] = useState<string>(inputValue);
-    const [filter, setFilter] = useState<string>("");
 
-    const {openSheet, closeSheet} = useBottomSheet();
+    const { openSheet, closeSheet } = useBottomSheet();
+    
+    
+    const handleFilterSelected: Dispatch<SetStateAction<string>> = (value) => {
+        
+        const resolvedValue = typeof value === 'function' ? 
+            (value as (prev: string) => string)(filterValue ?? "") : 
+            value;
+
+        if(setFilterValue) {
+            setFilterValue(value);
+            onSubmit(inputValue, resolvedValue);
+        }
+    }
+
 
     const handlerOpenFilter = () => {
-        openSheet(
-            <FilterOptionsBottom 
-                filterList={filterList ?? []} 
-                filterValue={filter} 
-                setFilterValue={setFilter}
-            />,
-            ["35%"],
-            false
-        )
+        if(setFilterValue && filterValue) {
+            openSheet(
+                <FilterOptionsBottom 
+                    filterList={filterList ?? []} 
+                    filterValue={filterValue ?? ""} 
+                    setFilterValue={handleFilterSelected}
+                />,
+                ["35%"],
+                false
+            )
+        }
     };
+
+    
 
     useEffect(() => {
         closeSheet();
-        onSubmit(search, filter);
-        
-    }, [filter]);
-
-    // Testar
-    useEffect(() => {
-        setFilter(filterValue ?? "");
-        // console.log(filterValue);
-        console.log("filter: ", filterValue);
-    }, [filterValue]);
+    }, [filterValue, closeSheet]);
 
 
     return (
@@ -75,7 +78,7 @@ export function SearchInputList({
                 style={styles.searchContainer}
             >   
                 <Pressable
-                    onPress={() => onSubmit(search, filter)}
+                    onPress={() => onSubmit(inputValue, filterValue)}
                     style={styles.iconContainer}
                 >
                     <Feather 
@@ -85,14 +88,17 @@ export function SearchInputList({
                 </Pressable>
 
                 <InputTextSearch
-                    value={search}
-                    onChangeText={setSearch}
+                    style={{maxHeight: 50}}
+                    value={inputValue}
+                    onChangeText={setInputValue}
                     placeholder={placeholder}
+                    onSubmitEditing={() => onSubmit(inputValue, filterValue)}
+                    returnKeyType="search"
                 />
 
-                {filterList?.length && (
+                {filterList?.length && filterValue ? (
                     <FilterButton onPress={handlerOpenFilter}/>
-                )}
+                ): null}
             </View>
         </SpacingScreenContainer>
     );
@@ -104,12 +110,10 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         backgroundColor: "#ffffff",
         borderWidth: 1,
-        // borderColor: theme.colors.pseudoLightGray,
         borderColor: theme.colors.orange,
         flexDirection: "row",
     },
     iconContainer: {
-        // backgroundColor: "red",
         alignItems: "center",
         justifyContent: "center"
     },
@@ -117,8 +121,6 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.textLG.fontSize, // testar alterar
         padding: theme.padding.xs,
         paddingLeft: theme.padding.sm,
-        // color: theme.colors.pseudoLightGray
         color: theme.colors.orange,
-        // flex: 1,
     }
 });

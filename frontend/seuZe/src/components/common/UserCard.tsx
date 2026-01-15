@@ -3,7 +3,6 @@ import { DefaultCard } from "../ui/DefaultCard";
 import { DefaultDescription, DefaultDescriptionSkeleton } from "../ui/DefaultDescription";
 import { RelationshipActions, RelationshipActionsSkeleton } from "../ui/RelationshipActions";
 import { memo } from "react";
-import { ButtonModernSkeleton } from "../ui/ButtonModern";
 
 export interface UserCardProps {
     title: string, 

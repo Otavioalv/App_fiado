@@ -45,7 +45,7 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
     });
 
     router.post("/partner/list", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res, "all");
+        return await clienteController.partnerList(req, res, "");
     });
 
     router.post("/partner/list/reseived", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {

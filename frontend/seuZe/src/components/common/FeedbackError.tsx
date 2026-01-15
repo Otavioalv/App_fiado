@@ -34,7 +34,13 @@ const errorConfig:FeedBackErrorconfigType = {
         iconName: "meh",
         title: "Algo deu errado",
         description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde",
-        buttonText: "Voltar ao Início",
+        buttonText: "Tente novamente",
+    },
+    NOTFOUND: {
+        iconName: "meh",
+        title: "Algo deu errado",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde",
+        buttonText: "Tente novamente",
     },
 
     // EDITAR
@@ -51,12 +57,6 @@ const errorConfig:FeedBackErrorconfigType = {
         buttonText: "Voltar ao Início",
     },
     UNAUTHORIZED: {
-        iconName: "meh",
-        title: "Algo deu errado",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde",
-        buttonText: "Voltar ao Início",
-    },
-    NOTFOUND: {
         iconName: "meh",
         title: "Algo deu errado",
         description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde",

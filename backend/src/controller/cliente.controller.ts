@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ClienteModel } from "../models/cliente.model";
-import { clienteInterface, loginInterface, fornecedorInterface} from "../shared/interfaces/userInterfaces";
+import { clienteInterface, loginInterface, fornecedorInterface, TypesListUser} from "../shared/interfaces/userInterfaces";
 import { ValidateDatasUser } from "../shared/validators/ValidateDatasUser";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import { generateToken, getTokenIdFromRequest } from "../shared/utils/tokenUtils";
@@ -104,14 +104,15 @@ class ClienteController extends UserController{
         }
     }
 
-    public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: "all" | "received" | "sent" | "accepted" = "all"): Promise<FastifyReply> { 
+    public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: TypesListUser = "all"): Promise<FastifyReply> { 
         try {
             const {...filterOpt} = req.query as queryFilter;
             const id:number = await getTokenIdFromRequest(req);
 
-            if(!filterOpt.search)
-                filterOpt.search = "";
+            filterOpt.filterList = ["Nome", "Apelido", "Estabelecimento", "Data"];
 
+            if(!filterOpt.filter)
+                filterOpt.filter = "Nome";
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 

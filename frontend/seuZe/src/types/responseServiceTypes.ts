@@ -92,3 +92,5 @@ export type ErrorTypes =
    "BADREQUEST";
 
 export type AppDefaultSizes = "S" | "M" | "L";
+
+export type OnSubmitSearchType = (search: string, filter?: string) => void;

@@ -2,6 +2,7 @@ import { StyleSheet, View, Text} from "react-native";
 import {Feather} from "@expo/vector-icons";
 import { theme } from "@/src/theme";
 import { ButtonModern } from "../ui/ButtonModern";
+import { memo } from "react";
 
 
 export interface ActionButtonProps {
@@ -20,7 +21,9 @@ export interface FeedbackTemplateProps {
 export default function FeedbackTemplate({description, iconName, title, primaryAction, secondaryAction}: FeedbackTemplateProps) {
     return (
         <View style={styles.container}>
+            
             <Feather style={styles.icon} name={iconName}/>
+            
             <Text style={styles.textTitle}> 
                 {title}
             </Text>
@@ -48,6 +51,8 @@ export default function FeedbackTemplate({description, iconName, title, primaryA
         </View>
     );
 }   
+
+export const MemoFeedbackTemplate = memo(FeedbackTemplate);
 
 const styles = StyleSheet.create({
     container: {

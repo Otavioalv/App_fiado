@@ -7,7 +7,9 @@ export interface addressInterface {
     numeroImovel?: number;
 }
 
+
 type RelationshipStatusType = "ACCEPTED" | "SENT" | "RECEIVED" | "NONE";
+export type TypesListUser = "all" | "received" | "sent" | "accepted";
 
 export interface userInterface{
     nome: string;
@@ -16,7 +18,7 @@ export interface userInterface{
     telefone: string;
     cliente_check?: boolean;
     fornecedor_chec?: boolean;
-    created_at: string;
+    created_at?: string; // Testando atualmente
 
 
     relationship_status?: RelationshipStatusType,

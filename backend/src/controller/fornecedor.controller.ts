@@ -6,7 +6,7 @@ import { Cursor, payloadInterface, queryFilter } from "../shared/interfaces/util
 import { generateToken, getTokenIdFromRequest } from "../shared/utils/tokenUtils";
 import { UserController } from "../shared/interfaces/class/UserController";
 import { ClienteModel } from "../models/cliente.model";
-import { fornecedorInterface, loginInterface, clienteInterface } from "../shared/interfaces/userInterfaces";
+import { fornecedorInterface, loginInterface, clienteInterface, TypesListUser } from "../shared/interfaces/userInterfaces";
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { MessageInterface } from "../shared/interfaces/notifierInterfaces";
 import { NotificationModel } from "../models/notification.model";
@@ -146,7 +146,7 @@ class FornecedorController extends UserController{
         }
     }
 
-    public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: "all" | "received" | "sent" | "accepted" = "all"): Promise<FastifyReply> { 
+    public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: TypesListUser = "all"): Promise<FastifyReply> { 
         try {
             const {...filterOpt} = req.query as queryFilter;
             const id:number = await getTokenIdFromRequest(req);

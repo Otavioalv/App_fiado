@@ -1,10 +1,8 @@
 import { theme } from "@/src/theme";
-// import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { MyBottomSheetFlatList } from "./MyBottomSheetFlatList";
-import { Feather } from "@expo/vector-icons";
-import { BottomSheetView } from "@gorhom/bottom-sheet";
+import { MemoButtonFilter } from "../ui/ButtonFilter";
 
 type FilterOptionsProps = {
     filterList: string[],
@@ -19,88 +17,56 @@ export function FilterOptionsBottom({filterList, filterValue, setFilterValue}: F
         setSelected(filterValue);
     }, [filterValue]);
 
-
-    const handleSetFilterValue = (value: string) => {
+    const handleSetFilterValue = useCallback((value: string) => {
         setFilterValue(value);
         setSelected(value);
-    }
+    }, [setFilterValue]);
+
+    
+    const renderItem = useCallback(
+        ({item}: {item: string}) => (
+            <MemoButtonFilter
+                onPress={handleSetFilterValue}
+                selected={selected}
+                title={item}
+            />
+        ),
+        [handleSetFilterValue, selected]
+    );
+
+    
+    const renderHeader = useCallback(() => (
+        <View style={styles.headerContainer}>
+             <Text style={styles.textHeader}>Filtrar por:</Text>
+        </View>
+    ), []);
 
     return (
-        <BottomSheetView>
-
-            <MyBottomSheetFlatList
-                data={filterList}
-                keyExtractor={(item:string, i: number) => item + i}
-                contentContainerStyle={styles.contentContainer}
-                style={styles.container}
-    
-                renderItem={({item}: {item: string}) => {
-                    const isValue:boolean = item === selected;
-    
-                    return (
-                        <Pressable 
-                            style={styles.buttonOpc}
-                            onPress={() => handleSetFilterValue(item)}
-                        >
-                            <Text
-                                style={[
-                                    styles.textBtt, 
-                                    isValue ? styles.textchecked : styles.textNeutral
-                                ]}
-                            >
-                                {item}
-                            </Text>
-    
-                            <Feather 
-                                name={isValue ? "check-circle" : "circle"}
-                                style={[
-                                    styles.textBtt, 
-                                    isValue ? styles.textchecked : styles.textNeutral
-                                ]}
-                            />
-                        </Pressable>
-                    )
-                }}
-            />
-        </BottomSheetView>
+        <MyBottomSheetFlatList
+            data={filterList}
+            keyExtractor={(item:string, i: number) => item + i}
+            contentContainerStyle={styles.contentContainer}
+            style={styles.container}
+            ListHeaderComponent={renderHeader}
+            renderItem={renderItem}
+        />
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        // backgroundColor: "blue",
         flex: 1
     },
     contentContainer: {
-        gap: 0
-        // paddingBottom: 20,
-        // gap: theme.gap.sm,
+        gap: 0,
     },
-    buttonOpc: {
-        // backgroundColor: "red",
-        // marginBottom: 5,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: theme.padding.md,
-        borderBottomWidth: 1,
-        borderColor: theme.colors.pseudoLightGray
-
+    headerContainer: {
+        alignItems: "center", 
+        paddingVertical: 10
     },
-
-    // Texto
-    textBtt: {
-        fontSize: theme.typography.textMD.fontSize
-    },
-    textchecked: {
-        color: theme.colors.orange
-    },
-    textNeutral: {
+    textHeader: {
+        fontSize: theme.typography.textMD.fontSize,
         color: theme.colors.textNeutral900
     },
 
-    // Icone
-    // icon: {
-    //     fontSize: theme.typography.textMD.fontSize
-    // }
 });

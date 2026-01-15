@@ -18,6 +18,8 @@ export function useInfiniteList<T extends PaginationResponseType>({
         queryKey, 
         queryFn,
         initialPageParam,
+        // retry: false,
+        // networkMode: "always",
         getNextPageParam: (lastPage) => {
             const { page, totalPages } = lastPage.pagination;
             return page < totalPages! ? page + 1 : undefined;

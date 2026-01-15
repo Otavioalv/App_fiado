@@ -9,7 +9,8 @@ export function InputTextSearch({...rest}: InputTextSearchProps) {
             {...rest}
             placeholderTextColor={theme.colors.darkGray}
             selectionColor={theme.colors.orange}
-            style={styles.container}
+            style={[styles.container, rest.style]}
+            multiline={false}
         />
     )
 }

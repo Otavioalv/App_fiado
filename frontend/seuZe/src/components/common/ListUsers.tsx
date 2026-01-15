@@ -1,7 +1,9 @@
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { MemoUserCard, MemoUserCardSkeleton, UserCardProps } from "./UserCard";
 import { useCallback } from "react";
 import { theme } from "@/src/theme";
+import { MemoFeedbackTemplate } from "./FeedbackTemplate";
+import MyScreenContainer from "./MyScreenContainer";
 
 
 export type ListUsersType = UserCardProps & {id: string};
@@ -18,13 +20,11 @@ export function ListUsers({data, onRefresh, refreshing, onEndReached, isFetching
     
     const renderItem = useCallback(
         ({item}: {item: UserCardProps}) => (
-            <View>
-                <MemoUserCard 
-                    title={item.title} 
-                    description={item.description} 
-                    relationshipType={item.relationshipType}
-                />
-            </View>
+            <MemoUserCard 
+                title={item.title} 
+                description={item.description} 
+                relationshipType={item.relationshipType}
+            />
         ),
         []
     );
@@ -33,12 +33,23 @@ export function ListUsers({data, onRefresh, refreshing, onEndReached, isFetching
         () => {
             if(!isFetchingNextPage) return null;
             return (
-                <View>
-                    <MemoUserCardSkeleton/>
-                </View>
+                <MemoUserCardSkeleton/>
             );
         },
         [isFetchingNextPage]
+    );
+
+    const renderEmpty = useCallback(
+        () => (
+            <MyScreenContainer>
+                <MemoFeedbackTemplate
+                    title={"Nenhum fornecedor encontrado"}
+                    description={"Verifique a escrita ou sua conexão com a internet."}
+                    iconName="info"
+                />
+            </MyScreenContainer>
+        ),
+        []
     );
 
     return (
@@ -65,6 +76,7 @@ export function ListUsers({data, onRefresh, refreshing, onEndReached, isFetching
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
             ListFooterComponent={renderFooter}
+            ListEmptyComponent={renderEmpty}
         />
     );
 }
