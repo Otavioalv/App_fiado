@@ -361,6 +361,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                 received: "(cf.fornecedor_check = TRUE AND cf.cliente_check = FALSE)",
                 sent: "(cf.cliente_check = TRUE AND cf.fornecedor_check = FALSE)",
                 accepted: "(cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE)",
+                none: "cf.fk_cliente_id IS NULL"
             };
 
             // Edição de filtros
