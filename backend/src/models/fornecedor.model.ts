@@ -350,10 +350,10 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             const {size, page, search, filter} = filterOpt;
             
             const sqlFilterList: Record<string, string> = {
-                "Nome": "f.nome",
-                "Apelido": "LOWER(unaccent(f.apelido))",
-                "Estabelecimento": "LOWER(unaccent(f.nomeestabelecimento))",
-                "Data": "cf.created_at"
+                "Nome": "f.nome ASC",
+                "Apelido": "LOWER(unaccent(f.apelido)) ASC",
+                "Estabelecimento": "LOWER(unaccent(f.nomeestabelecimento)) ASC",
+                "Data": "cf.created_at DESC"
             };
             
             const relationshipMap: Record<TypesListUser, string> = {

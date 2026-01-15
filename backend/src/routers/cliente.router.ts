@@ -44,14 +44,14 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
         return await clienteFornecedorController.aceitarParceriaFornecedor(req, res);
     });
 
-    router.post("/partner/list", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res, "");
+    router.post("/partner/list/all", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteController.partnerList(req, res, "all");
     });
 
-    router.post("/partner/list/reseived", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+    router.post("/partner/list/received", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.partnerList(req, res, "received");
     });
-    
+
     router.post("/partner/list/sent", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteController.partnerList(req, res, "sent");
     });
