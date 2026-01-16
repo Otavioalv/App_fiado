@@ -8,7 +8,7 @@ export interface addressInterface {
 }
 
 
-type RelationshipStatusType = "ACCEPTED" | "SENT" | "RECEIVED" | "NONE";
+export type RelationshipStatusType = "ACCEPTED" | "SENT" | "RECEIVED" | "NONE";
 export type TypesListUser = "all" | "received" | "sent" | "accepted" | "none";
 
 export interface userInterface{

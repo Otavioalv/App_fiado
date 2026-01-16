@@ -1,13 +1,13 @@
+import { RelationshipStatusType } from "./userInterfaces";
+
 export interface productInterface {
     id_produto?: number;
     fk_id_fornecedor?:number;
     disponivel?: boolean;
-    nome: string;
+    nome_prod: string;
     preco: number;
     quantidade: number;
 }
-
-
 
 
 export interface compraInterface {
@@ -30,3 +30,15 @@ export interface compraInterface {
     
     cancelado?:boolean;
 }
+
+
+export interface ProdFornecedorInterface {
+    id_fornecedor: number,
+    nome_fornecedor: string,
+    nomeestabelecimento: string,
+    cliente_check: boolean,
+    fornecedor_check: boolean,
+    relationship_status: RelationshipStatusType,
+}
+
+export type ListProductWithFornecedor = productInterface & ProdFornecedorInterface;

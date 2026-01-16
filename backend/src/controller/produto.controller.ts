@@ -13,6 +13,7 @@ import { NotificationCompraInput, NotificationInput, UserType } from "../shared/
 import { Notifications } from "../common/messages/notifications";
 import { FornecedorModel } from "../models/fornecedor.model";
 import { ResponseApi } from "../shared/consts/responseApi";
+import { TypesListUser } from "../shared/interfaces/userInterfaces";
 
 
 class ProdutoController {
@@ -143,21 +144,29 @@ class ProdutoController {
     public async listProductsByIdFornecedor(req: FastifyRequest, res: FastifyReply):Promise<FastifyReply> {
         try {
             const {...filterOpt} = req.query as queryFilter;
-            const {idFornecedor} = req.params as {idFornecedor:string | undefined};
+            const {typeList} = req.params as {typeList: string | undefined};
+            const idCliente:number = await getTokenIdFromRequest(req);
 
-            if(!filterOpt.search)
-                filterOpt.search = "";
+            filterOpt.filterList = ["Nome do Fornecedor", "Apelido", "Estabelecimento", "Nome do Produto"];
+
+            if(!filterOpt.filter)
+                filterOpt.filter = "Nome do Produto";
 
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
-            if(!idFornecedor || !isNumeric(idFornecedor))
-                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
 
+            const TYPES = ["accepted", "all", "none", "received", "sent"] as TypesListUser[];
 
+            if(!typeList || !TYPES.includes(typeList as TypesListUser)){
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER))
+            };
 
-            const listProduct = await this.produtoModel.listProducts(parseInt(idFornecedor), filterOpt);
+            if(!idCliente) {
+                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
+            }
 
+            const listProduct = await this.produtoModel.listProductsByIdFornecedor(idCliente, filterOpt, typeList as TypesListUser);
 
             return res.status(200).send(successResponse(ResponseApi.Product.LIST_SUCCESS, {list: listProduct, pagination: filterOpt}));
         } catch(e) {
@@ -198,7 +207,7 @@ class ProdutoController {
 
                 const compra: compraInterface = {
                     ...pd,
-                    nome_produto: produto.nome.trim(),
+                    nome_produto: produto.nome_prod.trim(),
                     valor_unit: produto.preco,
                     id_cliente: id_cliente
                 }
@@ -466,7 +475,7 @@ class ProdutoController {
         try {
             const productSchema = z.object({
                 id_produto: z.number().nonnegative("Insira um valor valido").optional(), 
-                nome: z.string().min(1, "Nome e obrigatorio"),
+                nome_prod: z.string().min(1, "Nome e obrigatorio"),
                 preco: z.number().nonnegative("Insira um valor valido"),
                 quantidade: z.number().nonnegative("Insira um valor valido")
             })

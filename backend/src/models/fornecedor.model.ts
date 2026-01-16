@@ -351,8 +351,8 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             
             const sqlFilterList: Record<string, string> = {
                 "Nome": "f.nome ASC",
-                "Apelido": "LOWER(unaccent(f.apelido)) ASC",
-                "Estabelecimento": "LOWER(unaccent(f.nomeestabelecimento)) ASC",
+                "Apelido": "f.apelido ASC",
+                "Estabelecimento": "f.nomeestabelecimento ASC",
                 "Data": "cf.created_at DESC"
             };
             
@@ -437,7 +437,6 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                     COUNT(*) as total
                 ${fromJoinSql}
                 ${whereSql};
-                
             `;
 
             const result:fornecedorInterface[] = (

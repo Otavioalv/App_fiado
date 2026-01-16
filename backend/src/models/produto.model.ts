@@ -1,8 +1,9 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { compraInterface, productInterface } from "../shared/interfaces/productInterface";
+import { compraInterface, ListProductWithFornecedor, productInterface } from "../shared/interfaces/productInterface";
 import { FilterListShop, queryFilter } from "../shared/interfaces/utilsInterfeces";
 import { UserType } from "../shared/interfaces/notifierInterfaces";
+import { TypesListUser } from "../shared/interfaces/userInterfaces";
 
 
 class ProdutoModel  {
@@ -20,7 +21,7 @@ class ProdutoModel  {
                 `
 
             const values = products.flatMap(product => [
-                product.nome, 
+                product.nome_prod, 
                 product.preco, 
                 product.quantidade, 
                 product.fk_id_fornecedor = id_fornecedor
@@ -121,6 +122,121 @@ class ProdutoModel  {
         }
     }
 
+    public async listProductsByIdFornecedor(
+        id_cliente: number, 
+        filterOpt:queryFilter,
+        typeList: TypesListUser = "accepted"
+    ): Promise<ListProductWithFornecedor[]>{
+        
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const {size, page, search, filter} = filterOpt;
+
+            const sqlFilterList: Record<string, string> = {
+                "Nome do Fornecedor": "f.nome ASC",
+                "Apelido": "f.apelido ASC",
+                "Estabelecimento": "f.nomeestabelecimento ASC",
+                "Nome do Produto": "p.nome ASC"
+            };
+
+            const relationshipMap: Record<TypesListUser, string> = {
+                all: "",
+                received: "(cf.fornecedor_check = TRUE AND cf.cliente_check = FALSE)",
+                sent: "(cf.cliente_check = TRUE AND cf.fornecedor_check = FALSE)",
+                accepted: "(cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE)",
+                none: "cf.fk_cliente_id IS NULL"
+            }
+
+
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+            const sqlSearch: string = `%${search}%`;
+            const orderBy: string = sqlFilterList[filter];
+            const relationshipCondition = relationshipMap[typeList];
+            const whereCondition: string[] = [];
+
+            if(relationshipCondition) {
+                whereCondition.push(relationshipCondition);
+            }
+
+            whereCondition.push(`
+                (
+                    f.nome ILIKE $2 OR 
+                    unaccent(f.apelido) ILIKE unaccent($2) OR 
+                    unaccent(f.nomeestabelecimento) ILIKE unaccent($2) OR
+                    unaccent(p.nome) ILIKE unaccent($2)
+                )
+            `);
+
+            const whereSql = whereCondition.length ? `WHERE ${whereCondition.join(" AND ")}` : "";
+
+            const fromJoinSql = `
+                FROM 
+                    produto AS p
+                LEFT JOIN 
+                    cliente_fornecedor AS cf
+                    ON
+                        p.fk_id_fornecedor = cf.fk_fornecedor_id
+                    AND
+                        cf.fk_cliente_id = $1
+                LEFT JOIN  
+                    fornecedor AS f
+                    ON
+                        p.fk_id_fornecedor = f.id_fornecedor
+            `;
+
+            const SQL_LIST = `
+                SELECT 
+                    p.id_produto,
+                    p.nome AS nome_prod,
+                    p.preco,
+                    p.quantidade,
+                    p.fk_id_fornecedor AS id_fornecedor,
+                    f.nome AS nome_fornecedor,
+                    f.nomeestabelecimento,
+                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
+                    CASE 
+                        WHEN cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE THEN 'ACCEPTED'
+                        WHEN cf.cliente_check = TRUE THEN 'SENT'
+                        WHEN cf.fornecedor_check = TRUE THEN 'RECEIVED'
+                        ELSE 'NONE'
+                    END AS relationship_status
+                ${fromJoinSql}
+                ${whereSql}
+                ORDER BY ${orderBy}
+                LIMIT $3
+                OFFSET $4;
+            `;
+
+            console.log(SQL_LIST);
+
+            const SQL_TOTAL = `
+                SELECT 
+                    COUNT(*) as total
+                ${fromJoinSql}
+                ${whereSql};
+            `;
+            
+            const listProducts = (await client.query(SQL_LIST, [id_cliente, sqlSearch, limit, offset])).rows as ListProductWithFornecedor[];
+            const {total} = (await client.query(SQL_TOTAL, [id_cliente, sqlSearch])).rows[0] as {total: number};
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
+
+            return listProducts;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao listar produtos");
+        } finally {
+            client?.release();
+        }
+    }
+
+
     public async updateProtucts(products: productInterface[], id_fornecedor: number) {
         let client: PoolClient | undefined;
         try {
@@ -134,7 +250,7 @@ class ProdutoModel  {
                     id_produto = $4 AND fk_id_fornecedor = $5
             `;
             const values = products.flatMap(product => [
-                product.nome, 
+                product.nome_prod, 
                 product.preco,
                 product.quantidade, 
                 product.id_produto,
@@ -184,7 +300,7 @@ class ProdutoModel  {
 
             const values = produtos.flatMap(p => [
                 p.id_produto,
-                p.nome,
+                p.nome_prod,
                 p.preco,
                 p.quantidade
             ]);
