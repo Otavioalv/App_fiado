@@ -6,7 +6,9 @@ import { StyleSheet, View } from "react-native";
 type DefaultCardProps = PropsWithChildren
 export function DefaultCard({children}:DefaultCardProps) {
     return (
-        <View style={styles.container}>
+        <View 
+            style={styles.container}
+        >
             {children}
         </View>
     );

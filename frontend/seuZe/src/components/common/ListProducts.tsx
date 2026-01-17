@@ -1,49 +1,50 @@
-import { FlatList, NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from "react-native";
-import { MemoUserCard, MemoUserCardSkeleton, UserCardProps } from "./UserCard";
 import { ReactElement, useCallback, useRef, useState } from "react";
-import { theme } from "@/src/theme";
-import { MemoFeedbackTemplate } from "./FeedbackTemplate";
-import MyScreenContainer from "./MyScreenContainer";
+import { MemoProductCard, ProductCardProps } from "./ProductCard";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
-import { ButtonScrollTop } from "../ui/ButtonScrollTop";
+import { NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from "react-native";
+import { theme } from "@/src/theme";
+import { MemoUserCardSkeleton } from "./UserCard";
+import MyScreenContainer from "./MyScreenContainer";
+import { MemoFeedbackTemplate } from "./FeedbackTemplate";
 
 
-export type ListUsersType = UserCardProps & {id: string};
+export type ListProductsType = ProductCardProps & {id: string}
 
-export interface ListUsersProps {
-    data: ListUsersType[],
+export interface ListProductsProps {
+    data: ListProductsType[],
     onRefresh: () => void,
     refreshing: boolean,
     isFetchingNextPage: boolean,
     onEndReached: () => void, 
     headerComponent?: ReactElement;
-    // React.ComponentType<any> | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | null | undefined
-    // ListHeaderComponent={}
 }
 
-export function ListUsers({
-    data, 
-    onRefresh, 
-    refreshing, 
-    onEndReached, 
-    isFetchingNextPage,
+export function ListProducts({
+    data,
+    isFetchingNextPage, 
+    onEndReached,
+    onRefresh,
+    refreshing,
     headerComponent
-}: ListUsersProps) {
+}: ListProductsProps) {
     const [showScrollTopButton, setShowScrollTopButton] = useState<boolean>(false);
-    const listRef = useRef<FlashListRef<ListUsersType>>(null);
+    const listRef = useRef<FlashListRef<ListProductsType>>(null);
+    // console.log(JSON.stringify(data, null, "  "));
 
     const renderItem = useCallback(
-        ({item}: {item: UserCardProps}) => (
-            <MemoUserCard 
-                title={item.title} 
-                description={item.description} 
+        ({item}: {item: ProductCardProps}) => (
+            <MemoProductCard
+                fornecedorName={item.fornecedorName}
+                marketName={item.marketName}
+                price={item.price}
+                prodName={item.prodName}
                 relationshipType={item.relationshipType}
-                date={item.date}
             />
         ),
         []
     );
 
+    // MemoListProductCard
     const renderFooter = useCallback(
         () => {
             if(!isFetchingNextPage) return null;
@@ -77,24 +78,12 @@ export function ListUsers({
         const offsetY = event.nativeEvent.contentOffset.y;
         const limit = 2000;
 
-        // console.log(offsetY);
-
         if (offsetY > limit && !showScrollTopButton) {
             setShowScrollTopButton(true);
         } else if (offsetY <= limit && showScrollTopButton) {
             setShowScrollTopButton(false);
         }
     };
-
-    const scrollToTop = () => {
-        if(listRef.current) {
-            listRef.current.scrollToOffset({ 
-                offset: 0, 
-                animated: true 
-            });
-        }
-    };
-
 
     return (
         <>
@@ -123,53 +112,19 @@ export function ListUsers({
                 ItemSeparatorComponent={itemSeparator}
 
             />
-
-            {showScrollTopButton && 
-                <ButtonScrollTop
-                    onPress={scrollToTop}
-                />
-            }
-
         </>
     );
 }
-
-type ListUsersSkeletonProps = {headerComponent?: ReactElement};
-
-export function ListUsersSkeleton({headerComponent}: ListUsersSkeletonProps) {
-    const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-
-    const renderItem = useCallback(() => (
-        <View>
-            <MemoUserCardSkeleton/>
-        </View>
-    ), []);
-
-    return (
-        <FlatList
-            data={data}
-            keyExtractor={(item) => item.toString()}
-            style={styles.container}
-            contentContainerStyle={styles.contentContainer}
-            renderItem={renderItem}
-            ListHeaderComponent={headerComponent}
-            // ListHeaderComponentStyle={{backgroundColor: "red"}}
-        />
-    )
-}
-
 
 const styles = StyleSheet.create({
     container: {
         flex: 1, 
         width: "100%",
-        // height: "100%",
-        // gap: theme.gap.xs
     },
     contentContainer: {
         flexGrow: 1,
         gap: theme.gap.sm,
         padding: theme.padding.sm
-    }
+    },
+
 });

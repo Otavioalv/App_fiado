@@ -2,7 +2,7 @@ import { DefaultRegisterSchema } from "../schemas/DefaultRegisterSchema";
 import { LoginSchema } from "../schemas/LoginSchema";
 import { api } from "./api";
 import { responseAxiosInterfaces } from "./typesApi";
-import { ClienteDataType, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData } from "../types/responseServiceTypes";
+import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData } from "../types/responseServiceTypes";
 
 
 const defaultEndPoint:string = "/cliente"
@@ -44,17 +44,16 @@ export async function me(): Promise<ClienteDataType>{
     }
 }
 
-
-export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}): Promise<ResultsWithPagination<ShoppingData[]>>{
+export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
     try {
-        const endPoint = defaultEndPoint + "/product/buy/list";
+        const endPoint = defaultEndPoint + "/product/list/" + listType;
         
         const response = await api.post(endPoint, {}, {
             params: {
                 ...pagination
             }
-        }) as responseAxiosInterfaces<ResultsWithPagination<ShoppingData[]>>;
-        // as responseAxiosInterfaces<{list: ShoppingData[]} & PaginationResponseType>
+        }) as responseAxiosInterfaces<ResultsWithPagination<ProductAndFornecedorData[]>>;
+          
         return response.data.data!;
     }catch(err:any){
         throw err
@@ -74,6 +73,22 @@ export async function partnarSent(pagination: PaginationType = {page: 1, size: 1
         return response.data.data!;
     }catch(err:any){
         throw err
+    }
+}
+
+export async function listPartner(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<PartnerFornecedorType[]>>{
+    try {
+        const endPoint = defaultEndPoint + "/partner/list/" + listType;
+
+        const response = await api.post(endPoint, {}, {
+            params: {
+                ...pagination
+            }
+        }) as responseAxiosInterfaces<ResultsWithPagination<PartnerFornecedorType[]>>;
+
+        return response.data.data!;
+    }catch(err: any){
+        throw err;
     }
 }
 

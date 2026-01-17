@@ -1,12 +1,113 @@
-import { Text, View } from "react-native";
-
+import { ListProducts, ListProductsType } from "@/src/components/common/ListProducts";
+import { SearchInputList } from "@/src/components/common/SearchInputList";
+import { useShoppingList } from "@/src/hooks/useClienteQueries";
+import { shoppingList } from "@/src/services/clienteService";
+import { OnSubmitSearchType } from "@/src/types/responseServiceTypes";
+import { useEffect, useMemo } from "react";
+import { Keyboard } from "react-native";
 
 export default function Produtos() {
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch,
+        isLoading,
+        isRefetching,
+        isError,
+        error
+    } = useShoppingList(
+        {
+            search: "",
+            filter: "",
+        },
+        "all"
+    );
+
+
+    const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
+    const currentFilter: string | undefined = data?.pages[0].pagination.filter;
+
+
+
+    useEffect(() => {
+        const teste = async () => {
+            const data = await shoppingList({page: 1, size: 10}, "all")
+            console.log(JSON.stringify(data, null, "  "));
+        }
+        teste();
+    }, []);
+
+    
+    // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
+    // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
+    // ISSO FILTRA USUARIOS POR ID PARA NAO CAUSAR REPETIÇÃO DE USUARIO NA LISTA, E NÃO OCORRER UM ERRO
+    const listProds = useMemo(() => {
+        if (!data) return [];
+
+        const map = new Map<string, ListProductsType>();
+
+        data.pages.forEach(page => {
+            page.list.forEach(u => {
+                const idString = u.id_produto?.toString() || Math.random().toString();
+
+                map.set(idString, {
+                    prodName: u.nome_prod,
+                    price: u.preco,
+                    marketName: u.nomeestabelecimento,
+                    fornecedorName: u.nome_fornecedor,
+                    relationshipType: u.relationship_status,
+                    id: idString,
+                });
+            });
+        });
+        return Array.from(map.values());
+    }, [data]);
+
+    const searchOnList: OnSubmitSearchType = (txtSearch: string, txtFilter: string = "") => {
+        Keyboard.dismiss();
+        // console.log(txtFilter, txtSearch);
+        // setErrorType(null);
+        // setTypingText(txtSearch.trim());
+        // setSearchQuery(txtSearch.trim());
+
+        // setFilter(txtFilter.trim());
+        // setFilterQuery(txtFilter.trim());
+    }
+    
+    
+    useEffect(() => {
+        console.log(listProds.length);
+    }, [listProds]);
+
+
     return(
-        <View>
-            <Text>
-                Produtos
-            </Text>
-        </View>
+        <>
+            {/* <SearchInputList
+                filterList={currentFilterList}
+                onSubmit={searchOnList}
+                inputValue={typingText}
+                setInputValue={setTypingText}
+                filterValue={filter.length ? filter : currentFilter}
+                setFilterValue={setFilter}
+                placeholder="Buscar por nome, apelido, estabelecimento"
+            /> */}
+
+
+            <ListProducts
+                data={listProds}
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                isFetchingNextPage={isFetchingNextPage}
+                
+                onEndReached={() => {
+                    if (hasNextPage && !isFetchingNextPage) {
+                        fetchNextPage();
+                    }
+                }}
+            />
+
+        </>
     )
 }

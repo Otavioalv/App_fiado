@@ -1,5 +1,5 @@
-import { listAllFornecedores } from "../services/clienteService";
-import { FilterType } from "../types/responseServiceTypes";
+import { listAllFornecedores, listPartner, shoppingList } from "../services/clienteService";
+import { FilterType, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 
 export function useListAllFornecedores(filters: FilterType) {
@@ -18,6 +18,49 @@ export function useListAllFornecedores(filters: FilterType) {
     });
 }
 
+export function useListPartner(filters: FilterType, listType: TypeUserList) {
+    const key: string = `list-partner-fornecedor-${listType}`;
+    // console.log(JSON.stringify(filters, null, "  "), listType, key);
+
+    return useInfiniteList({
+        queryKey: [key, filters],
+        queryFn: async ({pageParam}) => {
+            return await listPartner(
+                {
+                    page: pageParam as number, 
+                    size: 20,
+                    filter: filters.filter,
+                    search: filters.search
+                }, 
+                listType
+            );
+        },
+        initialPageParam: 1,
+    });
+}
+
+
+
+export function useShoppingList(filters: FilterType, listType: TypeUserList) {
+    const key: string = `shopping-list-${listType}`;
+
+    return useInfiniteList({
+        queryKey: [key, filters],
+        queryFn: async({pageParam}) => {
+            return await shoppingList(
+                {
+                    page: pageParam as number,
+                    size: 20,
+                    filter: filters.filter,
+                    search: filters.search
+                },
+                listType
+            )
+        }, 
+        initialPageParam: 1
+    });
+
+}
 
 
 

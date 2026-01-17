@@ -6,7 +6,7 @@ import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShor
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
 import { AppError } from "@/src/errors/AppError";
-import { me, partnarSent, shoppingList } from "@/src/services/clienteService";
+import { listPartner, me, partnarSent, shoppingList } from "@/src/services/clienteService";
 import { theme } from "@/src/theme";
 import { ClienteDataType, ErrorTypes, PaginationType } from "@/src/types/responseServiceTypes";
 import {Feather, FontAwesome} from "@expo/vector-icons";
@@ -45,7 +45,10 @@ export default function Home() {
             idSh: "2",
             title: "Minhas Parcerias", 
             icon: <FontAwesome name="handshake-o" size={32} color={theme.colors.orange}/>,
-            onPress: () => Alert.alert("Teste", "Vai para menu de parcerias, em fornecedores")
+            onPress: () => router.push({
+                pathname: "/(cliente)/fornecedores",
+                params: {type: "accepted"}
+            })
 
         }, 
         {
@@ -74,7 +77,8 @@ export default function Home() {
             onPress: () => router.push("/(cliente)/perfil")
         }  
     ];
-    
+ 
+    // Chama service de ME
     const fetchMe = useCallback(async () => {
         try {
             setMeLoad(true);
@@ -88,6 +92,7 @@ export default function Home() {
     }, []);
 
 
+    // Chama service de ultimas compras
     const fetchShoppingList = useCallback(async () => {
         try {
             setPurchaceLoad(true);
@@ -121,26 +126,34 @@ export default function Home() {
         }
     }, []);
 
+    // Chama service de Ultimas parcerias pendentes
     const fetchPartnerSent = useCallback(async () => {
         try{
             setLastPartnerLoad(true);
 
             const pagination: PaginationType = {
                 size: 10,
-                page: 1
+                page: 1,
+                filter: "Data"
             }
 
-            const result = await partnarSent(pagination);
+            const result = await listPartner(pagination, "sent");
 
             if(result.list.length) {
                 const infoData:InfoType[] = result.list.map((r, i) => {
-                    const dataObj = new Date(r.created_at);
-                    const day = String(dataObj.getDate()).padStart(2, "0");
-                    const month = String(dataObj.getMonth() + 1).padStart(2, "0");
+                    let dateInfo = "";
+
+                    if(r.created_at) {
+                        const dataObj = new Date(r.created_at);
+                        const day = String(dataObj.getDate()).padStart(2, "0");
+                        const month = String(dataObj.getMonth() + 1).padStart(2, "0");
+
+                        dateInfo = `Enviado em ${day}/${month}`;
+                    }
 
                     return {
                         title: r.nome,
-                        info: `Enviado em ${day}/${month}`,
+                        info: dateInfo,
                         id: i.toString()
                     }
                 });
@@ -155,7 +168,7 @@ export default function Home() {
     }, []);
 
 
-
+    // Carrega os dados
     const loadData = useCallback(async () => {
         try {
             setErrorType(null);
@@ -187,11 +200,13 @@ export default function Home() {
     }, [fetchMe, fetchShoppingList, fetchPartnerSent]);
 
 
+    // Carrega automaticamente ao iniciar a tela
     useEffect(() => {
         loadData();
     }, [loadData]);
 
 
+    // Tratamento de erro
     if(errorType) {
         return (
             <MyScreenContainer>

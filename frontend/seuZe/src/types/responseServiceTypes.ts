@@ -19,7 +19,7 @@ export type PaginationType = FilterType & {
 	totalPages?: number,
 }
 
-export type ShoppingData =  {
+export interface ShoppingData {
    id_compra?: number,
    fk_fornecedor_id: number,
    quantidade: number,
@@ -45,6 +45,21 @@ export type ShoppingData =  {
 }
 
 
+export interface ProductAndFornecedorData{
+   id_produto: number,
+   nome_prod: string,
+   preco: string, // number
+   quantidade: number,
+   id_fornecedor: number,
+   nome_fornecedor: string,
+   nomeestabelecimento: string,
+   cliente_check: boolean,
+   fornecedor_check: boolean,
+   relationship_status: RelationshipStatusType
+}
+
+
+
 
 export type AddressDataType = {
    nomeestabelecimento: string,
@@ -61,7 +76,7 @@ export type RelationshipStatusType = "ACCEPTED" | "SENT" | "RECEIVED" | "NONE";
 export interface PartnerStatusType {
    cliente_check: boolean,
    fornecedor_check: boolean,
-   created_at: string,
+   created_at?: string,
    relationship_status?: RelationshipStatusType,
 }
 
@@ -94,3 +109,5 @@ export type ErrorTypes =
 export type AppDefaultSizes = "S" | "M" | "L";
 
 export type OnSubmitSearchType = (search: string, filter?: string) => void;
+
+export type TypeUserList = "all" | "received" | "sent" | "accepted" | "none";
