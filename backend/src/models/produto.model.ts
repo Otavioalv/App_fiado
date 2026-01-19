@@ -544,7 +544,17 @@ class ProdutoModel  {
 
                     usr.nome AS nome_user, 
                     usr.apelido AS apelido_user,
-                    usr.telefone AS telefone_user
+                    usr.telefone AS telefone_user,
+                    
+                    CASE 
+                        WHEN cp.cancelado = TRUE THEN 'CANCELED'
+                        WHEN cp.aceito = FALSE THEN 'REFUSED'
+                        WHEN cp.aceito IS NULL THEN 'ANALYSIS'
+                        WHEN cp.retirado = FALSE THEN 'WAIT_REMOVE'
+                        WHEN cp.quitado = TRUE THEN 'PAID'
+                        ELSE 'PENDING'
+                    END AS shopping_status
+
                 FROM compra AS cp
                 ${fkUser}
                 ORDER BY ${sqlFilter}
