@@ -1,5 +1,5 @@
 import { theme } from "@/src/theme";
-import { ActivityIndicator, Modal, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Modal, StyleSheet, View } from "react-native";
 
 type LoadingProps = {
     visible: boolean

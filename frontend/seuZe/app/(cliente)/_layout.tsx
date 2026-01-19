@@ -6,7 +6,7 @@ import { theme } from "@/src/theme";
 export default function ClienteLayout() {
     return (
         <Tabs
-            initialRouteName="produtos" 
+            initialRouteName="home" 
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: theme.colors.orange,
@@ -61,8 +61,6 @@ export default function ClienteLayout() {
                         <Feather name="user" size={24} color={color}/>,
                 }}
             />
-
-            
         </Tabs>
     )
 }

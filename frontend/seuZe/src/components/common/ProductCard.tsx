@@ -1,9 +1,11 @@
 import { RelationshipStatusType } from "@/src/types/responseServiceTypes";
 import { DefaultCard } from "../ui/DefaultCard";
-import { StyleSheet, Text, View } from "react-native";
+import { Animated, StyleSheet, Text, View } from "react-native";
 import { memo } from "react";
 import { RelationshipActionProduct } from "../ui/RelationshipActionProduct";
 import { theme } from "@/src/theme";
+import { ButtonModernSkeleton } from "../ui/ButtonModern";
+import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 
 export interface ProductCardProps {
     prodName: string, 
@@ -62,6 +64,29 @@ export function ProductCard({
     );
 }
 
+
+export function ProductCardSkeleton() {
+    const anmOpacity = useAnimationOpacitySkeleton();
+
+    return (
+        <DefaultCard>
+            <View style={styleSkeleton.headContainer}>
+                <Animated.View style={[anmOpacity, styleSkeleton.titleTextBase, styleSkeleton.titleText]}/>
+                <Animated.View style={[anmOpacity, styleSkeleton.titleTextBase, styleSkeleton.price]}/>
+            </View>
+
+            <View style={styleSkeleton.bottomContainer}>
+                <Animated.View style={[anmOpacity, styleSkeleton.textBottom]}/>
+                <Animated.View style={[anmOpacity, styleSkeleton.textBottom]}/>
+            </View>
+
+            <ButtonModernSkeleton size="M"/>
+        </DefaultCard>
+    )
+}
+
+
+export const MemoProductCardSkeleton = memo(ProductCardSkeleton);
 export const MemoProductCard = memo(ProductCard);
 
 const styles = StyleSheet.create({
@@ -96,5 +121,30 @@ const styles = StyleSheet.create({
     subTitleValueText: {
         color: theme.colors.textNeutral900,
         fontSize: theme.typography.textMD.fontSize,    
+    }
+});
+
+const styleSkeleton = StyleSheet.create({
+    headContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    bottomContainer: {
+        gap: theme.gap.sm
+    },
+    titleText: {
+        width: 180
+    }, 
+    price: {
+        width: 100
+    },
+    titleTextBase: {
+        borderRadius: 1000,
+        height: 30,
+    },
+    textBottom: {
+        borderRadius: 1000,
+        height: 15,
+        width: 250
     }
 });

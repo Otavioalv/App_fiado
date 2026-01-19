@@ -1,4 +1,4 @@
-import { listAllFornecedores, listPartner, shoppingList } from "../services/clienteService";
+import { listAllFornecedores, listPartner, productList } from "../services/clienteService";
 import { FilterType, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 
@@ -41,13 +41,13 @@ export function useListPartner(filters: FilterType, listType: TypeUserList) {
 
 
 
-export function useShoppingList(filters: FilterType, listType: TypeUserList) {
+export function useProductList(filters: FilterType, listType: TypeUserList) {
     const key: string = `shopping-list-${listType}`;
 
     return useInfiniteList({
         queryKey: [key, filters],
         queryFn: async({pageParam}) => {
-            return await shoppingList(
+            return await productList(
                 {
                     page: pageParam as number,
                     size: 20,

@@ -185,9 +185,6 @@ export default function Fornecedores() {
                             chipList={chipList}
                             itemSelected={activeCategory} 
                             setItemSelected={setActiveCategory}
-                            onPress={() => {
-                                console.log("precionado chip")
-                            }}
                         />
                     }
                 />

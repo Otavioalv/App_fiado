@@ -109,3 +109,58 @@ fk_fornecedor_id = 6;
 DELETE FROM cliente_fornecedor 
 WHERE (fk_fornecedor_id = 80 OR fk_fornecedor_id = 81 OR fk_fornecedor_id = 82 OR fk_fornecedor_id = 83)  AND
 fk_cliente_id = 111;
+
+
+
+
+
+
+
+-- X listar individual
+-- listar tudo
+-- listar de parceiros
+
+-- id_produto
+-- nome_prod
+-- preco
+-- quantidade,
+
+-- nome_fornecedor
+-- nome estabelecimento
+-- partner status
+
+
+
+SELECT 
+    p.id_produto,
+    p.nome AS nome_prod,
+    p.preco,
+    p.quantidade,
+    p.fk_id_fornecedor AS id_fornecedor,
+    f.nome AS nome_fornecedor,
+    f.nomeestabelecimento,
+    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
+    CASE 
+        WHEN cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE THEN 'ACCEPTED'
+        WHEN cf.cliente_check = TRUE THEN 'SENT'
+        WHEN cf.fornecedor_check = TRUE THEN 'RECEIVED'
+        ELSE 'NONE'
+    END AS relationship_status
+FROM 
+    produto AS p
+LEFT JOIN 
+    cliente_fornecedor AS cf
+    ON
+        p.fk_id_fornecedor = cf.fk_fornecedor_id
+    AND
+        cf.fk_cliente_id = 153
+LEFT JOIN  
+    fornecedor AS f
+    ON
+        p.fk_id_fornecedor = f.id_fornecedor;
+
+
+
+
+select * from cliente_fornecedor where fk_cliente_id = 153 and fk_fornecedor_id IN (2, 7, 9);

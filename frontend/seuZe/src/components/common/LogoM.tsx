@@ -1,8 +1,6 @@
 import { Image } from "expo-image";
 import { StyleSheet, Text, View } from "react-native";
 
-// import Svg, { Text as SvgText } from "react-native-svg";
-
 export type LogoGProps = {
     text: string
 }

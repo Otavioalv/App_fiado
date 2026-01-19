@@ -55,6 +55,12 @@ const { session } = useSession();
 
 - [ ] Tipar datas nas listas API
 
+- [ ] Remover console.log desnecessario API
+
+- [ ] Fazer filtro list user por data colocar null por ultimo API
+
+- [ ] Tratar erros de autenticação, banco de dados pode estar fora do ar, e retornar 401. tem q retornar 500 API
+
 # Anotações
 ## Banco de dados (POSTGRES)
 

@@ -55,7 +55,8 @@ export interface ProductAndFornecedorData{
    nomeestabelecimento: string,
    cliente_check: boolean,
    fornecedor_check: boolean,
-   relationship_status: RelationshipStatusType
+   relationship_status: RelationshipStatusType,
+   apelido?:string,
 }
 
 

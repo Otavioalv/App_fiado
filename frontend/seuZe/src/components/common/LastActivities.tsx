@@ -41,6 +41,7 @@ export default function LastActivities({title, infos, isLoading, emptyStateCompo
                     keyExtractor={(item) => item}
                     horizontal={true}
                     contentContainerStyle={styles.listContainer}
+                    showsHorizontalScrollIndicator={false}
                     renderItem={() => (
                         <View style={styles.cardContainer}>
                             <BasicInfoCardSkeleton/>
@@ -61,6 +62,7 @@ export default function LastActivities({title, infos, isLoading, emptyStateCompo
                     horizontal={true}
                     maxToRenderPerBatch={10}
                     contentContainerStyle={styles.listContainer}
+                    showsHorizontalScrollIndicator={false}
                     renderItem={renderItem}
                 />
             )}

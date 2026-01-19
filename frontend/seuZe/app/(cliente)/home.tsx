@@ -6,7 +6,7 @@ import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShor
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
 import { AppError } from "@/src/errors/AppError";
-import { listPartner, me, partnarSent, shoppingList } from "@/src/services/clienteService";
+import { listPartner, me, shoppingList } from "@/src/services/clienteService";
 import { theme } from "@/src/theme";
 import { ClienteDataType, ErrorTypes, PaginationType } from "@/src/types/responseServiceTypes";
 import {Feather, FontAwesome} from "@expo/vector-icons";

@@ -1,5 +1,5 @@
 import { theme } from "@/src/theme";
-import { FlatList, View, Text, StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import { MemoButtonChip, MemoButtonChipSkeleton } from "../ui/ButtonChip";
 import { Dispatch, SetStateAction, useCallback } from "react";
 
@@ -9,19 +9,19 @@ export interface ChipDataType<T>{
 }
 
 interface ChipListProps<T> {
-    onPress: () => void,
     chipList: ChipDataType<T>[]
     itemSelected: T,
     setItemSelected: Dispatch<SetStateAction<T>>
+    onPress?: () => void,
 }
 
 
 
 export function ChipList<T>({
     chipList, 
-    onPress,
     itemSelected,
-    setItemSelected
+    setItemSelected,
+    onPress,
 }: ChipListProps<T>) {
 
     const handleItemSelected = useCallback((value: typeof itemSelected) => {

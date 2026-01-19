@@ -44,7 +44,7 @@ export async function me(): Promise<ClienteDataType>{
     }
 }
 
-export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
+export async function productList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
     try {
         const endPoint = defaultEndPoint + "/product/list/" + listType;
         
@@ -57,6 +57,22 @@ export async function shoppingList(pagination: PaginationType = {page: 1, size: 
         return response.data.data!;
     }catch(err:any){
         throw err
+    }
+}
+
+export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}): Promise<ResultsWithPagination<ShoppingData[]>>{
+    try{
+        const endPoint = defaultEndPoint + "/product/buy/list";
+        
+        const response = await api.post(endPoint, {}, {
+            params: {
+                ...pagination
+            }
+        }) as responseAxiosInterfaces<ResultsWithPagination<ShoppingData[]>>;
+          
+        return response.data.data!;
+    }catch(err: any){
+        throw err;
     }
 }
 

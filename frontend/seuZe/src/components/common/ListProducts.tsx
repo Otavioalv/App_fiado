@@ -1,11 +1,11 @@
 import { ReactElement, useCallback, useRef, useState } from "react";
-import { MemoProductCard, ProductCardProps } from "./ProductCard";
+import { MemoProductCard, MemoProductCardSkeleton, ProductCardProps } from "./ProductCard";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
-import { NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from "react-native";
 import { theme } from "@/src/theme";
-import { MemoUserCardSkeleton } from "./UserCard";
 import MyScreenContainer from "./MyScreenContainer";
 import { MemoFeedbackTemplate } from "./FeedbackTemplate";
+import { ButtonScrollTop } from "../ui/ButtonScrollTop";
 
 
 export type ListProductsType = ProductCardProps & {id: string}
@@ -49,7 +49,7 @@ export function ListProducts({
         () => {
             if(!isFetchingNextPage) return null;
             return (
-                <MemoUserCardSkeleton/>
+                <MemoProductCardSkeleton/>
             );
         },
         [isFetchingNextPage]
@@ -85,6 +85,15 @@ export function ListProducts({
         }
     };
 
+    const scrollToTop = () => {
+        if(listRef.current) {
+            listRef.current.scrollToOffset({ 
+                offset: 0, 
+                animated: true 
+            });
+        }
+    };
+
     return (
         <>
             <FlashList
@@ -112,8 +121,41 @@ export function ListProducts({
                 ItemSeparatorComponent={itemSeparator}
 
             />
+            
+            {showScrollTopButton && 
+                <ButtonScrollTop
+                    onPress={scrollToTop}
+                />
+            }
         </>
+
     );
+}
+
+
+
+type ListProductsSkeletonProps = {headerComponent?: ReactElement};
+
+export function ListProductsSkeleton({headerComponent}: ListProductsSkeletonProps) {
+    const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+
+    const renderItem = useCallback(() => (
+        <View>
+            <MemoProductCardSkeleton/>
+        </View>
+    ), []);
+
+    return (
+        <FlatList
+            data={data}
+            keyExtractor={(item) => item.toString()}
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+            renderItem={renderItem}
+            ListHeaderComponent={headerComponent}
+        />
+    )
 }
 
 const styles = StyleSheet.create({
