@@ -39,6 +39,7 @@ export interface ProdFornecedorInterface {
     cliente_check: boolean,
     fornecedor_check: boolean,
     relationship_status: RelationshipStatusType,
+    apelido?: string,
 }
 
 export type ListProductWithFornecedor = productInterface & ProdFornecedorInterface;

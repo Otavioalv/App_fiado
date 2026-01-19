@@ -197,6 +197,7 @@ class ProdutoModel  {
                     p.fk_id_fornecedor AS id_fornecedor,
                     f.nome AS nome_fornecedor,
                     f.nomeestabelecimento,
+                    f.apelido,
                     COALESCE(cf.cliente_check, FALSE) AS cliente_check,
                     COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
                     CASE 
@@ -212,7 +213,7 @@ class ProdutoModel  {
                 OFFSET $4;
             `;
 
-            console.log(SQL_LIST);
+            // console.log(SQL_LIST);
 
             const SQL_TOTAL = `
                 SELECT 
