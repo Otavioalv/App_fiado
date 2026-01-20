@@ -22,6 +22,7 @@ export interface compraInterface {
     coletado_em?: Date; 
 
     nome_produto?: string;
+    nomeestabelecimento?:string;
     
     valor_unit?: number;
     id_cliente?: number;
@@ -32,7 +33,7 @@ export interface compraInterface {
     
     cancelado?:boolean;
     
-    shopping_status?: shoppingStatusType,
+    shopping_status?: shoppingStatusType;
 }
 
 

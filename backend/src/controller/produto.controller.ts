@@ -297,7 +297,7 @@ class ProdutoController {
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER, {list: [], pagination: filterOpt}));
             
-            const listProd:compraInterface[] = await this.produtoModel.getShopList(fromUserId, userType, filterOpt, toUser);
+            const listProd:compraInterface[] = await this.produtoModel.getShopList2(fromUserId, userType, filterOpt, toUser);
 
             return res.status(200).send(successResponse(ResponseApi.Purchace.LIST_SUCCESS, {list: listProd, pagination: filterOpt}));
         }catch(e) {
