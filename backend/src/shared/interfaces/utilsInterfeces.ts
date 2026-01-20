@@ -21,7 +21,8 @@ export type queryFilter = {
     cursor?: Cursor;
 };
 
-export type FilterListShop = "Mais Recente"| "Mais Antigo"| "Quitado"| "Pendente"| "Retirado"| "Aguardando Retirada"| "Aceito" | "Recusado" |"Em Analise" | "Cancelados";
+export type FilterListShop = "Mais Recente"| "Mais Antigo" | "Nome do Usuário" | "Nome do Produto" | "Nome do Estabelecimento" | "Apelido";
+// export type ShoppingTypeList = "Quitado"| "Pendente"| "Retirado"| "Aguardando Retirada"| "Aceito" | "Recusado" |"Em Analise" | "Cancelados";
 
 
 export interface payloadInterface extends JwtPayload {

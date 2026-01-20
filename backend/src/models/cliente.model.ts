@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { clienteInterface, idsPartnerInterface } from "../shared/interfaces/userInterfaces";
+import { clienteInterface, idsPartnerInterface, TypesListUser } from "../shared/interfaces/userInterfaces";
 import { UserModel } from "../shared/interfaces/class/UserModel";
 import { queryFilter } from "../shared/interfaces/utilsInterfeces";
 
@@ -192,13 +192,11 @@ class ClienteModel extends UserModel<clienteInterface>{
         }
     }
     
-    public async getPartnerByIdFornecedor(id: number, typeList: "all" | "received" | "sent" | "accepted" = "all", filterOpt:queryFilter): Promise<clienteInterface[]>{
+    public async getPartnerByIdFornecedor(id: number, typeList: TypesListUser = "all", filterOpt:queryFilter): Promise<clienteInterface[]>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
 
-
-            
             var sqlOpt = "";
             
             

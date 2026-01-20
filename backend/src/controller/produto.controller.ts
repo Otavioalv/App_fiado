@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { getTokenIdFromRequest } from "../shared/utils/tokenUtils";
-import { compraInterface, productInterface } from "../shared/interfaces/productInterface";
+import { compraInterface, productInterface, ShoppingStatusType } from "../shared/interfaces/productInterface";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import {ProdutoModel} from "../models/produto.model";
 import { z } from "zod";
@@ -275,29 +275,37 @@ class ProdutoController {
     public async shopList(req: FastifyRequest, res: FastifyReply, userType: UserType):Promise<void> {
         try{
             const fromUserId = await getTokenIdFromRequest(req);
-            const param = (req.params as {toUser?: string}).toUser;
+            const {toUser, typeList} = (req.params as {toUser?: string, typeList: string});
             const {...filterOpt} = req.query as queryFilter;
 
-            const toUser:number | undefined = param ? Number(param) : undefined;
-
-            filterOpt.filterList =  ["Mais Recente", 
-                                    "Mais Antigo", 
-                                    "Quitado", 
-                                    "Pendente", 
-                                    "Retirado", 
-                                    "Aguardando Retirada", 
-                                    "Aceito", 
-                                    "Recusado", 
-                                    "Em Analise",
-                                    "Cancelados"] as FilterListShop[];
+            filterOpt.filterList =  [
+                "Mais Recente", 
+                "Mais Antigo",
+                "Apelido",
+                "Nome do Usuário",
+                "Nome do Produto",
+                "Nome do Estabelecimento",
+            ] as FilterListShop[];
+            
 
             if(!filterOpt.filter)
                 filterOpt.filter = "Mais Recente" as FilterListShop;
 
+            const TYPES = ["ALL", "ANALYSIS", "CANCELED", "PAID", "PENDING", "REFUSED", "WAIT_REMOVE"] as ShoppingStatusType[];
+            const uppTypeList = typeList.toUpperCase()
+
+            if(!typeList || !TYPES.includes(uppTypeList as ShoppingStatusType)){
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER))
+            };
+
+            if(!fromUserId) {
+                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
+            }
+
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER, {list: [], pagination: filterOpt}));
             
-            const listProd:compraInterface[] = await this.produtoModel.getShopList2(fromUserId, userType, filterOpt, toUser);
+            const listProd:compraInterface[] = await this.produtoModel.getShopList2(fromUserId, userType, filterOpt, uppTypeList as ShoppingStatusType, toUser);
 
             return res.status(200).send(successResponse(ResponseApi.Purchace.LIST_SUCCESS, {list: listProd, pagination: filterOpt}));
         }catch(e) {
