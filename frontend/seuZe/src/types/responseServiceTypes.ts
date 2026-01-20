@@ -19,6 +19,7 @@ export type PaginationType = FilterType & {
 	totalPages?: number,
 }
 
+export type ShoppingStatusType = "CANCELED"| "REFUSED"| "ANALYSIS"| "WAIT_REMOVE"| "PAID"| "PENDING";
 export interface ShoppingData {
    id_compra?: number,
    fk_fornecedor_id: number,
@@ -42,6 +43,8 @@ export interface ShoppingData {
    nome_user: string,
    apelido_user: string,
    telefone_user: string,
+   
+   shopping_status: ShoppingStatusType,
 }
 
 

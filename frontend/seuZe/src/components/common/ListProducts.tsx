@@ -34,7 +34,7 @@ export function ListProducts({
     const renderItem = useCallback(
         ({item}: {item: ProductCardProps}) => (
             <MemoProductCard
-                fornecedorName={item.fornecedorName}
+                nome={item.nome}
                 marketName={item.marketName}
                 price={item.price}
                 prodName={item.prodName}
@@ -59,7 +59,7 @@ export function ListProducts({
         () => (
             <MyScreenContainer>
                 <MemoFeedbackTemplate
-                    title={"Nenhum fornecedor encontrado"}
+                    title={"Nenhum produto encontrado"}
                     description={"Verifique os filtros de pesquisa ou sua conexão com a internet."}
                     iconName="info"
                 />

@@ -17,8 +17,6 @@ export interface ListUsersProps {
     isFetchingNextPage: boolean,
     onEndReached: () => void, 
     headerComponent?: ReactElement;
-    // React.ComponentType<any> | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | null | undefined
-    // ListHeaderComponent={}
 }
 
 export function ListUsers({

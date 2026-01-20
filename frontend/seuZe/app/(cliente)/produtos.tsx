@@ -58,7 +58,7 @@ export default function Produtos() {
                     prodName: u.nome_prod,
                     price: u.preco,
                     marketName: u.nomeestabelecimento,
-                    fornecedorName: fornecedorName,
+                    nome: fornecedorName,
                     relationshipType: u.relationship_status,
                     id: idString,
                 });
@@ -145,7 +145,6 @@ export default function Produtos() {
                 setFilterValue={setFilter}
                 placeholder="Buscar por nome, apelido, estabelecimento"
             />
-
 
             {isLoading ? 
                 <ListProductsSkeleton headerComponent={<ChipListSkeleton/>}/> : (
