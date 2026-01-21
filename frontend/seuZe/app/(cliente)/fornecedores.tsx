@@ -10,6 +10,29 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Keyboard } from "react-native";
 
+const chipList: ChipDataType<TypeUserList>[] = [
+    {
+        id: "all",
+        label: "Todos"
+    },
+    {
+        id: "accepted",
+        label: "Parcerias"
+    },
+    {
+        id: "received",
+        label: "Solicitações Recebidas"
+    }, 
+    {
+        id: "sent",
+        label: "Solicitações Enviadas"
+    },
+    {
+        id: "none",
+        label: "Conheçer Fornecedores"
+    }
+];
+
 export default function Fornecedores() {
     const { type } = useLocalSearchParams<{ type?: TypeUserList }>();
     const router = useRouter();
@@ -52,7 +75,7 @@ export default function Fornecedores() {
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
-                const idString = u.id_fornecedor?.toString() || Math.random().toString();
+                const idString = u.id_fornecedor?.toString();
                 const description: string = `${u.nome}${u.apelido ? ` - (${u.apelido})` : ""}, ${u.uf}`;
 
                 let dateValue = ""
@@ -107,7 +130,6 @@ export default function Fornecedores() {
     }, [type, router]);
 
 
-
     const searchOnList: OnSubmitSearchType = (txtSearch: string, txtFilter: string = "") => {
         Keyboard.dismiss();
         console.log(txtFilter, txtSearch);
@@ -130,29 +152,6 @@ export default function Fornecedores() {
         )
     }
 
-    const chipList: ChipDataType<TypeUserList>[] = [
-        {
-            id: "all",
-            label: "Todos"
-        },
-        {
-            id: "accepted",
-            label: "Parcerias"
-        },
-        {
-            id: "received",
-            label: "Solicitações Recebidas"
-        }, 
-        {
-            id: "sent",
-            label: "Solicitações Enviadas"
-        },
-        {
-            id: "none",
-            label: "Conheçer Fornecedores"
-        }
-    ];
-
 
     return(
         <>  
@@ -163,7 +162,7 @@ export default function Fornecedores() {
                 setInputValue={setTypingText}
                 filterValue={filter.length ? filter : currentFilter}
                 setFilterValue={setFilter}
-                placeholder="Buscar por nome, apelido, estabelecimento"
+                placeholder="Nome, Apelido, Estabelecimento..."
             />
 
             {isLoading ? 

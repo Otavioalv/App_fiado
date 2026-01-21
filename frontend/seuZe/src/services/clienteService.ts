@@ -2,7 +2,7 @@ import { DefaultRegisterSchema } from "../schemas/DefaultRegisterSchema";
 import { LoginSchema } from "../schemas/LoginSchema";
 import { api } from "./api";
 import { responseAxiosInterfaces } from "./typesApi";
-import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData } from "../types/responseServiceTypes";
+import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList } from "../types/responseServiceTypes";
 
 
 const defaultEndPoint:string = "/cliente"
@@ -44,6 +44,7 @@ export async function me(): Promise<ClienteDataType>{
     }
 }
 
+
 export async function productList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
     try {
         const endPoint = defaultEndPoint + "/product/list/" + listType;
@@ -60,9 +61,9 @@ export async function productList(pagination: PaginationType = {page: 1, size: 1
     }
 }
 
-export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}): Promise<ResultsWithPagination<ShoppingData[]>>{
+export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeShoppingList): Promise<ResultsWithPagination<ShoppingData[]>>{
     try{
-        const endPoint = defaultEndPoint + "/product/buy/list";
+        const endPoint = defaultEndPoint + "/product/buy/list/" + listType;
         
         const response = await api.post(endPoint, {}, {
             params: {

@@ -21,7 +21,7 @@ export type PaginationType = FilterType & {
 
 export type ShoppingStatusType = "CANCELED"| "REFUSED"| "ANALYSIS"| "WAIT_REMOVE"| "PAID"| "PENDING";
 export interface ShoppingData {
-   id_compra?: number,
+   id_compra: number,
    fk_fornecedor_id: number,
    quantidade: number,
 
@@ -43,6 +43,7 @@ export interface ShoppingData {
    nome_user: string,
    apelido_user: string,
    telefone_user: string,
+   nomeestabelecimento: string,
    
    shopping_status: ShoppingStatusType,
 }
@@ -115,3 +116,4 @@ export type AppDefaultSizes = "S" | "M" | "L";
 export type OnSubmitSearchType = (search: string, filter?: string) => void;
 
 export type TypeUserList = "all" | "received" | "sent" | "accepted" | "none";
+export type TypeShoppingList = "canceled" | "refused" | "analysis" | "wait_remove" | "paid" | "pending" | "all";

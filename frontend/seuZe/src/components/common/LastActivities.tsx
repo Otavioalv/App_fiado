@@ -2,6 +2,7 @@ import { FlatList, Text, View, StyleSheet, Dimensions } from "react-native";
 import { BasicInfoCardProps, BasicInfoCardSkeleton, MemoBasicInfoCard} from "./BasicInfoCard";
 import { theme } from "@/src/theme";
 import {ReactNode, useCallback} from "react";
+import { FlashList } from "@shopify/flash-list";
 
 export type InfoType = BasicInfoCardProps & {id: string};
 
@@ -29,6 +30,12 @@ export default function LastActivities({title, infos, isLoading, emptyStateCompo
         []
     );
 
+    const itemSeparator = () => {
+        return (
+            <View style={{width: theme.gap.sm}}/>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.textSubtitle}>
@@ -40,7 +47,7 @@ export default function LastActivities({title, infos, isLoading, emptyStateCompo
                     data={["1", "2"]}
                     keyExtractor={(item) => item}
                     horizontal={true}
-                    contentContainerStyle={styles.listContainer}
+                    contentContainerStyle={[styles.listContainer, styles.listContainerSkeleton]}
                     showsHorizontalScrollIndicator={false}
                     renderItem={() => (
                         <View style={styles.cardContainer}>
@@ -54,16 +61,17 @@ export default function LastActivities({title, infos, isLoading, emptyStateCompo
             {isEmpty && emptyStateComponent}
 
             {!isLoading && !isEmpty && (
-                <FlatList
+                <FlashList
                     data={infos}
                     keyExtractor={(item) => item.id}
-                    initialNumToRender={5}
-                    windowSize={10}
+                    // initialNumToRender={5}
+                    // windowSize={10}
+                    // maxToRenderPerBatch={10}
                     horizontal={true}
-                    maxToRenderPerBatch={10}
                     contentContainerStyle={styles.listContainer}
                     showsHorizontalScrollIndicator={false}
                     renderItem={renderItem}
+                    ItemSeparatorComponent={itemSeparator}
                 />
             )}
         </View>
@@ -82,7 +90,10 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         padding: theme.padding.sm,
-        gap: theme.gap.md,
+        paddingHorizontal: 0,
+    },
+    listContainerSkeleton: {
+        gap: theme.gap.sm,
         // backgroundColor: "red"
     },
     cardContainer: {

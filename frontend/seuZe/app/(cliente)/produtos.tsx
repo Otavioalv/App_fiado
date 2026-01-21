@@ -9,6 +9,30 @@ import { ErrorTypes, OnSubmitSearchType, TypeUserList } from "@/src/types/respon
 import { useEffect, useMemo, useState } from "react";
 import { Keyboard } from "react-native";
 
+
+const chipList: ChipDataType<TypeUserList>[] = [
+    {
+        id: "all",
+        label: "Todos"
+    },
+    {
+        id: "accepted",
+        label: "Parcerias"
+    },
+    {
+        id: "received",
+        label: "Solicitações Recebidas"
+    }, 
+    {
+        id: "sent",
+        label: "Solicitações Enviadas"
+    },
+    {
+        id: "none",
+        label: "Conheçer Fornecedores"
+    }
+];
+
 export default function Produtos() {
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [typingText, setTypingText] = useState<string>("");
@@ -69,8 +93,6 @@ export default function Produtos() {
 
     const searchOnList: OnSubmitSearchType = (txtSearch: string, txtFilter: string = "") => {
         Keyboard.dismiss();
-        
-        console.log(txtFilter, txtSearch);
 
         setErrorType(null);
         setTypingText(txtSearch.trim());
@@ -79,30 +101,6 @@ export default function Produtos() {
         setFilter(txtFilter.trim());
         setFilterQuery(txtFilter.trim());
     }
-
-     const chipList: ChipDataType<TypeUserList>[] = [
-        {
-            id: "all",
-            label: "Todos"
-        },
-        {
-            id: "accepted",
-            label: "Parcerias"
-        },
-        {
-            id: "received",
-            label: "Solicitações Recebidas"
-        }, 
-        {
-            id: "sent",
-            label: "Solicitações Enviadas"
-        },
-        {
-            id: "none",
-            label: "Conheçer Fornecedores"
-        }
-    ];
-
 
     useEffect(() => {
         if(isError) {
@@ -143,7 +141,7 @@ export default function Produtos() {
                 setInputValue={setTypingText}
                 filterValue={filter.length ? filter : currentFilter}
                 setFilterValue={setFilter}
-                placeholder="Buscar por nome, apelido, estabelecimento"
+                placeholder="Nome, Apelido, Estabelecimento, Produto..."
             />
 
             {isLoading ? 

@@ -1,5 +1,6 @@
+import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
-import { View, Text, TextStyle, ViewStyle, StyleSheet } from "react-native";
+import { View, Text, TextStyle, ViewStyle, StyleSheet, Animated } from "react-native";
 
 type ChipBadgeVariants = "primary" | "outline" | "disabled";
 
@@ -55,13 +56,24 @@ export function ChipBadge({
     );
 }
 
+export function ChipBadgeSkeleton() {
+    const anmOpacity = useAnimationOpacitySkeleton();
+
+    return (
+        <Animated.View
+            style={[anmOpacity, styles.containerSkeleton]}
+        />
+    );
+}
+
 
 const styles = StyleSheet.create({
     // Container
     containerBase: {
         padding: theme.padding.xs,
         paddingHorizontal: theme.padding.sm,
-        borderRadius: 1000
+        borderRadius: 1000,
+        alignItems: "center"
     },
     containerPrimary: {
         backgroundColor: theme.colors.orange
@@ -73,6 +85,12 @@ const styles = StyleSheet.create({
     },
     containerDisabled: {
         backgroundColor: theme.colors.pseudoLightGray
+    },
+
+    containerSkeleton: {
+        width: 80,
+        height: 25,
+        borderRadius: 1000,
     },
 
     // Text

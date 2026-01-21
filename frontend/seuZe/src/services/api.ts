@@ -16,6 +16,7 @@ export const api = axios.create({
     headers: {"Content-Type": "application/json"}
 });
 
+
 export const setAuthToken = (token: string | null) => {
     authToken = token;
 }
@@ -39,7 +40,7 @@ api.interceptors.request.use(
             // const fakeError = {
             //     isAxiosError: true,
             //     response: {
-            //         status: 500, // <--- O NÚMERO MÁGICO
+            //         status: 500, 
             //         data: { message: "Simulação de explosão no servidor" }
             //     }
             // };

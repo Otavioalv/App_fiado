@@ -6,30 +6,19 @@ import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShor
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
 import { AppError } from "@/src/errors/AppError";
-import { listPartner, me, shoppingList } from "@/src/services/clienteService";
+import { useListPartner, useMe, useShoppingList } from "@/src/hooks/useClienteQueries";
 import { theme } from "@/src/theme";
-import { ClienteDataType, ErrorTypes, PaginationType } from "@/src/types/responseServiceTypes";
+import { ErrorTypes} from "@/src/types/responseServiceTypes";
+import { transformDateToUI } from "@/src/utils";
 import {Feather, FontAwesome} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Alert, RefreshControl, ScrollView } from "react-native";
 
 
 export default function Home() {
-    
-    const [userData, setUserData] = useState<ClienteDataType>({nome: "", telefone: "", id_cliente: 0});
-    const [meLoad, setMeLoad] = useState<boolean>(true);
-    
-    const [lastPuschases, setLastPuschases] = useState<InfoType[]>([]);
-    const [purchaceLoad, setPurchaceLoad] = useState<boolean>(true);
-
-    const [lastPartnerSent, setLastPartnerSent] = useState<InfoType[]>([]);
-    const [lastPartnerLoad, setLastPartnerLoad] = useState<boolean>(true);
-
     const [refreshing, setRefreshing] = useState<boolean>(false);
-
     const [errorType, setErrorType] = useState<ErrorTypes | null>(null);
-
 
     const router = useRouter();
     
@@ -77,95 +66,67 @@ export default function Home() {
             onPress: () => router.push("/(cliente)/perfil")
         }  
     ];
+
+    const {
+        data: userData,
+        isLoading: meLoad,
+        refetch: fetchMe
+    } = useMe();
+
+    const {
+        data: lastPurchased,
+        isLoading: purchasedLoad,
+        refetch: fetchShoppingList
+    } = useShoppingList({
+        filter: "Mais Recente",
+    }, "all", 10);
+
+    const {
+        data: lastPartnerSent,
+        isLoading: lastPartnerLoad,
+        refetch: fetchPartnerSent
+    } = useListPartner({
+        filter: "Data",
+    }, "sent", 10);
+
+    const listPurchased:InfoType[] = useMemo((): InfoType[] => {
+            const list = lastPurchased?.pages?.[0]?.list;
+            
+            if(!list) return [];
+
+            const info:InfoType[] = list.map(l => ({
+                id: l.id_compra.toString(),
+                title: l.nome_produto,
+                info: `Coletado em ${transformDateToUI(l.coletado_em)}`
+            }));
+
+            return info
+
+    }, [lastPurchased]);
+
+    const listPartners: InfoType[] = useMemo(():InfoType[] => {
+        const list = lastPartnerSent?.pages?.[0]?.list;
+
+        if(!list) return [];
+
+        const info:InfoType[] = list.map(l => {
+            let dateInfo = "";
+
+            if(l.created_at) {
+                dateInfo = `Enviado em ${transformDateToUI(l.created_at)}`;
+            }
+
+            return {
+                id: l.id_fornecedor.toString(),
+                info: dateInfo,
+                title: l.nome
+            }
+        });
+        
+        return info;
+    }, [lastPartnerSent]);
  
-    // Chama service de ME
-    const fetchMe = useCallback(async () => {
-        try {
-            setMeLoad(true);
-            const result:ClienteDataType = await me();   
-            setUserData(result);
-        }catch(err: any) {
-            throw err;
-        }finally{
-            setMeLoad(false);
-        }
-    }, []);
 
-
-    // Chama service de ultimas compras
-    const fetchShoppingList = useCallback(async () => {
-        try {
-            setPurchaceLoad(true);
-
-            const pagination: PaginationType = {
-                page: 1,
-                size: 10, 
-                filter: "Mais Recente"
-            }
-
-            const result = await shoppingList(pagination);
-
-            if(result.list.length){
-                const infoData:InfoType[] = result.list.map((r, i) => {
-                    const dataObj = new Date(r.coletado_em);
-                    const day = String(dataObj.getDate()).padStart(2, "0");
-                    const month = String(dataObj.getMonth() + 1).padStart(2, "0");
-                    return {
-                        title: r.nome_produto,
-                        info: `Coletado em ${day}/${month}`,
-                        id: i.toString()
-                    }
-                });
-
-                setLastPuschases([...infoData]);
-            }
-        } catch(err) {
-            throw err;
-        }finally {
-            setPurchaceLoad(false);
-        }
-    }, []);
-
-    // Chama service de Ultimas parcerias pendentes
-    const fetchPartnerSent = useCallback(async () => {
-        try{
-            setLastPartnerLoad(true);
-
-            const pagination: PaginationType = {
-                size: 10,
-                page: 1,
-                filter: "Data"
-            }
-
-            const result = await listPartner(pagination, "sent");
-
-            if(result.list.length) {
-                const infoData:InfoType[] = result.list.map((r, i) => {
-                    let dateInfo = "";
-
-                    if(r.created_at) {
-                        const dataObj = new Date(r.created_at);
-                        const day = String(dataObj.getDate()).padStart(2, "0");
-                        const month = String(dataObj.getMonth() + 1).padStart(2, "0");
-
-                        dateInfo = `Enviado em ${day}/${month}`;
-                    }
-
-                    return {
-                        title: r.nome,
-                        info: dateInfo,
-                        id: i.toString()
-                    }
-                });
-
-                setLastPartnerSent(infoData);
-            }
-        } catch(err) {
-            throw err;
-        }finally {
-            setLastPartnerLoad(false);
-        }
-    }, []);
 
 
     // Carrega os dados
@@ -201,9 +162,9 @@ export default function Home() {
 
 
     // Carrega automaticamente ao iniciar a tela
-    useEffect(() => {
-        loadData();
-    }, [loadData]);
+    // useEffect(() => {
+    //     loadData();
+    // }, [loadData]);
 
 
     // Tratamento de erro
@@ -230,10 +191,10 @@ export default function Home() {
                     progressBackgroundColor={"#FFFFFF"}
                 />
             }   
-        >
+        >   
             <UserHeader 
-                nome={userData.nome} 
-                apelido={userData.apelido}
+                nome={userData?.nome || ""} 
+                apelido={userData?.apelido || ""}
                 isLoading={meLoad}
             />
 
@@ -245,9 +206,9 @@ export default function Home() {
                 <SectionContainer title="Últimas Atividades">
                     <LastActivities 
                         title={"Últimas Compras"} 
-                        infos={lastPuschases} 
+                        infos={listPurchased} 
                         // infos={[]} 
-                        isLoading={purchaceLoad}
+                        isLoading={purchasedLoad}
                         emptyStateComponent={
                             <EmptyState
                                 title={"Você ainda não fez compras"}
@@ -266,7 +227,7 @@ export default function Home() {
                     />
                     <LastActivities 
                         title={"Últimas parcerias pendentes"} 
-                        infos={lastPartnerSent} 
+                        infos={listPartners} 
                         // infos={[]} 
                         isLoading={lastPartnerLoad}
                         emptyStateComponent={

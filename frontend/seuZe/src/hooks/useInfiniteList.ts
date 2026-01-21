@@ -26,3 +26,5 @@ export function useInfiniteList<T extends PaginationResponseType>({
         }
     });
 }
+
+

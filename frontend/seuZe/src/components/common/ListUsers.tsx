@@ -135,7 +135,7 @@ export function ListUsers({
 type ListUsersSkeletonProps = {headerComponent?: ReactElement};
 
 export function ListUsersSkeleton({headerComponent}: ListUsersSkeletonProps) {
-    const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const data = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 
     const renderItem = useCallback(() => (
@@ -147,7 +147,7 @@ export function ListUsersSkeleton({headerComponent}: ListUsersSkeletonProps) {
     return (
         <FlatList
             data={data}
-            keyExtractor={(item) => item.toString()}
+            keyExtractor={(item) => item}
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
             renderItem={renderItem}

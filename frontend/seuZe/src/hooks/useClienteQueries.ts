@@ -1,5 +1,6 @@
-import { listAllFornecedores, listPartner, productList, shoppingList } from "../services/clienteService";
-import { FilterType, TypeUserList} from "../types/responseServiceTypes";
+import { useQuery } from "@tanstack/react-query";
+import { listAllFornecedores, listPartner, me, productList, shoppingList } from "../services/clienteService";
+import { FilterType, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 
 export function useListAllFornecedores(filters: FilterType) {
@@ -18,17 +19,17 @@ export function useListAllFornecedores(filters: FilterType) {
     });
 }
 
-export function useListPartner(filters: FilterType, listType: TypeUserList) {
-    const key: string = `list-partner-fornecedor-${listType}`;
+export function useListPartner(filters: FilterType, listType: TypeUserList, size: number = 20) {
+    const key: string = `list-partner-fornecedor`;
     // console.log(JSON.stringify(filters, null, "  "), listType, key);
 
     return useInfiniteList({
-        queryKey: [key, filters],
+        queryKey: [key, listType, filters],
         queryFn: async ({pageParam}) => {
             return await listPartner(
                 {
                     page: pageParam as number, 
-                    size: 20,
+                    size: size,
                     filter: filters.filter,
                     search: filters.search
                 }, 
@@ -39,13 +40,11 @@ export function useListPartner(filters: FilterType, listType: TypeUserList) {
     });
 }
 
-
-
 export function useProductList(filters: FilterType, listType: TypeUserList) {
-    const key: string = `product-list-${listType}`;
+    const key: string = `product-list`;
 
     return useInfiniteList({
-        queryKey: [key, filters],
+        queryKey: [key, listType, filters],
         queryFn: async({pageParam}) => {
             return await productList(
                 {
@@ -62,23 +61,36 @@ export function useProductList(filters: FilterType, listType: TypeUserList) {
 
 }
 
-export function useShoppingList(filters: FilterType/* , listType: TypeUserList */) {
+export function useShoppingList(filters: FilterType, listType: TypeShoppingList, size: number = 20) {
     const key: string = `shopping-list`;
-
+    
     return useInfiniteList({
-        queryKey: [key, filters],
+        queryKey: [key, listType, filters],
         queryFn: async({pageParam}) => {
             return await shoppingList(
                 {
                     page: pageParam as number,
-                    size: 20,
+                    size: size,
                     filter: filters.filter,
                     search: filters.search
                 },
-                // listType
+                listType
             )
         }, 
         initialPageParam: 1
+    });
+}
+
+export function useMe() {
+    const key: string = "me-cliente";
+
+    return useQuery({
+        queryKey: [key],
+        queryFn: async () => {
+            return await me();
+        },
+        // staleTime: 1000 * 60 * 10, // 10min
+        // retry: 1,
     });
 }
 

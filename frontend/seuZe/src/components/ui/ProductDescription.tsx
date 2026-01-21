@@ -21,32 +21,32 @@ export function ProductDescription({
         <View style={styles.container}>
             
             <View style={[styles.textContainer, styles.textContainerBase]}>
-                <Text style={[styles.titleText, styles.titleBase]}>
+                <Text style={[styles.titleText, styles.titleBase]} numberOfLines={1}>
                     {prodName}
                 </Text>
-                <Text style={[styles.priceText, styles.titleText]}>
+                <Text style={[styles.titleText, styles.priceText]} numberOfLines={1}>
                     R$ {price}
                 </Text>
             </View>
 
 
             <View style={[styles.textContainerBase]}>
-                <Text>
-                    <Text style={styles.subTitleText}>
+                <Text numberOfLines={1}>
+                    <Text style={styles.subTitleText} numberOfLines={1}>
                         {"Estabelecimento:  "}
                     </Text>
-                    <Text style={styles.subTitleValueText}>
+                    <Text style={styles.subTitleValueText} numberOfLines={1}>
                         {marketName}
                     </Text>
                 </Text>
 
-                <Text>
-                    <Text style={styles.subTitleText}>
+                <Text numberOfLines={1}>
+                    <Text style={styles.subTitleText} numberOfLines={1}>
                         {"Resp: "}
                     </Text>
-                    <Text style={styles.subTitleValueText}>
+                    <Text style={styles.subTitleValueText} numberOfLines={1}>
                         {nome}
-                        {apelido && ` - ${apelido}`}
+                        {apelido && ` - (${apelido})`}
                     </Text>
                 </Text>
 
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
     },
     
 
@@ -96,12 +96,14 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.textLG.fontSize,
     },
     titleBase: {
-        color: theme.colors.textNeutral900
+        color: theme.colors.textNeutral900,
+        maxWidth: "70%"
     },
     
 
     priceText: {
-        color: theme.colors.orange
+        color: theme.colors.orange,
+        maxWidth: "30%"
     },
 
     
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
     },
     subTitleValueText: {
         color: theme.colors.textNeutral900,
-        fontSize: theme.typography.textMD.fontSize,    
+        fontSize: theme.typography.textMD.fontSize,  
     }
 });
 

@@ -6,7 +6,7 @@ import { theme } from "@/src/theme";
 export default function ClienteLayout() {
     return (
         <Tabs
-            initialRouteName="compras" 
+            initialRouteName="home" 
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: theme.colors.orange,
