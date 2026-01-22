@@ -1,15 +1,16 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
-import FeedbackError from "@/src/components/common/FeedbackError";
-import { ListShoppingProd, ListShoppingProdSkeleton, ListShoppingType } from "@/src/components/common/ListShoppingProd";
-import MyScreenContainer from "@/src/components/common/MyScreenContainer";
+import { GenericInfiniteList } from "@/src/components/common/GenericInfiniteList";
+import { ListShoppingType } from "@/src/components/common/ListShoppingProd";
+import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
-import { AppError } from "@/src/errors/AppError";
+import { MemoShoppingCard, MemoShoppingCardSkeleton, ShoppingCardProps } from "@/src/components/common/ShoppingCard";
 import { useShoppingList } from "@/src/hooks/useClienteQueries";
-import { ErrorTypes, OnSubmitSearchType, TypeShoppingList } from "@/src/types/responseServiceTypes";
+import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
+import { useFilterScreen } from "@/src/hooks/useFilterScreen";
+import { TypeShoppingList } from "@/src/types/responseServiceTypes";
 import { transformDateToUI } from "@/src/utils";
-import { useEffect, useMemo, useState } from "react";
-import { Keyboard } from "react-native";
-
+import { useCallback, useMemo } from "react";
+import { View } from "react-native";
 
 const chipList:ChipDataType<TypeShoppingList>[] = [
     {
@@ -42,14 +43,19 @@ const chipList:ChipDataType<TypeShoppingList>[] = [
     }
 ];
 
-
 export default function Compras() {
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [typingText, setTypingText] = useState<string>("");
-    const [filterQuery, setFilterQuery] = useState<string>("");
-    const [filter, setFilter] = useState<string>("");
-    const [errorType, setErrorType] = useState<ErrorTypes | null>(null);
-    const [activeCategory, setActiveCategory] = useState<TypeShoppingList>("all");
+    const {
+        searchQuery,
+        filter,
+        typingText,
+        handleSearch,
+        activeCategory,
+        errorType,
+        setErrorType,
+        setActiveCategory,
+        setTypingText,
+        setFilter,
+    } = useFilterScreen<TypeShoppingList>("all");
 
     const {
         data,
@@ -69,10 +75,10 @@ export default function Compras() {
         activeCategory
     );
 
+
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
 
-    // console.log(JSON.stringify(data, null, "  "));
 
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
     // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
@@ -109,83 +115,72 @@ export default function Compras() {
         return Array.from(map.values());
     }, [data]);
 
-    const searchOnList: OnSubmitSearchType = (txtSearch: string, txtFilter: string = "") => {
-        Keyboard.dismiss();
-        console.log(txtFilter, txtSearch);
-        setErrorType(null);
-        setTypingText(txtSearch.trim());
-        setSearchQuery(txtSearch.trim());
+    const renderItem = useCallback(
+        ({item}: {item: ShoppingCardProps}) => (
+            <MemoShoppingCard
+                marketName={item.marketName}
+                nome={item.nome}
+                price={item.price}
+                prodName={item.prodName}
+                status={item.status}
+                apelido={item.apelido}
+                prazo={item.prazo}
+                paid={item.paid}
+                criadoEm={item.criadoEm}
+            />
+        ),
+        []
+    );
 
-        setFilter(txtFilter.trim());
-        setFilterQuery(txtFilter.trim());
-    }
-    
-    useEffect(() => {
-        if(isError) {
-            if(error instanceof AppError){
-                const {message, type} = error;
-                
-                console.log("[Load List] Erro: ", message);
-                console.log("[Load List] Type: ", type);
-                console.log("\n");
-    
-                setErrorType(type);
-            }
-            else {
-                console.log("[Load List] Erro Desconhecido: ", error, "\n");
-                setErrorType("UNKNOWN");
-            }
-        }
-    }, [isError, error]);
+    const renderItemSkeleton = useCallback(() => (
+            <View>
+                <MemoShoppingCardSkeleton/>
+            </View>
+    ), []);
 
+    useErrorScreenListener(isError, error, setErrorType);
 
-    if(errorType) {
-        return (
-            <MyScreenContainer>
-                <FeedbackError
-                    errorType={errorType}
-                    onAction={() => searchOnList(searchQuery, filterQuery)}
-                />
-            </MyScreenContainer>
-        )
-    }
-
-    
-
-    return(
-        <>
+    return (
+        <ScreenErrorGuard errorType={errorType} onRetry={refetch}>
             <SearchInputList
                 filterList={currentFilterList}
-                onSubmit={searchOnList}
+                onSubmit={handleSearch}
                 inputValue={typingText}
                 setInputValue={setTypingText}
                 filterValue={filter.length ? filter : currentFilter}
                 setFilterValue={setFilter}
-                placeholder="Nome, Apelido, Estabelecimento, Produto..."
+                placeholder="Nome, Apelido, Estabelecimento..."
             />
 
-            {isLoading ? 
-                <ListShoppingProdSkeleton headerComponent={<ChipListSkeleton/>}/> : (
-                <ListShoppingProd
-                    data={listShopping}
-                    refreshing={isRefetching}
-                    onRefresh={refetch}
-                    isFetchingNextPage={isFetchingNextPage}
-                    onEndReached={() => {
-                        if(hasNextPage && !isFetchingNextPage) {
-                            fetchNextPage();
-                        }
-                    }}
-                    
-                    headerComponent={
-                        <ChipList
-                            chipList={chipList}
-                            itemSelected={activeCategory} 
-                            setItemSelected={setActiveCategory}
-                        />
+            <GenericInfiniteList
+                SkeletonComponent={<MemoShoppingCardSkeleton/>}
+                SkeletonList={{
+                    data: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                    keyExtractor: (i) => i,
+                    renderItem: renderItemSkeleton,
+                    HeaderComponent: <ChipListSkeleton/>
+                }}
+                data={listShopping}
+                renderItem={renderItem}
+                isFetchingNextPage={isFetchingNextPage}
+                isLoading={isLoading}
+                isRefetching={isRefetching}
+                keyExtractor={(i) => i.id.toString()}
+                onEndReached={() => {
+                    if (hasNextPage && !isFetchingNextPage) {
+                        fetchNextPage();
                     }
-                /> 
-            )}
-        </>
-    );
+                }}
+                onRefresh={refetch}
+                HeaderComponent={
+                    <ChipList 
+                        chipList={chipList}
+                        itemSelected={activeCategory} 
+                        setItemSelected={setActiveCategory}
+                    />
+                }
+                emptyMessage={"Nenhum usuário encontrado"}
+            />
+        </ScreenErrorGuard>
+    ); 
 }

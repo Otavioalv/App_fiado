@@ -61,6 +61,15 @@ export default function ClienteLayout() {
                         <Feather name="user" size={24} color={color}/>,
                 }}
             />
+
+            <Tabs.Screen
+                name="teste"
+                options={{
+                    title: "Teste",
+                    tabBarIcon: ({color}) => 
+                        <Feather name="terminal" size={24} color={color}/>,
+                }}
+            />
         </Tabs>
     )
 }

@@ -1,55 +1,61 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
 import { GenericInfiniteList } from "@/src/components/common/GenericInfiniteList";
-import { ListUsersType } from "@/src/components/common/ListUsers";
+import { ListShoppingType } from "@/src/components/common/ListShoppingProd";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
-import { MemoUserCard, MemoUserCardSkeleton, UserCardProps } from "@/src/components/common/UserCard";
-import { useListPartner } from "@/src/hooks/useClienteQueries";
+import { MemoShoppingCard, MemoShoppingCardSkeleton, ShoppingCardProps } from "@/src/components/common/ShoppingCard";
+import { useShoppingList } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
-import { TypeUserList } from "@/src/types/responseServiceTypes";
+import { TypeShoppingList } from "@/src/types/responseServiceTypes";
+import { transformDateToUI } from "@/src/utils";
 import { useCallback, useMemo } from "react";
 import { View } from "react-native";
 
-const chipList: ChipDataType<TypeUserList>[] = [
+const chipList:ChipDataType<TypeShoppingList>[] = [
     {
         id: "all",
         label: "Todos"
-    },
-    {
-        id: "accepted",
-        label: "Parcerias"
-    },
-    {
-        id: "received",
-        label: "Solicitações Recebidas"
     }, 
     {
-        id: "sent",
-        label: "Solicitações Enviadas"
+        id: "analysis",
+        label: "Em Análise"
     },
     {
-        id: "none",
-        label: "Conheçer Fornecedores"
+        id: "paid",
+        label: "Quitado"
+    }, 
+    {
+        id: "pending",
+        label: "Pendente"
+    }, 
+    {
+        id: "refused",
+        label: "Recusado"
+    },
+    {
+        id: "wait_remove",
+        label: "Aguardando Retirada"
+    },
+    {
+        id: "canceled",
+        label: "Cancelado"
     }
 ];
 
-export default function Fornecedores() {
-
+export default function Teste() {
     const {
         searchQuery,
         filter,
         typingText,
+        handleSearch,
         activeCategory,
         errorType,
-        
         setErrorType,
         setActiveCategory,
         setTypingText,
         setFilter,
-
-        handleSearch, 
-    } = useFilterScreen<TypeUserList>("all");
+    } = useFilterScreen<TypeShoppingList>("all");
 
     const {
         data,
@@ -61,7 +67,7 @@ export default function Fornecedores() {
         isRefetching,
         isError,
         error
-    } = useListPartner(
+    } = useShoppingList(
         {
             search: searchQuery,
             filter: filter,
@@ -77,46 +83,50 @@ export default function Fornecedores() {
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
     // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
     // ISSO FILTRA USUARIOS POR ID PARA NAO CAUSAR REPETIÇÃO DE USUARIO NA LISTA, E NÃO OCORRER UM ERRO
-    const listUsers = useMemo(() => {
+    const listShopping = useMemo(() => {
         if (!data) return [];
 
-        const map = new Map<string, ListUsersType>();
+        const map = new Map<string, ListShoppingType>();
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
-                const idString = u.id_fornecedor?.toString();
-                const description: string = `${u.nome}${u.apelido ? ` - (${u.apelido})` : ""}, ${u.uf}`;
-
-                let dateValue = ""
-                if(u.created_at) {
-                    const dataObj = new Date(u.created_at);
-                    const day = String(dataObj.getDate()).padStart(2, "0");
-                    const month = String(dataObj.getMonth() + 1).padStart(2, "0");
-
-                    dateValue = `${day}/${month}`;
-                }
+                const idString = u.id_compra?.toString() || Math.random().toString();
+                
+                let dateValue = transformDateToUI(u.prazo);
+                let createdAtValue = transformDateToUI(u.created_at);
 
                 map.set(idString, {
-                    title: u.nomeestabelecimento,
-                    description: description,
                     id: idString,
-                    relationshipType: u.relationship_status ?? 'NONE',
-                    date: dateValue
+                    marketName: u.nomeestabelecimento,
+                    nome: u.nome_user,
+                    price: u.valor_unit,
+                    prodName: u.nome_produto,
+                    status: u.shopping_status,
+                    prazo: dateValue,
+                    apelido: u.apelido_user,
+                    paid: u.quitado,
+                    criadoEm: createdAtValue
                 });
+
+                // console.log(map);
             });
         });
 
         return Array.from(map.values());
     }, [data]);
 
-
     const renderItem = useCallback(
-        ({item}: {item: UserCardProps}) => (
-            <MemoUserCard 
-                title={item.title} 
-                description={item.description} 
-                relationshipType={item.relationshipType}
-                date={item.date}
+        ({item}: {item: ShoppingCardProps}) => (
+            <MemoShoppingCard
+                marketName={item.marketName}
+                nome={item.nome}
+                price={item.price}
+                prodName={item.prodName}
+                status={item.status}
+                apelido={item.apelido}
+                prazo={item.prazo}
+                paid={item.paid}
+                criadoEm={item.criadoEm}
             />
         ),
         []
@@ -124,7 +134,7 @@ export default function Fornecedores() {
 
     const renderItemSkeleton = useCallback(() => (
             <View>
-                <MemoUserCardSkeleton/>
+                <MemoShoppingCardSkeleton/>
             </View>
     ), []);
 
@@ -143,14 +153,14 @@ export default function Fornecedores() {
             />
 
             <GenericInfiniteList
-                SkeletonComponent={<MemoUserCardSkeleton/>}
+                SkeletonComponent={<MemoShoppingCardSkeleton/>}
                 SkeletonList={{
                     data: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
                     keyExtractor: (i) => i,
                     renderItem: renderItemSkeleton,
                     HeaderComponent: <ChipListSkeleton/>
                 }}
-                data={listUsers}
+                data={listShopping}
                 renderItem={renderItem}
                 isFetchingNextPage={isFetchingNextPage}
                 isLoading={isLoading}

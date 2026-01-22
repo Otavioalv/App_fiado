@@ -40,7 +40,7 @@ api.interceptors.request.use(
             // const fakeError = {
             //     isAxiosError: true,
             //     response: {
-            //         status: 500, 
+            //         status: 500,
             //         data: { message: "Simulação de explosão no servidor" }
             //     }
             // };
