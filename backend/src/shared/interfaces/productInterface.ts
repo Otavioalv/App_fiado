@@ -9,7 +9,9 @@ export interface productInterface {
     quantidade: number;
 }
 
-export type ShoppingStatusType = "CANCELED"| "REFUSED"| "ANALYSIS"| "WAIT_REMOVE"| "PAID"| "PENDING" | "ALL";
+export type PaymentStatusType = "PAID" | "PENDING";
+export type ShoppingStatusType = "CANCELED"| "REFUSED" | "ANALYSIS"| "WAIT_REMOVE" | "REMOVED" | "ALL" ;
+export type AllShoppingStatusType = ShoppingStatusType | PaymentStatusType
 
 export interface compraInterface {
     id_compra: number;
@@ -33,6 +35,7 @@ export interface compraInterface {
     cancelado?:boolean;
     
     shopping_status?: ShoppingStatusType;
+    payment_status?: PaymentStatusType;
 }
 
 

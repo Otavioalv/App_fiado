@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { getTokenIdFromRequest } from "../shared/utils/tokenUtils";
-import { compraInterface, productInterface, ShoppingStatusType } from "../shared/interfaces/productInterface";
+import { AllShoppingStatusType, compraInterface, productInterface, ShoppingStatusType } from "../shared/interfaces/productInterface";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import {ProdutoModel} from "../models/produto.model";
 import { z } from "zod";
@@ -291,7 +291,7 @@ class ProdutoController {
             if(!filterOpt.filter)
                 filterOpt.filter = "Mais Recente" as FilterListShop;
 
-            const TYPES = ["ALL", "ANALYSIS", "CANCELED", "PAID", "PENDING", "REFUSED", "WAIT_REMOVE"] as ShoppingStatusType[];
+            const TYPES = ["ALL", "ANALYSIS", "CANCELED", "PAID", "PENDING", "REFUSED", "WAIT_REMOVE", "REMOVED"] as AllShoppingStatusType[];
             const uppTypeList = typeList.toUpperCase()
 
             if(!typeList || !TYPES.includes(uppTypeList as ShoppingStatusType)){

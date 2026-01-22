@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { compraInterface, ListProductWithFornecedor, productInterface, ShoppingStatusType } from "../shared/interfaces/productInterface";
+import { AllShoppingStatusType, compraInterface, ListProductWithFornecedor, productInterface, ShoppingStatusType } from "../shared/interfaces/productInterface";
 import { FilterListShop, queryFilter } from "../shared/interfaces/utilsInterfeces";
 import { UserType } from "../shared/interfaces/notifierInterfaces";
 import { TypesListUser } from "../shared/interfaces/userInterfaces";
@@ -597,7 +597,7 @@ class ProdutoModel  {
             const params: any[] = [];
             params.push(fromUserId); 
             
-            const statusWhereMap: Record<ShoppingStatusType, string> = {
+            const statusWhereMap: Record<AllShoppingStatusType, string> = {
                 CANCELED:
                     "AND cp.cancelado = TRUE",
 
@@ -609,6 +609,9 @@ class ProdutoModel  {
 
                 WAIT_REMOVE:
                     "AND cp.cancelado = FALSE AND cp.aceito = TRUE AND cp.retirado = FALSE",
+                
+                REMOVED: 
+                    "AND cp.cancelado = FALSE and cp.aceito = TRUE AND cp.retirado = TRUE",
 
                 PAID:
                     "AND cp.cancelado = FALSE AND cp.aceito = TRUE AND cp.quitado = TRUE",
@@ -708,9 +711,12 @@ class ProdutoModel  {
                         WHEN cp.aceito = FALSE THEN 'REFUSED'
                         WHEN cp.aceito IS NULL THEN 'ANALYSIS'
                         WHEN cp.retirado = FALSE THEN 'WAIT_REMOVE'
+                        ELSE 'REMOVED'
+                    END AS shopping_status,
+                    CASE    
                         WHEN cp.quitado = TRUE THEN 'PAID'
                         ELSE 'PENDING'
-                    END AS shopping_status
+                    END AS payment_status
 
                 FROM compra AS cp
                 ${joinAndWhere}
