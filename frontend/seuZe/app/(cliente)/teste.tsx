@@ -1,186 +1,159 @@
-import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
-import { GenericInfiniteList } from "@/src/components/common/GenericInfiniteList";
-import { ListShoppingType } from "@/src/components/common/ListShoppingProd";
-import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
-import { SearchInputList } from "@/src/components/common/SearchInputList";
-import { MemoShoppingCard, MemoShoppingCardSkeleton, ShoppingCardProps } from "@/src/components/common/ShoppingCard";
-import { useShoppingList } from "@/src/hooks/useClienteQueries";
-import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
-import { useFilterScreen } from "@/src/hooks/useFilterScreen";
-import { TypeShoppingList } from "@/src/types/responseServiceTypes";
-import { transformDateToUI } from "@/src/utils";
-import { useCallback, useMemo } from "react";
-import { View } from "react-native";
+import { FormFieldsType, GenericForm } from "@/src/components/common/GenericForm";
+import { useSession } from "@/src/context/authContext";
+import { AppError } from "@/src/errors/AppError";
+import { fornecedorRegisterSchema, FornecedorRegisterSchema, LoginSchema } from "@/src/schemas/FormSchemas";
+import { login, register } from "@/src/services/fornecedorService";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import Toast from "react-native-toast-message";
 
-const chipList:ChipDataType<TypeShoppingList>[] = [
+
+const formFields: FormFieldsType<FornecedorRegisterSchema>[] = [
     {
-        id: "all",
-        label: "Todos"
-    }, 
-    {
-        id: "analysis",
-        label: "Em Análise"
+        name: "nome",
+        title: "NOME*",
+        placeholder: "Nome de usuário",
+        // disabled: true,
     },
     {
-        id: "paid",
-        label: "Quitado"
-    }, 
-    {
-        id: "pending",
-        label: "Pendente"
-    }, 
-    {
-        id: "refused",
-        label: "Recusado"
+        name: "telefone",
+        title:"TELEFONE*" ,
+        placeholder:"(XX) XXXXX-XXXX",
+        keyboardType: "phone-pad",
     },
     {
-        id: "wait_remove",
-        label: "Aguardando Retirada"
+        name: "senha",
+        title:"SENHA*",
+        placeholder:"Senha",
+        secureTextEntry: true,
+        isSecure: true,
+        // disabled: true
     },
     {
-        id: "canceled",
-        label: "Cancelado"
+        name: "confirmarSenha",
+        title:"CONFIRMAR SENHA*",
+        placeholder:"Confirmar senha",
+        secureTextEntry: true,
+        isSecure: true,
+    },
+    {
+        name: "apelido",
+        title: "APELIDO",
+        placeholder: "Apelido",
+    },
+    {
+        name: "nomeEstabelecimento",
+        title: "NOME DO ESTABELECIMENTO*",
+        placeholder: "Estabelecimento",
+    },
+    {
+        name: "logradouro",
+        title: "ENDEREÇO (RUA, AVENIDA, TV ...)*" ,
+        placeholder: "Endereço",
+    },
+    [
+        {
+            name: "numeroImovel",
+            title: "NUMERO*" ,
+            placeholder: "Numero" ,
+        },
+        {
+            name: "uf",
+            title: "UF*" ,
+            placeholder: "(am, pa, ac...)",
+        }
+    ],
+    [
+        {
+            name: "bairro",
+            title: "BAIRRO*" ,
+            placeholder: "Bairro",
+        },
+        {
+            name: "cep",
+            title: "CEP*" ,
+            placeholder: "XXXXX-XXX",
+        }
+    ],
+    {
+        name: "complemento",
+        title: "COMPLEMENTO" ,
+        placeholder: "Complemento",
     }
 ];
 
+
+
+
 export default function Teste() {
-    const {
-        searchQuery,
-        filter,
-        typingText,
-        handleSearch,
-        activeCategory,
-        errorType,
-        setErrorType,
-        setActiveCategory,
-        setTypingText,
-        setFilter,
-    } = useFilterScreen<TypeShoppingList>("all");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const {signIn} = useSession();
 
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        refetch,
-        isLoading,
-        isRefetching,
-        isError,
-        error
-    } = useShoppingList(
-        {
-            search: searchQuery,
-            filter: filter,
-        },
-        activeCategory
-    );
+    const {control, handleSubmit} = useForm<FornecedorRegisterSchema>({
+        resolver: zodResolver(fornecedorRegisterSchema),
+        values: {
+            nome: "valor inicial dois", 
+            bairro: "sdfa", 
+            cep: "23131232", 
+            confirmarSenha: "senhapadrao@12", 
+            logradouro: "ssdfadsadas", 
+            nomeEstabelecimento: "senhapadrao@12", 
+            numeroImovel: "sdfas", 
+            senha: "senhapadrao@12", 
+            telefone: "92991492939", 
+            uf: "am", 
+            apelido: "eopelido", 
+            complemento: ""
+        }
+    })
 
-
-    const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
-    const currentFilter: string | undefined = data?.pages[0].pagination.filter;
-
-
-    // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
-    // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
-    // ISSO FILTRA USUARIOS POR ID PARA NAO CAUSAR REPETIÇÃO DE USUARIO NA LISTA, E NÃO OCORRER UM ERRO
-    const listShopping = useMemo(() => {
-        if (!data) return [];
-
-        const map = new Map<string, ListShoppingType>();
-
-        data.pages.forEach(page => {
-            page.list.forEach(u => {
-                const idString = u.id_compra?.toString() || Math.random().toString();
-                
-                let dateValue = transformDateToUI(u.prazo);
-                let createdAtValue = transformDateToUI(u.created_at);
-
-                map.set(idString, {
-                    id: idString,
-                    marketName: u.nomeestabelecimento,
-                    nome: u.nome_user,
-                    price: u.valor_unit,
-                    prodName: u.nome_produto,
-                    status: u.shopping_status,
-                    prazo: dateValue,
-                    apelido: u.apelido_user,
-                    paid: u.quitado,
-                    criadoEm: createdAtValue
+    const onSubmit = async (data: FornecedorRegisterSchema) => {
+        try{
+            setIsLoading(true);
+            if(await register(data)){
+                Toast.show({
+                    type: "success",
+                    text1: "Usuário cadastrado com sucesso",
+                    text2: "Realizando login"
                 });
 
-                // console.log(map);
-            });
-        });
-
-        return Array.from(map.values());
-    }, [data]);
-
-    const renderItem = useCallback(
-        ({item}: {item: ShoppingCardProps}) => (
-            <MemoShoppingCard
-                marketName={item.marketName}
-                nome={item.nome}
-                price={item.price}
-                prodName={item.prodName}
-                status={item.status}
-                apelido={item.apelido}
-                prazo={item.prazo}
-                paid={item.paid}
-                criadoEm={item.criadoEm}
-            />
-        ),
-        []
-    );
-
-    const renderItemSkeleton = useCallback(() => (
-            <View>
-                <MemoShoppingCardSkeleton/>
-            </View>
-    ), []);
-
-    useErrorScreenListener(isError, error, setErrorType);
+                const loginData: LoginSchema = {nome: data.nome, senha: data.senha};
+                const token = await login(loginData);
+                
+                if(token) {
+                    signIn(token, "fornecedor");
+                }
+            }
+        }catch(err) {
+            if(err instanceof AppError){
+                const {message} = err;
+                Toast.show({
+                    type: "error",
+                    text1: message,
+                    text2: "Por favor tente novamente"
+                });
+            }else {
+                Toast.show({
+                    type: "error",
+                    text1: "Recurso não encontrado",
+                    text2: "Por favor tente novamente"
+                });
+            }
+        }finally {
+            setIsLoading(false);
+        }
+    }
 
     return (
-        <ScreenErrorGuard errorType={errorType} onRetry={refetch}>
-            <SearchInputList
-                filterList={currentFilterList}
-                onSubmit={handleSearch}
-                inputValue={typingText}
-                setInputValue={setTypingText}
-                filterValue={filter.length ? filter : currentFilter}
-                setFilterValue={setFilter}
-                placeholder="Nome, Apelido, Estabelecimento..."
-            />
-
-            <GenericInfiniteList
-                SkeletonComponent={<MemoShoppingCardSkeleton/>}
-                SkeletonList={{
-                    data: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-                    keyExtractor: (i) => i,
-                    renderItem: renderItemSkeleton,
-                    HeaderComponent: <ChipListSkeleton/>
-                }}
-                data={listShopping}
-                renderItem={renderItem}
-                isFetchingNextPage={isFetchingNextPage}
+        <>
+            <GenericForm
+                control={control}
+                formFields={formFields}
                 isLoading={isLoading}
-                isRefetching={isRefetching}
-                keyExtractor={(i) => i.id.toString()}
-                onEndReached={() => {
-                    if (hasNextPage && !isFetchingNextPage) {
-                        fetchNextPage();
-                    }
-                }}
-                onRefresh={refetch}
-                HeaderComponent={
-                    <ChipList 
-                        chipList={chipList}
-                        itemSelected={activeCategory} 
-                        setItemSelected={setActiveCategory}
-                    />
-                }
-                emptyMessage={"Nenhum usuário encontrado"}
+                textButton={"CADASTRAR"}
+                onPress={handleSubmit(onSubmit)}
             />
-        </ScreenErrorGuard>
-    ); 
+        </>
+    );
 }

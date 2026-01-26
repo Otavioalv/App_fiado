@@ -1,87 +1,71 @@
-import { ShoppingStatusType } from "@/src/types/responseServiceTypes";
-import { Animated, StyleSheet, View } from "react-native";
-import { ChipBadge, ChipBadgeSkeleton } from "./ChipBadge";
+import { PaymentStatusType, ShoppingStatusType } from "@/src/types/responseServiceTypes";
+import { StyleSheet, View } from "react-native";
+import { ChipBadge, ChipBadgeProps, ChipBadgeSkeleton } from "./ChipBadge";
 import { theme } from "@/src/theme";
 
 
 export interface StatusShoppingProps {
-    status: ShoppingStatusType,
-    paid: boolean
+    shoppingStatus: ShoppingStatusType,
+    paymentStatus: PaymentStatusType
 }
 
+
+const shoppingStatusSet:Record<ShoppingStatusType, ChipBadgeProps> = {
+    ANALYSIS: {
+        text:"Em Análise",
+        variant:"outline"
+    },
+    CANCELED: {
+        text:"Cancelado",
+        variant:"disabled"
+    },
+    REFUSED: {
+        text:"Recusado",
+        variant:"disabled",
+    },
+    REMOVED: {
+        text: "Retirado",
+        variant: "primary",
+    },
+    WAIT_REMOVE: {
+        text:"Aguardando Retirada",
+        variant:"outline",
+    }
+}
+
+const paymentStatusSet: Record<PaymentStatusType, ChipBadgeProps> = {
+    PAID: {
+        text: "Quitado",
+        variant: "primary"
+    },
+    PENDING: {
+        text: "Pendente",
+        variant: "outline"
+    }
+}
+// workana
+
 export function StatusShopping({
-    status,
-    paid
+    shoppingStatus,
+    paymentStatus,
 }:StatusShoppingProps) {
+    const shoppingStatusValue = shoppingStatusSet[shoppingStatus];
+    const paymentStatusValue = paymentStatusSet[paymentStatus];
 
     return (
         <View
             style={styles.container}
-        >
-        {/* // <View 
-        //     style={{
-        //         // flex: 1, 
-        //         // alignItems: "flex-start",
+        >   
+            <ChipBadge
+                text={paymentStatusValue.text}
+                variant={paymentStatusValue.variant}
+            />
 
-        //         // backgroundColor: "red"
-        //     }}
-        // > */}
-
-            {status !== "PAID" && (<>
-                {paid ? (
-                    <ChipBadge
-                        text="Quitado"
-                        variant="primary"
-                    />
-                ) : (
-                    <ChipBadge
-                        text="Pendente"
-                        variant="outline"
-                    />
-                )}
-            </>)}
-
-            {status === "ANALYSIS" && (
-                <ChipBadge
-                    text="Em Análise"
-                    variant="outline"
-                />
-            )}
-
-            {status === "CANCELED" && (
-                <ChipBadge
-                    text="Cancelado"
-                    variant="disabled"
-                />
-            )}
-
-            {status === "PAID" && (
-                <ChipBadge
-                    text="Quitado"
-                    variant="primary"
-                />
-            )}
-
-            {status === "PENDING" && (
-                <ChipBadge
-                    text="Pendente"
-                    variant="outline"
-                />
-            )}
-
-            {status === "REFUSED" && (
-                <ChipBadge
-                    text="Recusado"
-                    variant="disabled"
-                />  
-            )}
-
-            {status === "WAIT_REMOVE" && (
-                <ChipBadge
-                    text="Aguardando Retirada"
-                    variant="outline"
-                />  
-            )}
+            <ChipBadge
+                text={shoppingStatusValue.text}
+                variant={shoppingStatusValue.variant}
+            />
+            
         </View>
     );
 }

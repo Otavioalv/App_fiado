@@ -8,7 +8,7 @@ import { useShoppingList } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeShoppingList } from "@/src/types/responseServiceTypes";
-import { transformDateToUI } from "@/src/utils";
+// import { transformDateToUI } from "@/src/utils";
 import { useCallback, useMemo } from "react";
 import { View } from "react-native";
 
@@ -22,6 +22,14 @@ const chipList:ChipDataType<TypeShoppingList>[] = [
         label: "Em Análise"
     },
     {
+        id: "wait_remove",
+        label: "Aguardando Retirada"
+    },
+    {
+        id: "removed",
+        label: "Retirados"
+    },
+    {
         id: "paid",
         label: "Quitado"
     }, 
@@ -32,10 +40,6 @@ const chipList:ChipDataType<TypeShoppingList>[] = [
     {
         id: "refused",
         label: "Recusado"
-    },
-    {
-        id: "wait_remove",
-        label: "Aguardando Retirada"
     },
     {
         id: "canceled",
@@ -92,8 +96,8 @@ export default function Compras() {
             page.list.forEach(u => {
                 const idString = u.id_compra?.toString() || Math.random().toString();
                 
-                let dateValue = transformDateToUI(u.prazo);
-                let createdAtValue = transformDateToUI(u.created_at);
+                // let dateValue = transformDateToUI(u.prazo);
+                // let createdAtValue = transformDateToUI(u.created_at);
 
                 map.set(idString, {
                     id: idString,
@@ -101,11 +105,11 @@ export default function Compras() {
                     nome: u.nome_user,
                     price: u.valor_unit,
                     prodName: u.nome_produto,
-                    status: u.shopping_status,
-                    prazo: dateValue,
+                    shoppingStatus: u.shopping_status,
+                    paymentStatus: u.payment_status,
+                    prazo: new Date(u.prazo),
                     apelido: u.apelido_user,
-                    paid: u.quitado,
-                    criadoEm: createdAtValue
+                    criadoEm: new Date(u.created_at)
                 });
 
                 // console.log(map);
@@ -122,10 +126,10 @@ export default function Compras() {
                 nome={item.nome}
                 price={item.price}
                 prodName={item.prodName}
-                status={item.status}
+                shoppingStatus={item.shoppingStatus}
+                paymentStatus={item.paymentStatus}
                 apelido={item.apelido}
                 prazo={item.prazo}
-                paid={item.paid}
                 criadoEm={item.criadoEm}
             />
         ),

@@ -8,8 +8,9 @@ import { useListPartner } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeUserList } from "@/src/types/responseServiceTypes";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { View } from "react-native";
+import { useFilterCategoryStore } from "@/src/stores/cliente/fornecedores.store";
 
 const chipList: ChipDataType<TypeUserList>[] = [
     {
@@ -35,6 +36,7 @@ const chipList: ChipDataType<TypeUserList>[] = [
 ];
 
 export default function Fornecedores() {
+    // const {type} = useLocalSearchParams<{type: TypeUserList}>();
 
     const {
         searchQuery,
@@ -68,6 +70,8 @@ export default function Fornecedores() {
         },
         activeCategory
     );
+
+    const {consume, requestedCategory} = useFilterCategoryStore();
 
 
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
@@ -129,6 +133,15 @@ export default function Fornecedores() {
     ), []);
 
     useErrorScreenListener(isError, error, setErrorType);
+
+
+    useEffect(() => {
+        if(requestedCategory) {
+            setActiveCategory(requestedCategory);
+            consume();
+        }
+    }, [consume, requestedCategory, setActiveCategory]);
+
 
     return (
         <ScreenErrorGuard errorType={errorType} onRetry={refetch}>

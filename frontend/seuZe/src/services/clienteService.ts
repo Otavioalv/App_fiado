@@ -1,5 +1,4 @@
-import { DefaultRegisterSchema } from "../schemas/DefaultRegisterSchema";
-import { LoginSchema } from "../schemas/LoginSchema";
+import { DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { api } from "./api";
 import { responseAxiosInterfaces } from "./typesApi";
 import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList } from "../types/responseServiceTypes";
@@ -13,6 +12,24 @@ export async function login(userData: LoginSchema): Promise<string | null>{
         const response = await api.post(endPoint, userData) as responseAxiosInterfaces<{token: string}>;
         return response.data.data!.token;
     }catch(error){
+        /* 
+        if(err instanceof AppError){
+            const {message} = err;
+            
+            Toast.show({
+                type: "error",
+                text1: message,
+                text2: "Por favor tente novamente"
+            })
+        }else {
+            Toast.show({
+                type: "error",
+                text1: "Recurso não encontrado",
+                text2: "Por favor tente novamente"
+            });
+        }
+        */
+
         throw error;
     }
 }

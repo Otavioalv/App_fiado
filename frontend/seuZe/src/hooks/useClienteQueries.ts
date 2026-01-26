@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { listAllFornecedores, listPartner, me, productList, shoppingList } from "../services/clienteService";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { listAllFornecedores, listPartner, login, me, productList, register, shoppingList } from "../services/clienteService";
 import { FilterType, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
+import { DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 
 export function useListAllFornecedores(filters: FilterType) {
     return useInfiniteList({
@@ -91,6 +92,35 @@ export function useMe() {
         },
         // staleTime: 1000 * 60 * 10, // 10min
         // retry: 1,
+    });
+}
+
+export function useRegister() {
+    
+    // retorna boleano, erro tipo any, entrada tipo DefaultRegisterSchema
+    return useMutation<boolean, any, DefaultRegisterSchema>({
+        mutationFn: async (data) => {
+            return await register(data);
+        },
+        networkMode: 'always',
+        onSuccess: (s) => {
+            console.log(s);
+        }
+    });
+}
+
+
+
+export function useLogin() {
+    // Testar erro tipo any
+    return useMutation<string | null, any, LoginSchema>({
+        mutationFn: async (data) => {
+            return await login(data);
+        },
+        networkMode: 'always',
+        onSuccess: (s) => {
+            console.log(s);
+        }
     });
 }
 

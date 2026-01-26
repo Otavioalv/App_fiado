@@ -19,7 +19,10 @@ export type PaginationType = FilterType & {
 	totalPages?: number,
 }
 
-export type ShoppingStatusType = "CANCELED"| "REFUSED"| "ANALYSIS"| "WAIT_REMOVE"| "PAID"| "PENDING";
+export type PaymentStatusType = "PAID" | "PENDING";
+export type ShoppingStatusType = "CANCELED"| "REFUSED" | "ANALYSIS"| "WAIT_REMOVE" | "REMOVED";
+
+export type AllShoppingStatusType = ShoppingStatusType | PaymentStatusType
 export interface ShoppingData {
    id_compra: number,
    fk_fornecedor_id: number,
@@ -46,6 +49,7 @@ export interface ShoppingData {
    nomeestabelecimento: string,
    
    shopping_status: ShoppingStatusType,
+   payment_status: PaymentStatusType,
 }
 
 
@@ -116,4 +120,4 @@ export type AppDefaultSizes = "S" | "M" | "L";
 export type OnSubmitSearchType = (search: string, filter?: string) => void;
 
 export type TypeUserList = "all" | "received" | "sent" | "accepted" | "none";
-export type TypeShoppingList = "canceled" | "refused" | "analysis" | "wait_remove" | "paid" | "pending" | "all";
+export type TypeShoppingList = "canceled" | "refused" | "analysis" | "wait_remove" | "paid" | "pending" | "all" | "removed";

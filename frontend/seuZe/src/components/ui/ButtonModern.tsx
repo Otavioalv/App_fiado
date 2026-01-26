@@ -5,7 +5,7 @@ import { Feather } from "@expo/vector-icons";
 import { useRef } from "react";
 import { Animated, Pressable, PressableProps, StyleSheet, Text,  TextStyle,  ViewStyle } from "react-native";
 
-type ButtonVariant = "primary" | "outline" | "disabled";
+type ButtonVariant = "primary" | "outline" | "disabled" | "ghost";
 interface ComponentsStyles {
     container: ViewStyle,
     text: TextStyle,
@@ -13,7 +13,7 @@ interface ComponentsStyles {
 }
 
 type VariantStyle = Record<ButtonVariant, ComponentsStyles>;
-type SizeStyle = Record<AppDefaultSizes, ComponentsStyles>;
+type SizeStyleType = Record<AppDefaultSizes, ComponentsStyles>;
 
 export interface ButtonProps extends PressableProps {
     placeholder: string;
@@ -35,7 +35,7 @@ export function ButtonModern({placeholder, variant = "primary", size = "L",style
         }).start();
     }
 
-    const sizeStyle: SizeStyle = {
+    const sizeStyle: SizeStyleType = {
         S: {
             text: styles.textSmall, 
             container: styles.paddingSmall,
@@ -68,6 +68,11 @@ export function ButtonModern({placeholder, variant = "primary", size = "L",style
             container: styles.disabledContainer, 
             text: styles.textDisabled,
             icon: styles.textDisabled
+        },  
+        ghost: {    
+            container: styles.ghostContainer, 
+            text: styles.textGhost,
+            icon: styles.textGhost
         }
     }
 
@@ -154,6 +159,9 @@ const styles = StyleSheet.create({
     disabledContainer: {
         backgroundColor: theme.colors.pseudoLightGray
     },
+    ghostContainer: {
+        backgroundColor: "transparent"
+    },
 
     // Estilo texto
     textPrimary: {
@@ -164,6 +172,9 @@ const styles = StyleSheet.create({
     },
     textDisabled: {
         color: theme.colors.darkGray
+    },
+    textGhost: {
+        color: theme.colors.orange,
     },
 
     // Tamanho botao

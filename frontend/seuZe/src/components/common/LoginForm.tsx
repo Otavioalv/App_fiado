@@ -1,18 +1,34 @@
 import {  StyleSheet, Text, View } from "react-native";
-import InputForm from "@/src/components/ui/InputForm";
-import Button from "@/src/components/ui/Button";
 import { useRouter } from "expo-router";
 import { theme } from "@/src/theme";
-import { Controller, useForm } from "react-hook-form";
-import { loginSchema, LoginSchema } from "@/src/schemas/LoginSchema";
+import { useForm } from "react-hook-form";
+import { loginSchema, LoginSchema } from "@/src/schemas/FormSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {login as loginCliente} from "@/src/services/clienteService"
-import {login as loginFornecedor} from "@/src/services/fornecedorService";
-import { useState } from "react";
-import Loading from "../ui/Loading";
 import { useSession } from "@/src/context/authContext";
 import { AppError } from "@/src/errors/AppError";
 import Toast from "react-native-toast-message";
+import { FormFieldsType, GenericForm } from "./GenericForm";
+import Logo from "./Logo";
+import { SpacingScreenContainer } from "../ui/SpacingScreenContainer";
+import { ButtonModern } from "../ui/ButtonModern";
+import { useLogin as useLoginCliente } from "@/src/hooks/useClienteQueries";
+import { useLogin as useLoginFornecedor} from "@/src/hooks/useFornecedorQueries";
+
+const formFields: FormFieldsType<LoginSchema>[] = [
+    {
+        name: "nome", 
+        title: "NOME",
+        placeholder: "Nome de usuário",
+    },
+    {
+        name: "senha",
+        title: "SENHA*" ,
+        placeholder: "Senha" ,
+        secureTextEntry: true,
+        isSecure: true,
+    },
+]
+
 
 export type LoginFormProps = {
     title: string
@@ -20,8 +36,22 @@ export type LoginFormProps = {
 
 export default function LoginForm({ title }:LoginFormProps) {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState<boolean>(false);
     const { signIn } = useSession();
+
+
+    const {
+        mutateAsync: loginCliente,
+        isPending: isPendingCliente
+
+    } = useLoginCliente();
+
+    const {
+        mutateAsync: loginFornecedor,
+        isPending: isPendingFornecedor,
+    } = useLoginFornecedor();
+
+
+
 
     const {control, handleSubmit} = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema)
@@ -29,9 +59,9 @@ export default function LoginForm({ title }:LoginFormProps) {
 
     // Login cliente
     const onSubmitCliente = async (data: LoginSchema) => {
-        setIsLoading(true);
         try {
             const token = await loginCliente(data);
+            
             if(token) {
                 signIn(token, "cliente");
             }
@@ -50,14 +80,11 @@ export default function LoginForm({ title }:LoginFormProps) {
                     text2: "Por favor tente novamente"
                 });
             }
-        }finally{
-            setIsLoading(false);
         }
     }
 
     // Login fornecedor
     const onSubmitFornecedor = async (data: LoginSchema) => {
-        setIsLoading(true);
         try {
             const token = await loginFornecedor(data);
             if(token){ 
@@ -78,79 +105,58 @@ export default function LoginForm({ title }:LoginFormProps) {
                     text2: "Por favor tente novamente"
                 })
             }
-        }finally {
-            setIsLoading(false);
         }
     }
 
     // secureTextEntry
     return (
-        <View style={style.container}>
-            
-            <Loading visible={isLoading}/>
-
-            <Text style={style.title}>
-                {title}
-            </Text>
-
-            <View style={style.formContainer}>
-                <Controller
-                    control={control}
-                    name="nome"
-                    render={({field, fieldState}) => 
-                        <InputForm 
-                            title="NOME" 
-                            placeholder="Nome de usuário"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            errorMessage={fieldState.error?.message}
-                        />
-                    }
+        <>  
+            <SpacingScreenContainer>
+                <Logo
+                    size="L"
                 />
+            </SpacingScreenContainer>
 
-                <Controller
-                    control={control}
-                    name="senha"
-                    render={({field, fieldState}) => 
-                        <InputForm 
-                            title="SENHA" 
-                            placeholder="Senha" 
-                            secureTextEntry={true}
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            errorMessage={fieldState.error?.message}
-                        />
-                    }
-                />
-                
-                
+            <GenericForm
+                control={control}
+                formFields={formFields}
+                title={"Entre para continuar"}
+                isLoading={isPendingCliente || isPendingFornecedor}
+            >
                 <Text style={style.descText}>
                     ENTRAR COMO
                 </Text>
-
-                <Button placeholder="COMPRADOR" onPress={handleSubmit(onSubmitCliente)}/>
-                <Button placeholder="FORNECEDOR" onPress={handleSubmit(onSubmitFornecedor)}/>
-            </View>
-
-            <Text style={style.title}>
-                OU
-            </Text>
-
-            <View style={style.formContainer}>
-                <Text style={style.descText}>
-                    CADASTRE-SE COMO
-                </Text>
-                
-                <Button 
+                <ButtonModern
                     placeholder="COMPRADOR" 
-                    onPress={() => router.push("/(auth)/registerCliente")}
+                    onPress={handleSubmit(onSubmitCliente)}
                 />
-                <Button 
-                    placeholder="FORNECEDOR"
-                    onPress={() => router.push("/(auth)/registerFornecedor")}
+                <ButtonModern
+                    placeholder="FORNECEDOR" 
+                    onPress={handleSubmit(onSubmitFornecedor)}
                 />
-            </View>
-        </View>
+
+                <Text style={style.title}>
+                    OU
+                </Text>
+
+                <View style={style.formContainer}>
+                    <Text style={style.descText}>
+                        CADASTRE-SE COMO
+                    </Text>
+                    
+                    <ButtonModern
+                        placeholder="COMPRADOR" 
+                        variant="outline"
+                        onPress={() => router.push("/(auth)/registerCliente")}
+                    />
+                    <ButtonModern
+                        placeholder="FORNECEDOR"
+                        variant="outline"
+                        onPress={() => router.push("/(auth)/registerFornecedor")}
+                    />
+                </View>
+            </GenericForm>
+        </>
     )
 }
 
@@ -162,15 +168,19 @@ const style = StyleSheet.create({
         paddingBottom: theme.padding.md
     },
     title: {
+        color: theme.colors.textNeutral900,
         fontSize: theme.typography.textLG.fontSize,
         fontWeight: "bold",
         textAlign: "center"
     },
     descText: {
+        color: theme.colors.textNeutral900,
         fontSize: theme.typography.textMD.fontSize,
         fontWeight: "bold"
     },
     formContainer: {
         gap: theme.gap.md, 
+        paddingTop: 0,
+        flex: 1
     }
 })

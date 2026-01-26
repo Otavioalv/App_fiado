@@ -5,10 +5,11 @@ import { memo } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
+import { transformDateToUI } from "@/src/utils";
 
 export interface ShoppingCardProps extends ProductDescriptionProps, StatusShoppingProps {
-    prazo?: string,
-    criadoEm?: string
+    prazo: Date,
+    criadoEm: Date
 }
 
 export function ShoppingCard({
@@ -17,13 +18,20 @@ export function ShoppingCard({
     price,
     prodName,
     apelido,
-    status,
+    shoppingStatus,
     prazo,
-    paid,
+    paymentStatus,
     criadoEm
 }: ShoppingCardProps) {
+    const prazoText:string = new Date() < prazo ? "Venceu: " : "Vence: ";
+
+    // console.log(new Date(prazo), prazo);
+    
+    const prazoTransform: string = transformDateToUI(prazo)
+    const criadoEmTransform: string = transformDateToUI(criadoEm);
 
     // console.log(status);
+    
     return (
         <DefaultCard>
             <ProductDescription
@@ -38,20 +46,20 @@ export function ShoppingCard({
                 style={styles.containerBottom}
             >
                 <StatusShopping
-                    status={status}
-                    paid={paid}
+                    shoppingStatus={shoppingStatus}
+                    paymentStatus={paymentStatus}
                 />
                 
                 <View style={styles.dateContainer}>
                     {prazo && (
                         <Text numberOfLines={1}>
-                            Vence: {prazo}
+                            {prazoText} {prazoTransform}
                         </Text>
                         
                     )}
                     {criadoEm && (
                         <Text numberOfLines={1}>
-                            Criado em: {criadoEm}
+                            Criado em: {criadoEmTransform}
                         </Text>
                     )}
                 </View>

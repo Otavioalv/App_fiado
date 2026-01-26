@@ -11,6 +11,8 @@ export default function Loading({visible}: LoadingProps) {
             transparent={true}
             animationType="fade"
             visible={visible}
+            statusBarTranslucent={true}
+            navigationBarTranslucent={true}
             onRequestClose={() => {}}
         >
             <View style={styles.container}>

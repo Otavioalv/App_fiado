@@ -1,20 +1,22 @@
 import { MyDefaultTheme } from "@/src/constants/theme";
 import { theme } from "@/src/theme";
 import { PropsWithChildren } from "react";
-import { StyleSheet } from "react-native";
+import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 import { SpacingScreenContainer } from "../ui/SpacingScreenContainer";
 
-export default function MyScreenContainer({children}: PropsWithChildren) {
+type MyScreenContainerProps = PropsWithChildren & {style?: StyleProp<ViewStyle>};
+
+export default function MyScreenContainer({children, style}: MyScreenContainerProps) {
     return (
         <SpacingScreenContainer
-            style={style.container}
+            style={[styles.container, style]}
         >
             {children}
         </SpacingScreenContainer>
     )
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         backgroundColor: MyDefaultTheme.colors.background,
         // backgroundColor: "red",
