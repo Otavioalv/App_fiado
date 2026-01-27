@@ -8,15 +8,12 @@ import { UserController } from "../shared/interfaces/class/UserController";
 import { ClienteModel } from "../models/cliente.model";
 import { fornecedorInterface, loginInterface, clienteInterface, TypesListUser } from "../shared/interfaces/userInterfaces";
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
-import { MessageInterface } from "../shared/interfaces/notifierInterfaces";
-import { NotificationModel } from "../models/notification.model";
 import { ResponseApi } from "../shared/consts/responseApi";
 
 
 class FornecedorController extends UserController{
     private fornecedorModel:FornecedorModel = new FornecedorModel();
     private clienteModel:ClienteModel = new ClienteModel();
-    private notificationModel: NotificationModel = new NotificationModel();
     private validateDatasUser:ValidateDatasUser = new ValidateDatasUser();
 
     public async register(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {

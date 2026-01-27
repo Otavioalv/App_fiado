@@ -18,7 +18,7 @@ export interface userInterface{
     telefone: string;
     cliente_check?: boolean;
     fornecedor_chec?: boolean;
-    created_at?: string; // Testando atualmente
+    created_at?: string;
 
 
     relationship_status?: RelationshipStatusType,

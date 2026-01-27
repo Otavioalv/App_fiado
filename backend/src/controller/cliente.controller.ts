@@ -21,8 +21,10 @@ class ClienteController extends UserController{
     public async register(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             const datasRegister: clienteInterface = await req.body as clienteInterface; 
+            console.log("ANTES: ", datasRegister)
             const message = await this.validateDatasUser.validateDatasCliente(datasRegister);
-            
+            console.log("DEPOIS: ", datasRegister)
+
             if(!datasRegister){
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA))
             }
@@ -49,7 +51,8 @@ class ClienteController extends UserController{
         try {
             const datasLogin: loginInterface = await req.body as loginInterface;
             const message = await this.validateDatasUser.validateLogin(datasLogin);
-
+            console.log(datasLogin, message);
+            
             if(message.length) {
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA, message));
             }
@@ -99,6 +102,63 @@ class ClienteController extends UserController{
             const {senha, ...data} = await this.clienteModel.findUserById(id);
 
             return res.status(200).send(successResponse(ResponseApi.Users.LIST_USER_DATA, data));
+        } catch(e) {
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
+        }
+    }
+    
+    public async update(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+        try {
+            // Fazer função de atualização-
+            const id:number = await getTokenIdFromRequest(req);
+            const dataUpdate: clienteInterface = await req.body as clienteInterface;
+            
+            // console.log("UPDATE CONTROLLER: ", Object.keys(dataUpdate));
+
+            // Verifica se dados recebidos esta vazio
+            if(Object.keys(dataUpdate).length === 0) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }
+            
+            // Verifica os dados recebidos
+            const message = await this.validateDatasUser.validateDatasUpdateCliente(dataUpdate);
+            if(message.length) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA, message));
+            }
+
+            // Verifica se usuario existe no banco de dados (ATUALIZAR COM URGENCIA) 
+            // retorno do controler deve ter tipo undefined ou null para melhor verificação dos dados
+            // Deve ser mais concreto com os dados (codigo feito  antes de obter mais experiencia)
+            const currentUser = await this.clienteModel.findUserById(id);
+            if(Object.keys(currentUser || {}).length === 0) {
+                return res.status(400).send(errorResponse(ResponseApi.Auth.USER_NOT_FOUND));
+            }
+
+            // Verifica se nome existe, pois e um dado unico. Futuramente numero de telefone verificar tmb
+            const dataUser = await this.clienteModel.findByUsername(dataUpdate.nome);
+
+            /* 
+                se o nome for igual ao recebido: nao enviar erro
+                se o nome existir enviar erro
+
+                nome tem q ser diferente, 
+            */
+            if(Object.keys(dataUser || {}).length > 0 && currentUser.nome !== dataUser.nome) {
+                return res.status(400).send(errorResponse(ResponseApi.Auth.USER_ALREADY_EXISTS_UPD));
+            }
+            
+            /* 
+                {
+                    "id_cliente": 153,
+                    "nome": "otavio",
+                    "telefone": "92992348389",
+                    "apelido": "senhapadrao"
+                }
+            */
+
+            await this.clienteModel.update(dataUpdate, id);
+
+            return res.status(200).send(successResponse(ResponseApi.Users.UPDATE_SUCCESS));
         } catch(e) {
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }

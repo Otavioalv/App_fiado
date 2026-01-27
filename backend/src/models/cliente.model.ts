@@ -29,8 +29,38 @@ class ClienteModel extends UserModel<clienteInterface>{
             throw new Error("Erro ao salvar usuario no banco de dados");
         } finally {
             client?.release();
-            return;
         }
+    }
+
+    public async update(datasUpdate: clienteInterface, idCliente: number) {
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const SQL = `
+                UPDATE cliente 
+                SET 
+                    nome = $1, 
+                    apelido = $2, 
+                    telefone = $3
+                WHERE 
+                    id_cliente = $4
+            `
+            const {nome, apelido, telefone} = datasUpdate;
+            const values = [nome, apelido, telefone, idCliente];
+
+            await client.query('BEGIN');
+            await client.query(SQL, values);
+            await client.query('COMMIT');
+
+            return;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao salvar usuario no banco de dados");
+        } finally {
+            client?.release();
+        }   
     }
 
     public async findByUsername(username: string): Promise<clienteInterface>{

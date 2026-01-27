@@ -29,11 +29,11 @@ class ValidateDatasUser {
             const messages: Record<string, string[]>[] = [];
             
             // dados relacionados a fornecedor e cliente
-            // datasRegister.nome = datasRegister.nome.trim().toLowerCase();
-            datasRegister.nome = datasRegister.nome.trim();
+            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            // datasRegister.nome = datasRegister.nome.trim();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
-            datasRegister.telefone = datasRegister.telefone.trim();
+            datasRegister.telefone = this.normalizePhone(datasRegister.telefone.trim());
 
             // dados relacionados a fornecedor
             datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
@@ -76,7 +76,9 @@ class ValidateDatasUser {
             if(nomeVerificado.nome.length) {
                 messages.push(nomeVerificado);
             }
-            datasRegister.nome = await removeAccents(datasRegister.nome);
+            
+            // Habilitar se permitir acento
+            // datasRegister.nome = await removeAccents(datasRegister.nome);
 
             if(senhaValidada.senha.length) {
                 messages.push(senhaValidada);
@@ -150,19 +152,19 @@ class ValidateDatasUser {
 
     public async validateDatasCliente(datasRegister: clienteInterface): Promise<Record<string, string[]>[]>{
         try {
-            // datasRegister.nome = datasRegister.nome.trim().toLowerCase();
-            datasRegister.nome = datasRegister.nome.trim();
+            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            // datasRegister.nome = datasRegister.nome.trim();
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
-            datasRegister.telefone = datasRegister.telefone.trim();
-
+            datasRegister.telefone = this.normalizePhone(datasRegister.telefone.trim())
+            
             const messages: Record<string, string[]>[] = [];
-
+            
             const nomeVerificado = await this.validarNome(datasRegister.nome);
             const senhaValidada = await this.validarSenha(datasRegister.senha);
             const apelidoValidado = await this.validarApelido(datasRegister.apelido);
             const telefoneValidado = await this.validarTelefone(datasRegister.telefone);
-
+            
             if(
                 !datasRegister.nome || 
                 !datasRegister.senha || 
@@ -171,14 +173,15 @@ class ValidateDatasUser {
                 const objMenssage = {
                     all: ["Preencha os campos obrigatorios"]
                 };
-
+                
                 messages.push(objMenssage);
             }
 
             if(nomeVerificado.nome.length)
                 messages.push(nomeVerificado);
 
-            datasRegister.nome = await removeAccents(datasRegister.nome);
+            // Habilitar se permitir acento
+            // datasRegister.nome = await removeAccents(datasRegister.nome);
 
             if(senhaValidada.senha.length)
                 messages.push(senhaValidada);
@@ -195,12 +198,43 @@ class ValidateDatasUser {
         }
     }
 
+    // DUPLICAÇÃO DE CODIGO, CONVERTER TODAS ESSAS VERIFICAÇÕES PARA ZOD
+    public async validateDatasUpdateCliente(datasRegister: clienteInterface): Promise<Record<string, string[]>[]>{
+        try {
+            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            // datasRegister.nome = datasRegister.nome.trim();
+            datasRegister.apelido = datasRegister.apelido?.trim();
+            datasRegister.telefone = this.normalizePhone(datasRegister.telefone.trim());
+
+            const messages: Record<string, string[]>[] = [];
+
+            const nomeVerificado = await this.validarNome(datasRegister.nome);
+            const apelidoValidado = await this.validarApelido(datasRegister.apelido);
+            const telefoneValidado = await this.validarTelefone(datasRegister.telefone);
+
+            if(nomeVerificado.nome.length)
+                messages.push(nomeVerificado);
+
+            datasRegister.nome = await removeAccents(datasRegister.nome);
+
+            if(apelidoValidado.apelido.length)
+                messages.push(apelidoValidado);
+            
+            if(telefoneValidado.telefone.length)
+                messages.push(telefoneValidado);
+
+            return messages
+        } catch (e) {
+            throw new Error('Erro ao validar dados');
+        }
+    }
+
     public async validateLogin(datasLogin: loginInterface): Promise<Record<string, string[]>[]>{
         try {
             const messages: Record<string, string[]>[] = [];
 
-            // datasLogin.nome = datasLogin.nome.trim().toLowerCase();
-            datasLogin.nome = datasLogin.nome.trim();
+            datasLogin.nome = datasLogin.nome.trim().toLowerCase();
+            // datasLogin.nome = datasLogin.nome.trim();
             datasLogin.senha = datasLogin.senha.trim();
 
             const nomeVerificado = await this.validarNome(datasLogin.nome);
@@ -318,8 +352,8 @@ class ValidateDatasUser {
         if(
             !validator.isLength(nome, {min: 4}) || 
             /\s\s/.test(nome) || 
-            // !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(nome) ||
-            !/^[a-zA-Z\s]+$/.test(nome) ||
+            // !/^[a-zA-Z\s\u00C0-\u00FF]+$/.test(nome) || // permite acento
+            !/^[a-zA-Z\s]+$/.test(nome) || // Nao p-ermite acento
             /[0-9]/.test(nome)
         ) {
             arrMenssage.push("Nome inválido (não use acentos, números ou caracteres especiais)");
@@ -354,18 +388,37 @@ class ValidateDatasUser {
     }
 
     private async validarTelefone(telefone: string): Promise<{telefone: string[]}> {
-        const arrMessage: string[] = [];
+        const errMessage: string[] = [];
+
+        if (telefone.length < 12 || telefone.length > 13) {
+            errMessage.push('Telefone com tamanho inválido');
+        }
 
         if(!validator.isMobilePhone(telefone, 'pt-BR')) {
-            arrMessage.push("Numero telefone invalido");
+            errMessage.push("Numero telefone invalido");
         }
 
         const objMessage = {
-            telefone: arrMessage
+            telefone: errMessage
         }
 
         return objMessage;
     }
+
+    private normalizePhone(input: string): string {
+        let phone = input.replace(/\D/g, '');
+
+        if (phone.startsWith('00')) {
+            phone = phone.slice(2);
+        }
+
+        if (!phone.startsWith('55')) {
+            phone = '55' + phone;
+        }
+
+        return phone;
+    }
+
 
 }
 

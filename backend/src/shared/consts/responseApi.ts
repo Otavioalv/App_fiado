@@ -1,6 +1,7 @@
 export const ResponseApi = {
     Auth: {
         USER_ALREADY_EXISTS: "Usuário já existe. Realize o login",
+        USER_ALREADY_EXISTS_UPD: "Nome de usuário já existe. Utilize outro",
         REGISTER_SUCCESS: "Usuário registrado com sucesso",
         LOGIN_SUCCESS: "Login realizado com sucesso",
         INVALID_CREDENTIALS: "Nome de usuário ou senha incorreto",
