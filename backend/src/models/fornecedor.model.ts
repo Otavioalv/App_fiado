@@ -337,73 +337,84 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
 
 
     public async getPartnerByIdCliente(
-        id: number, 
-        typeList: TypesListUser = "all", 
-        filterOpt: queryFilter
-    ): Promise<fornecedorInterface[]>{
+        idCliente: number,
+        typeList: TypesListUser = "all",
+        filterOpt: queryFilter,
+        idFornecedor?: number,
+    ): Promise<fornecedorInterface[]> {
 
         let client: PoolClient | undefined;
 
         try {
             client = await connection.connect();
-            
-            const {size, page, search, filter} = filterOpt;
-            
+
+            const { size, page, search, filter } = filterOpt;
+
             const sqlFilterList: Record<string, string> = {
-                "Nome": "f.nome ASC",
-                "Apelido": "f.apelido ASC",
-                "Estabelecimento": "f.nomeestabelecimento ASC",
-                "Data": "cf.created_at DESC"
+                Nome: "f.nome ASC",
+                Apelido: "f.apelido ASC",
+                Estabelecimento: "f.nomeestabelecimento ASC",
+                Data: "cf.created_at DESC",
             };
-            
+
+            const orderBy = sqlFilterList[filter] ?? "f.nome ASC";
+
             const relationshipMap: Record<TypesListUser, string> = {
                 all: "",
-                received: "(cf.fornecedor_check = TRUE AND cf.cliente_check = FALSE)",
                 sent: "(cf.cliente_check = TRUE AND cf.fornecedor_check = FALSE)",
+                received: "(cf.fornecedor_check = TRUE AND cf.cliente_check = FALSE)",
                 accepted: "(cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE)",
-                none: "cf.fk_cliente_id IS NULL"
+                none: "cf.fk_cliente_id IS NULL",
             };
 
-            // Edição de filtros
-            const limit:number = size; // numero de quantidades a mostrar
-            const offset:number = (page - 1) * limit // Começa a partir do numero 
-            const searchSql: string = `%${search}%`; // para se adaptar ao filtro ILIKE
-            const orderBy = sqlFilterList[filter]; // Se não tiver filter, por padrao pega pelo nome
-            const relationshipCondition = relationshipMap[typeList]; // filtro relacionamento
-            const whereCondition: string[] = [];
+            const limit = size;
+            const offset = (page - 1) * limit;
+
+            const whereConditions: string[] = [];
+            const values: any[] = [];
+            let paramIndex = 1;
 
 
+            values.push(idCliente);
+
+
+            const relationshipCondition = relationshipMap[typeList];
             if(relationshipCondition) {
-                whereCondition.push(relationshipCondition);
+                whereConditions.push(relationshipCondition);
             }
 
-            // condição obrigatoria, sempre vai ter
-            whereCondition.push(`
+            const searchSql = `%${search}%`;
+            values.push(searchSql);
+            const searchParam = `$${++paramIndex}`;
+
+            whereConditions.push(`
                 (
-                    f.nome ILIKE $2 OR 
-                    unaccent(f.apelido) ILIKE unaccent($2) OR 
-                    unaccent(f.nomeestabelecimento) ILIKE unaccent($2)
+                    f.nome ILIKE ${searchParam}
+                    OR unaccent(f.apelido) ILIKE unaccent(${searchParam})
+                    OR unaccent(f.nomeestabelecimento) ILIKE unaccent(${searchParam})
                 )
             `);
 
-            // junta todas as condições no where
-            const whereSql = `WHERE ${whereCondition.join(" AND ")}`;
+            if(idFornecedor) {
+                values.push(idFornecedor);
+                whereConditions.push(`f.id_fornecedor = $${++paramIndex}`);
+            }
 
+            const whereSql = whereConditions.length
+                ? `WHERE ${whereConditions.join(" AND ")}`
+                : "";
 
-            // join compartilhado
             const fromJoinSql = `
-                FROM 
-                    fornecedor AS f
-                LEFT JOIN
-                    cliente_fornecedor AS cf 
-                ON 
-                    f.id_fornecedor = cf.fk_fornecedor_id
-                AND 
-                    cf.fk_cliente_id = $1
+                FROM fornecedor AS f
+                LEFT JOIN cliente_fornecedor AS cf
+                    ON f.id_fornecedor = cf.fk_fornecedor_id
+                AND cf.fk_cliente_id = $1
             `;
 
-            const SQL_LIST:string = `
-                SELECT 
+            values.push(limit, offset);
+
+            const SQL_LIST = `
+                SELECT
                     f.id_fornecedor,
                     f.nome,
                     f.apelido,
@@ -416,48 +427,51 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                     f.cep,
                     f.uf,
                     cf.created_at,
-                    
+
                     COALESCE(cf.cliente_check, FALSE) AS cliente_check,
                     COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
-                    CASE 
+
+                    CASE
                         WHEN cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE THEN 'ACCEPTED'
                         WHEN cf.cliente_check = TRUE THEN 'SENT'
                         WHEN cf.fornecedor_check = TRUE THEN 'RECEIVED'
                         ELSE 'NONE'
-                    END as relationship_status
+                    END AS relationship_status
+
                 ${fromJoinSql}
                 ${whereSql}
                 ORDER BY ${orderBy}
-                LIMIT $3
-                OFFSET $4;
+                LIMIT $${paramIndex + 1}
+                OFFSET $${paramIndex + 2};
             `;
 
             const SQL_TOTAL = `
-                SELECT 
-                    COUNT(*) as total
+                SELECT COUNT(*) AS total
                 ${fromJoinSql}
                 ${whereSql};
             `;
 
-            const result:fornecedorInterface[] = (
-                await client.query(SQL_LIST, [id, searchSql, limit, offset])
+            const result = (
+                await client.query(SQL_LIST, values)
             ).rows as fornecedorInterface[];
 
-            const {total} = (
-                await client.query(SQL_TOTAL, [id, searchSql])
-            ).rows[0] as {total: number};
+            const { total } = (
+                await client.query(SQL_TOTAL, values.slice(0, paramIndex))
+            ).rows[0];
 
             filterOpt.total = Number(total);
             filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
 
             return result;
-        } catch(e) {
+
+        } catch (e) {
             console.error(e);
             throw new Error("Erro ao coletar parcerias");
         } finally {
             client?.release();
         }
     }
+
 
 }
 

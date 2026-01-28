@@ -8,8 +8,6 @@ import { UserController } from "../shared/interfaces/class/UserController";
 import { FornecedorModel } from "../models/fornecedor.model";
 import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { queryFilter, payloadInterface } from "../shared/interfaces/utilsInterfeces";
-import { MessageInterface } from "../shared/interfaces/notifierInterfaces";
-import { NotificationModel } from "../models/notification.model";
 import { ResponseApi } from "../shared/consts/responseApi";
 
 
@@ -164,24 +162,42 @@ class ClienteController extends UserController{
         }
     }
 
-    public async partnerList(req: FastifyRequest, res: FastifyReply, typeList: TypesListUser = "all"): Promise<FastifyReply> { 
+
+    public async partnerList(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> { 
         try {
-            const {...filterOpt} = req.query as queryFilter;
-            const id:number = await getTokenIdFromRequest(req);
+            const {idFornecedor, ...filterOpt} = req.query as queryFilter & { idFornecedor?: string};
+            const {typeList} = (req.params as {typeList: string | null});
+            const idCliente:number = await getTokenIdFromRequest(req);
+
+            if(!idCliente) {
+                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
+            }
 
             filterOpt.filterList = ["Nome", "Apelido", "Estabelecimento", "Data"];
-
             if(!filterOpt.filter)
                 filterOpt.filter = "Nome";
             
+            
+            const TYPES = ["accepted", "all", "none", "received", "sent"] as TypesListUser[];
+            const lowTypeList = typeList ? typeList?.toLowerCase() : "all"; 
+            // console.log("typeList: ", typeList?.toLowerCase(), lowTypeList);
+            if(!TYPES.includes(lowTypeList as TypesListUser)){
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER))
+            };
+
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
-            if(!id) {
-                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
+            let fornecedorId: number | undefined;
+
+            if(idFornecedor) {
+                fornecedorId = Number(idFornecedor);
+                if(Number.isNaN(fornecedorId)) {
+                    return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+                }
             }
             
-            const listPartner:fornecedorInterface[] = await this.fornecedorModel.getPartnerByIdCliente(id, typeList, filterOpt);
+            const listPartner:fornecedorInterface[] = await this.fornecedorModel.getPartnerByIdCliente(idCliente, lowTypeList as TypesListUser, filterOpt, fornecedorId);
 
             return res.status(200).send(successResponse(ResponseApi.Partner.LIST_SUCCESS, {list: listPartner, pagination: filterOpt}));
         } catch(e) {
@@ -189,6 +205,7 @@ class ClienteController extends UserController{
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
+
 
     private async generateTokenUser(user: loginInterface): Promise<string>{
         try {

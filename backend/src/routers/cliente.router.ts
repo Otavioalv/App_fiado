@@ -31,6 +31,7 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
         return await clienteController.update(req, res);
     })
     
+    // INUTILIZADO
     router.post("/list-fornecedores", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await fornecedorController.listAll(req, res);
     });
@@ -48,25 +49,9 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
         return await clienteFornecedorController.aceitarParceriaFornecedor(req, res);
     });
 
-    router.post("/partner/list/all", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res, "all");
-    });
-
-    router.post("/partner/list/received", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res, "received");
-    });
-
-    router.post("/partner/list/sent", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res, "sent");
-    });
-
-    router.post("/partner/list/accepted", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res, "accepted");
-    });
-    
-    router.post("/partner/list/none", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await clienteController.partnerList(req, res, "none");
-    });
+    router.get("/partner/list/:typeList", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await clienteController.partnerList(req, res);
+    }); 
     
     router.post("/product/buy", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.buyProducts(req, res);
