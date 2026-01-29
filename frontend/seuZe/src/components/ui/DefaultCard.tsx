@@ -1,13 +1,14 @@
 import { theme } from "@/src/theme";
 import { PropsWithChildren } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
 
-type DefaultCardProps = PropsWithChildren
-export function DefaultCard({children}:DefaultCardProps) {
+type DefaultCardProps = PropsWithChildren & {style?: StyleProp<ViewStyle>};
+
+export function DefaultCard({children, style}:DefaultCardProps) {
     return (
         <View 
-            style={styles.container}
+            style={[styles.container, style]}
         >
             {children}
         </View>

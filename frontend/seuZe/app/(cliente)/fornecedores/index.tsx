@@ -11,6 +11,7 @@ import { TypeUserList } from "@/src/types/responseServiceTypes";
 import { useCallback, useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { useFilterCategoryStore } from "@/src/stores/cliente/fornecedores.store";
+import { useRouter } from "expo-router";
 
 const chipList: ChipDataType<TypeUserList>[] = [
     {
@@ -37,6 +38,7 @@ const chipList: ChipDataType<TypeUserList>[] = [
 
 export default function Fornecedores() {
     // const {type} = useLocalSearchParams<{type: TypeUserList}>();
+    const router = useRouter();
 
     const {
         searchQuery,
@@ -105,13 +107,14 @@ export default function Fornecedores() {
                     description: description,
                     id: idString,
                     relationshipType: u.relationship_status ?? 'NONE',
-                    date: dateValue
+                    date: dateValue,
+                    onPress: () => router.push(`/(cliente)/fornecedores/${u.id_fornecedor}`)
                 });
             });
         });
 
         return Array.from(map.values());
-    }, [data]);
+    }, [data, router]);
 
 
     const renderItem = useCallback(
@@ -121,6 +124,7 @@ export default function Fornecedores() {
                 description={item.description} 
                 relationshipType={item.relationshipType}
                 date={item.date}
+                onPress={item.onPress}
             />
         ),
         []

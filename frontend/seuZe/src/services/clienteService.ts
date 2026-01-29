@@ -1,4 +1,4 @@
-import { DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
+import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { api } from "./api";
 import { responseAxiosInterfaces } from "./typesApi";
 import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList } from "../types/responseServiceTypes";
@@ -61,6 +61,17 @@ export async function me(): Promise<ClienteDataType>{
     }
 }
 
+export async function update(updtData: BasicFormSchema): Promise<boolean> {
+    try {
+        const endPoint = defaultEndPoint + "/update";
+        // const response = await api.post(endPoint, dataToUser) as responseAxiosInterfaces<{token: string}>;
+        await api.post(endPoint, updtData) as responseAxiosInterfaces<null>;
+
+        return true;
+    }catch(error){
+        throw error
+    }
+}
 
 export async function productList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
     try {
@@ -114,7 +125,7 @@ export async function listPartner(pagination: PaginationType = {page: 1, size: 1
     try {
         const endPoint = defaultEndPoint + "/partner/list/" + listType;
 
-        const response = await api.post(endPoint, {}, {
+        const response = await api.get(endPoint, {
             params: {
                 ...pagination
             }
@@ -126,20 +137,20 @@ export async function listPartner(pagination: PaginationType = {page: 1, size: 1
     }
 }
 
-export async function listAllFornecedores(pagination: PaginationType = {page: 1, size: 20}): Promise<ResultsWithPagination<PartnerFornecedorType[]>> {
-    try {
-        const endPoint = defaultEndPoint + "/list-fornecedores";
+// export async function listAllFornecedores(pagination: PaginationType = {page: 1, size: 20}): Promise<ResultsWithPagination<PartnerFornecedorType[]>> {
+//     try {
+//         const endPoint = defaultEndPoint + "/list-fornecedores";
 
-        const response = await api.post(endPoint, {}, {
-            params: {
-                ...pagination
-            }
-        }) as responseAxiosInterfaces<ResultsWithPagination<PartnerFornecedorType[]>>;
+//         const response = await api.post(endPoint, {}, {
+//             params: {
+//                 ...pagination
+//             }
+//         }) as responseAxiosInterfaces<ResultsWithPagination<PartnerFornecedorType[]>>;
 
-        // console.log(JSON.stringify(response.data.data?.list[0], null, "  "));
+//         // console.log(JSON.stringify(response.data.data?.list[0], null, "  "));
 
-        return response.data.data!;
-    }catch(err: any) {
-        throw err;
-    }
-}
+//         return response.data.data!;
+//     }catch(err: any) {
+//         throw err;
+//     }
+// }

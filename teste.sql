@@ -162,5 +162,102 @@ LEFT JOIN
 
 
 
+-- adiciona valores aleatorios a produto
+INSERT INTO produto (nome, preco, quantidade, fk_id_fornecedor)
+SELECT
+  p.nome,
+  round((random() * 40 + 3)::numeric, 2) AS preco,
+  (random() * 300)::int + 10          AS quantidade,
+  f.id                                AS fk_id_fornecedor
+FROM (VALUES
+  (297),(298),(300),(303),(305),(308),(309),(310),(311),(313)
+) AS f(id)
+CROSS JOIN (VALUES
+  ('Arroz Branco Tipo 1'),
+  ('Feijão Carioca'),
+  ('Óleo de Soja 900ml'),
+  ('Açúcar Cristal 1kg'),
+  ('Café Torrado e Moído 500g'),
+  ('Leite Integral 1L'),
+  ('Macarrão Espaguete 500g'),
+  ('Farinha de Trigo 1kg')
+) AS p(nome);
 
-select * from cliente_fornecedor where fk_cliente_id = 153 and fk_fornecedor_id IN (2, 7, 9);
+
+
+INSERT INTO cliente_fornecedor (
+  cliente_check,
+  fornecedor_check,
+  created_at,
+  fk_cliente_id,
+  fk_fornecedor_id
+)
+SELECT
+  (random() < 0.5) AS cliente_check,
+  (random() < 0.5) AS fornecedor_check,
+  now() - (random() * interval '30 days') AS created_at,
+  153 AS fk_cliente_id,
+  f.id AS fk_fornecedor_id
+FROM (VALUES
+  (483), (456), (457), (458), (459), (460), 
+  (461), (462), (463), (464), (466), (468), 
+  (469), (475), (477), (479), (481)
+) AS f(id);
+
+
+
+INSERT INTO compra (
+  nome_produto,
+  quantidade,
+  valor_unit,
+  quitado,
+  retirado,
+  created_at,
+  prazo,
+  fk_cliente_id,
+  fk_fornecedor_id,
+  aceito,
+  coletado_em,
+  cancelado
+)
+SELECT
+  p.nome_produto,
+  (random() * 20)::int + 1                       AS quantidade,
+  round((random() * 40 + 5)::numeric, 2)         AS valor_unit,
+
+  (random() < 0.6)                               AS quitado,
+
+  r.retirado,
+
+  now() - (random() * interval '20 days')        AS created_at,
+  now() + (random() * interval '15 days')        AS prazo,
+
+  153                                            AS fk_cliente_id,
+  f.id                                           AS fk_fornecedor_id,
+
+  (random() < 0.7)                               AS aceito,
+
+  CASE
+    WHEN r.retirado = true
+      THEN now() - (random() * interval '5 days')
+    ELSE NULL
+  END                                            AS coletado_em,
+
+  r.cancelado
+FROM (VALUES
+  (297),(298),(300),(303),(305),
+  (308),(309),(310),(311),(313)
+) AS f(id)
+CROSS JOIN (VALUES
+  ('Arroz Branco Tipo 1'),
+  ('Feijão Carioca'),
+  ('Óleo de Soja 900ml'),
+  ('Açúcar Cristal 1kg'),
+  ('Café Torrado e Moído 500g')
+) AS p(nome_produto)
+CROSS JOIN LATERAL (
+  SELECT
+    (random() < 0.5)  AS retirado,
+    (random() < 0.1)  AS cancelado
+) r;
+

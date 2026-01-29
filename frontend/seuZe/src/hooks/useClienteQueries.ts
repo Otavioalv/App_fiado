@@ -1,24 +1,24 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { listAllFornecedores, listPartner, login, me, productList, register, shoppingList } from "../services/clienteService";
+import { listPartner, login, me, productList, register, shoppingList, update } from "../services/clienteService";
 import { FilterType, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
-import { DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
+import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 
-export function useListAllFornecedores(filters: FilterType) {
-    return useInfiniteList({
-        queryKey: ['list-all-fornecedores', filters],
-        queryFn: async ({pageParam}) => {
+// export function useListAllFornecedores(filters: FilterType) {
+//     return useInfiniteList({
+//         queryKey: ['list-all-fornecedores', filters],
+//         queryFn: async ({pageParam}) => {
 
-            return await listAllFornecedores({
-                page: pageParam as number, 
-                size: 20,
-                filter: filters.filter,
-                search: filters.search
-            });
-        },
-        initialPageParam: 1
-    });
-}
+//             return await listAllFornecedores({
+//                 page: pageParam as number, 
+//                 size: 20,
+//                 filter: filters.filter,
+//                 search: filters.search
+//             });
+//         },
+//         initialPageParam: 1
+//     });
+// }
 
 export function useListPartner(filters: FilterType, listType: TypeUserList, size: number = 20) {
     const key: string = `list-partner-fornecedor`;
@@ -124,6 +124,18 @@ export function useLogin() {
     });
 }
 
+
+export function useUpdate() {
+    return useMutation<boolean, any, BasicFormSchema>({
+        mutationFn: async (data) => {
+            return await update(data);
+        },
+        networkMode: 'always',
+        onSuccess: (s) => {
+            console.log(s);
+        }
+    })
+}
 
 
 // import { useInfiniteList } from './useInfiniteList';

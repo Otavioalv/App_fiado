@@ -183,7 +183,7 @@ export default function Compras() {
                         setItemSelected={setActiveCategory}
                     />
                 }
-                emptyMessage={"Nenhum usuário encontrado"}
+                emptyMessage={"Nenhuma compra encontrada"}
             />
         </ScreenErrorGuard>
     ); 

@@ -158,7 +158,7 @@ export default function Produtos() {
                         setItemSelected={setActiveCategory}
                     />
                 }
-                emptyMessage={"Nenhum usuário encontrado"}
+                emptyMessage={"Nenhum produto encontrado"}
             />
         </ScreenErrorGuard>
     ); 

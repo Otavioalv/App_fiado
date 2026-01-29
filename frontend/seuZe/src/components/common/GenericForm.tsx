@@ -77,7 +77,6 @@ export function GenericForm<T extends FieldValues>({
                                         name={field.name}
                                         title={field.title}
                                         placeholder={field.placeholder}
-                                        secureTextEntry={field.secureTextEntry}
                                         isSecure={field.isSecure}
                                         keyboardType={field.keyboardType}
                                         disabled={field.disabled}

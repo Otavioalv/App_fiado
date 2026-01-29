@@ -1,5 +1,6 @@
 import { theme } from "@/src/theme";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text } from "react-native";
+import { HeaderBottomContainer } from "./HeaderBottomContainer";
 
 interface ProfileHeaderProps {
     nome: string, 
@@ -11,7 +12,7 @@ export function ProfileHeader({
     nome
 }: ProfileHeaderProps) {
     return (
-        <View   
+        <HeaderBottomContainer 
             style={styles.container}
         >
             <Text
@@ -24,22 +25,16 @@ export function ProfileHeader({
             >
                 {apelido}
             </Text>
-        </View>
+        </HeaderBottomContainer>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        // flex: 1,
         backgroundColor: "#ffffff",
         width: "100%",
         justifyContent: "space-between",
         alignItems: "center",
-        borderBottomWidth: 1,
-        borderColor: theme.colors.pseudoLightGray,
-        padding: theme.padding.md,
-        paddingVertical: theme.padding.lg,
-    
     },
     nomeText: {
         ...theme.typography.textXL,

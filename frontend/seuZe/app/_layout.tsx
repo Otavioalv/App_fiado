@@ -11,7 +11,7 @@ import { UserType } from "@/src/types/userType";
 import { SplashScreenController } from "@/src/components/common/SplashScreenController";
 import { useEffect } from "react";
 import { registerForbiddenAction } from "@/src/services/api";
-import { focusManager, onlineManager, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, onlineManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetProvider } from "@/src/context/bottomSheetContext";

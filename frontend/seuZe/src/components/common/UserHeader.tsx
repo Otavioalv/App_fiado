@@ -2,6 +2,7 @@ import { theme } from "@/src/theme";
 import { StyleSheet, Text, View } from "react-native";
 import Feather from '@expo/vector-icons/Feather';
 import { DefaultDescription, DefaultDescriptionSkeleton } from "../ui/DefaultDescription";
+import { HeaderBottomContainer } from "../ui/HeaderBottomContainer";
 
 interface UserHeaderProps {
     nome: string,
@@ -16,7 +17,7 @@ export function UserHeader({apelido, nome, isLoading=false}: UserHeaderProps) {
         
 
     return (
-        <View style={styles.container}>
+        <HeaderBottomContainer style={styles.container}>
             <DefaultDescription
                 text1={`Olá, ${nome}!`}
                 text2={`Apelido: ${apelido}`}
@@ -32,19 +33,19 @@ export function UserHeader({apelido, nome, isLoading=false}: UserHeaderProps) {
                     </Text>
                 </View>
             </View>
-        </View>
+        </HeaderBottomContainer>
     );
 }
 
 export function UserHeaderSkeleton() {
     return (
-        <View style={styles.container}>
+        <HeaderBottomContainer style={styles.container}>
             <DefaultDescriptionSkeleton size="M"/>
 
             <View style={styles.bellNotify}>
                 <Feather name="bell" size={24} color={theme.colors.textNeutral900} />
             </View>
-        </View>
+        </HeaderBottomContainer>
     );
 }
 
@@ -54,12 +55,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        width: "100%",
-        borderBottomWidth: 1,
-        backgroundColor: "#ffffff",
-        borderColor: theme.colors.pseudoLightGray,
-        paddingHorizontal: theme.padding.md,
-        paddingVertical: theme.padding.sm,
     },
     bellNotify: {
     },

@@ -16,7 +16,6 @@ export default function ModernInputForm({
     errorMessage, 
     disabled = false, 
     isSecure = false,
-    secureTextEntry,
     ...rest
 }: ModernInputFormProps) {
     const [showPassword, setShowPassWord] = useState<boolean>(false);
@@ -37,7 +36,7 @@ export default function ModernInputForm({
         
             <View style={[
                 styles.inputWrapper, 
-                !disabled ? styles.inputEnable : undefined
+                disabled ? styles.inputDisabled :  styles.inputEnable,
             ]}>
                 <TextInput
                     style={[styles.textInput]}
@@ -80,7 +79,6 @@ const styles = StyleSheet.create({
     container: {
         padding: 0,
         gap: theme.gap.xs,
-        fontSize: theme.typography.textSM.fontSize,
         flex: 1, // Testar
         // backgroundColor: "green",
     }, 
@@ -88,7 +86,6 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingLeft: theme.padding.sm,
         fontSize: theme.typography.textMD.fontSize,
-        color: theme.colors.textNeutral900
         // backgroundColor: "red",
     }, 
     inputWrapper: {
@@ -100,14 +97,16 @@ const styles = StyleSheet.create({
         backgroundColor: "#ffffff",
         borderRadius: theme.radius.sm,
         color: "black",
-        // width: "100%",
         height: 60,
-        // paddingLeft: theme.padding.sm,
         fontSize: theme.typography.textMD.fontSize,
     },
     inputEnable: {
         borderWidth: 1,
         borderColor: theme.colors.pseudoLightGray
+    },
+    inputDisabled: {
+        backgroundColor: "transparent", // Visual cinza se estiver desabilitado
+        borderWidth: 0,
     },
     titleInput: {
         fontSize: theme.typography.textSM.fontSize,

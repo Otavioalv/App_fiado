@@ -93,16 +93,19 @@ export default function Home() {
 
     const listPurchased:InfoType[] = useMemo((): InfoType[] => {
             const list = lastPurchased?.pages?.[0]?.list;
+
+            // console.log(JSON.stringify(list, null, "  "));
             
             if(!list) return [];
 
             const info:InfoType[] = list.map(l => ({
                 id: l.id_compra.toString(),
                 title: l.nome_produto,
-                info: `Coletado em ${transformDateToUI(l.coletado_em)}`
+                info: `Criado em ${transformDateToUI(l.created_at || "")}`
             }));
 
             return info
+            // return []
 
     }, [lastPurchased]);
 

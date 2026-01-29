@@ -6,7 +6,7 @@ import { theme } from "@/src/theme";
 export default function ClienteLayout() {
     return (
         <Tabs
-            initialRouteName="perfil" 
+            initialRouteName="fornecedores" 
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: theme.colors.orange,
@@ -59,15 +59,6 @@ export default function ClienteLayout() {
                     title: "Perfil",
                     tabBarIcon: ({color}) => 
                         <Feather name="user" size={24} color={color}/>,
-                }}
-            />
-
-            <Tabs.Screen
-                name="teste"
-                options={{
-                    title: "Teste",
-                    tabBarIcon: ({color}) => 
-                        <Feather name="terminal" size={24} color={color}/>,
                 }}
             />
         </Tabs>

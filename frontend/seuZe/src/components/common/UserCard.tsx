@@ -3,19 +3,28 @@ import { DefaultCard } from "../ui/DefaultCard";
 import { DefaultDescription, DefaultDescriptionSkeleton } from "../ui/DefaultDescription";
 import { RelationshipActions, RelationshipActionsSkeleton } from "../ui/RelationshipActions";
 import { memo } from "react";
-import { StyleSheet, Text } from "react-native";
+import { PressableProps, StyleSheet, Text } from "react-native";
 import { theme } from "@/src/theme";
+import { PressableCard } from "../ui/PressableCard";
 
-export interface UserCardProps {
+export interface UserCardProps extends PressableProps {
     title: string, 
     description: string,
     relationshipType: RelationshipStatusType,
-    date?: string
-}
+    date?: string,
+};
 
-export function UserCard({description, title, relationshipType, date}: UserCardProps) {
+export function UserCard({
+    description, 
+    title, 
+    relationshipType, 
+    date,
+    ...pressableProps
+}: UserCardProps) {
     return (
-        <DefaultCard>
+        <PressableCard
+            {...pressableProps}
+        >
             <DefaultDescription
                 text1={title}
                 text2={description}
@@ -31,7 +40,7 @@ export function UserCard({description, title, relationshipType, date}: UserCardP
             }
 
             <RelationshipActions type={relationshipType}/>
-        </DefaultCard>
+        </PressableCard>
     );
 }
 

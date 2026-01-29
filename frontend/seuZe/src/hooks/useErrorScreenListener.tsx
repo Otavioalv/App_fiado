@@ -6,7 +6,7 @@ import { AppError } from "../errors/AppError";
 export function useErrorScreenListener(
     isError: boolean,
     error: unknown,
-    setErrorType: (type: ErrorTypes) => void
+    setErrorType: (type: ErrorTypes | null) => void
 ) {
     useEffect(() => {   
         if(isError) {
@@ -23,6 +23,8 @@ export function useErrorScreenListener(
                 console.log("[Load List] Erro Desconhecido: ", error, "\n");
                 setErrorType("UNKNOWN");
             }
+        } else {
+            setErrorType(null);
         }
     }, [isError, error, setErrorType]);
 }

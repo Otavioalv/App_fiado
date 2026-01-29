@@ -38,10 +38,10 @@ export function ListShoppingProd({
                 nome={item.nome}
                 price={item.price}
                 prodName={item.prodName}
-                status={item.status}
+                paymentStatus={item.paymentStatus}
                 apelido={item.apelido}
                 prazo={item.prazo}
-                paid={item.paid}
+                shoppingStatus={item.shoppingStatus}
                 criadoEm={item.criadoEm}
             />
         ),

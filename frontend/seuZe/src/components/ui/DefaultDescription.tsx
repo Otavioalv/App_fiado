@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     // Container Estilo
     containerBase: {
         // backgroundColor: "red",
-        flex: 1
+        // flex: 1
     },
     containerSkeleton: {
         flex: 1, 
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.textLG.fontSize,
     },
     text1Large: {
-
+        fontSize: theme.typography.textXL.fontSize
     },
     text1Skeleton: {
         // height: 15, 
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.textMD.fontSize,
     },
     text2Large: {
-
+        fontSize: theme.typography.textLG.fontSize,
     },
     text2Skeleton: {
         // height: 15, 

@@ -57,6 +57,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#ffffff",
         borderWidth: 1,
         borderColor: theme.colors.pseudoLightGray,
+        
+        // boxShadow: '5px 5px 0px 2px rgba(0, 0, 0, 0.2)', 
     },
     container: {
         flex: 1,
