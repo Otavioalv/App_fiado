@@ -371,7 +371,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             const offset = (page - 1) * limit;
 
             const whereConditions: string[] = [];
-            const values: any[] = [];
+            const values: string[] & number[] = [];
             let paramIndex = 1;
 
 
@@ -452,11 +452,11 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             `;
 
             const result = (
-                await client.query(SQL_LIST, values)
-            ).rows as fornecedorInterface[];
+                await client.query<fornecedorInterface>(SQL_LIST, values)
+            ).rows;
 
             const { total } = (
-                await client.query(SQL_TOTAL, values.slice(0, paramIndex))
+                await client.query<{total: number}>(SQL_TOTAL, values.slice(0, paramIndex))
             ).rows[0];
 
             filterOpt.total = Number(total);

@@ -162,7 +162,6 @@ class ClienteController extends UserController{
         }
     }
 
-
     public async partnerList(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> { 
         try {
             const {idFornecedor, ...filterOpt} = req.query as queryFilter & { idFornecedor?: string};

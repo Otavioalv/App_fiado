@@ -125,7 +125,8 @@ class ProdutoModel  {
     public async listProductsByIdFornecedor(
         id_cliente: number, 
         filterOpt:queryFilter,
-        typeList: TypesListUser = "accepted"
+        typeList: TypesListUser = "accepted",
+        idFornecedor?: number,
     ): Promise<ListProductWithFornecedor[]>{
         
         let client: PoolClient | undefined;
@@ -154,7 +155,7 @@ class ProdutoModel  {
             const limit:number = size; // numero de quantidades a mostrar
             const offset:number = (page - 1) * limit // Começa a partir do numero 
             const sqlSearch: string = `%${search}%`;
-            const orderBy: string = sqlFilterList[filter];
+            const orderBy: string = sqlFilterList[filter] ?? "f.nome ASC";
             const relationshipCondition = relationshipMap[typeList];
             const whereCondition: string[] = [];
 
@@ -236,6 +237,155 @@ class ProdutoModel  {
             client?.release();
         }
     }
+
+
+
+    public async listProductsByIdFornecedor2(
+        idCliente: number, 
+        filterOpt:queryFilter,
+        typeList: TypesListUser = "accepted",
+        idFornecedor?: number,
+    ): Promise<ListProductWithFornecedor[]>{
+        
+        
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const {size, page, search, filter} = filterOpt;
+
+            const sqlFilterList: Record<string, string> = {
+                "Nome do Fornecedor": "f.nome ASC",
+                "Apelido": "f.apelido ASC",
+                "Estabelecimento": "f.nomeestabelecimento ASC",
+                "Nome do Produto": "p.nome ASC"
+            };
+            
+            const orderBy: string = sqlFilterList[filter] ?? "f.nome ASC";
+
+            const relationshipMap: Record<TypesListUser, string> = {
+                all: "",
+                received: "(cf.fornecedor_check = TRUE AND cf.cliente_check = FALSE)",
+                sent: "(cf.cliente_check = TRUE AND cf.fornecedor_check = FALSE)",
+                accepted: "(cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE)",
+                none: "cf.fk_cliente_id IS NULL"
+            }
+            
+            
+            
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+            
+            const whereCondition: string[] = [];
+            const values: string[] & number[] = [];
+            let paramIndex = 1;
+
+            
+            values.push(idCliente);
+
+
+            const relationshipCondition = relationshipMap[typeList];
+            if(relationshipCondition) {
+                whereCondition.push(relationshipCondition);
+            }
+
+            const sqlSearch: string = `%${search}%`;
+            values.push(sqlSearch);
+            const searchParam = `$${++paramIndex}`;
+
+            whereCondition.push(`
+                (
+                    f.nome ILIKE ${searchParam} OR 
+                    unaccent(f.apelido) ILIKE unaccent(${searchParam}) OR 
+                    unaccent(f.nomeestabelecimento) ILIKE unaccent(${searchParam}) OR
+                    unaccent(p.nome) ILIKE unaccent(${searchParam})
+                )
+            `);
+            
+            if(idFornecedor) {  
+                values.push(idFornecedor);
+                whereCondition.push(`f.id_fornecedor = $${++paramIndex}`);
+            }
+
+            const whereSql = whereCondition.length ? 
+            `WHERE ${whereCondition.join(" AND ")}` 
+            : "";
+            
+
+            const fromJoinSql = `
+                FROM 
+                    produto AS p
+                LEFT JOIN 
+                    cliente_fornecedor AS cf
+                    ON
+                        p.fk_id_fornecedor = cf.fk_fornecedor_id
+                    AND
+                        cf.fk_cliente_id = $1
+                LEFT JOIN  
+                    fornecedor AS f
+                    ON
+                        p.fk_id_fornecedor = f.id_fornecedor
+            `;
+
+
+            values.push(limit, offset);
+
+            const SQL_LIST = `
+                SELECT 
+                    p.id_produto,
+                    p.nome AS nome_prod,
+                    p.preco,
+                    p.quantidade,
+                    p.fk_id_fornecedor AS id_fornecedor,
+                    f.nome AS nome_fornecedor,
+                    f.nomeestabelecimento,
+                    f.apelido,
+                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
+                    CASE 
+                        WHEN cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE THEN 'ACCEPTED'
+                        WHEN cf.cliente_check = TRUE THEN 'SENT'
+                        WHEN cf.fornecedor_check = TRUE THEN 'RECEIVED'
+                        ELSE 'NONE'
+                    END AS relationship_status
+                ${fromJoinSql}
+                ${whereSql}
+                ORDER BY ${orderBy}
+                LIMIT $${paramIndex + 1}
+                OFFSET $${paramIndex + 2};
+            `;
+
+            // console.log(SQL_LIST);
+
+            const SQL_TOTAL = `
+                SELECT COUNT(*) as total
+                ${fromJoinSql}
+                ${whereSql};
+            `;
+
+            // console.log(SQL_LIST, values);
+            
+            const listProducts = (
+                await client.query<ListProductWithFornecedor>(SQL_LIST, values)
+            ).rows;
+            
+            const {total} = (
+                await client.query<{total: number}>(SQL_TOTAL, values.slice(0, paramIndex))
+            ).rows[0];
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
+
+            return listProducts;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao listar produtos");
+        } finally {
+            client?.release();
+        }
+    }
+
 
 
     public async updateProtucts(products: productInterface[], id_fornecedor: number) {

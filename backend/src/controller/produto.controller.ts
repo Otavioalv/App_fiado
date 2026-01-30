@@ -143,32 +143,52 @@ class ProdutoController {
 
     public async listProductsByIdFornecedor(req: FastifyRequest, res: FastifyReply):Promise<FastifyReply> {
         try {
-            const {...filterOpt} = req.query as queryFilter;
+            const {idFornecedor, ...filterOpt} = req.query as queryFilter & { idFornecedor?: string};
             const {typeList} = req.params as {typeList: string | undefined};
             const idCliente:number = await getTokenIdFromRequest(req);
 
+            if(!idCliente) {
+                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
+            }
+            
             filterOpt.filterList = ["Nome do Fornecedor", "Apelido", "Estabelecimento", "Nome do Produto"];
-
             if(!filterOpt.filter)
                 filterOpt.filter = "Nome do Produto";
+
+            const TYPES = ["accepted", "all", "none", "received", "sent"] as TypesListUser[];
+            const lowTypeList = typeList ? typeList?.toLocaleLowerCase() : "all";
+            if(!TYPES.includes(lowTypeList as TypesListUser)){
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER))
+            };
 
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 
 
-            const TYPES = ["accepted", "all", "none", "received", "sent"] as TypesListUser[];
+            let fornecedorIdNum: number | undefined;
 
-            if(!typeList || !TYPES.includes(typeList as TypesListUser)){
-                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER))
-            };
-
-            if(!idCliente) {
-                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
+            if(idFornecedor) {
+                fornecedorIdNum = Number(idFornecedor);
+                if(Number.isNaN(fornecedorIdNum)) { 
+                    return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+                }
             }
 
-            const listProduct = await this.produtoModel.listProductsByIdFornecedor(idCliente, filterOpt, typeList as TypesListUser);
+            const listProduct = await this.produtoModel.listProductsByIdFornecedor2(idCliente, filterOpt, typeList as TypesListUser, fornecedorIdNum);
 
-            return res.status(200).send(successResponse(ResponseApi.Product.LIST_SUCCESS, {list: listProduct, pagination: filterOpt}));
+            // console.log(fornecedorIdNum, filterOpt, typeList, idCliente);
+
+            return res
+                .status(200)
+                .send(
+                    successResponse(
+                        ResponseApi.Product.LIST_SUCCESS,
+                        {
+                            list: listProduct, 
+                            pagination: filterOpt
+                        }
+                    )
+                );
         } catch(e) {
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         } 
