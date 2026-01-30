@@ -57,7 +57,7 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
         return await produtoController.buyProducts(req, res);
     }); 
     
-    router.post("/product/list/:typeList", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+    router.get("/product/list/:typeList", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.listProductsByIdFornecedor(req, res);
     }); 
 

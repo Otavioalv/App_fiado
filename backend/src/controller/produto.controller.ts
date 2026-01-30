@@ -174,7 +174,7 @@ class ProdutoController {
                 }
             }
 
-            const listProduct = await this.produtoModel.listProductsByIdFornecedor2(idCliente, filterOpt, typeList as TypesListUser, fornecedorIdNum);
+            const listProduct = await this.produtoModel.listProductsByIdFornecedor(idCliente, filterOpt, typeList as TypesListUser, fornecedorIdNum);
 
             // console.log(fornecedorIdNum, filterOpt, typeList, idCliente);
 
