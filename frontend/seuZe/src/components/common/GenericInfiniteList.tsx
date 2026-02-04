@@ -1,5 +1,4 @@
 import { FlatList, FlatListProps, NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from "react-native";
-import { UserCardProps } from "./UserCard";
 import { ReactElement, useCallback, useRef, useState } from "react";
 import { theme } from "@/src/theme";
 import { MemoFeedbackTemplate } from "./FeedbackTemplate";
@@ -8,23 +7,24 @@ import { FlashList, FlashListProps, FlashListRef } from "@shopify/flash-list";
 import { ButtonScrollTop } from "../ui/ButtonScrollTop";
 
 
-export type GenericInfiniteListType = UserCardProps & {id: string};
+export type GenericInfiniteListType<T> = T & {id: string} ;
 
-export interface GenericInfiniteListProps<T>{
+
+export interface GenericInfiniteListProps<T> extends FlashListProps<T> {
     data: T[],
-    isLoading: boolean;
+    isLoading: boolean,
     isRefetching: boolean;
-    isFetchingNextPage: boolean,
+    isFetchingNextPage?: boolean,
     onRefresh: () => void,
-    onEndReached: () => void, 
+    keyExtractor: (item: T) => string,
+    onEndReached?: () => void, 
     renderItem: FlashListProps<T>["renderItem"],
-    SkeletonComponent: ReactElement;
-    HeaderComponent?: ReactElement;
+    SkeletonComponent?: ReactElement,
+    HeaderComponent?: ReactElement,
     SkeletonList: GenericInfiniteListSkeletonProps<string>,
-    emptyMessage?: string;
-    keyExtractor: (item: T) => string;
-
-}
+    emptyMessage?: string,
+    hasBorderSeparator?: boolean,
+};
 
 export function GenericInfiniteList<T>({
     data,
@@ -39,6 +39,7 @@ export function GenericInfiniteList<T>({
     SkeletonList,
     keyExtractor,
     emptyMessage = "Nenhum item encontrado",
+    hasBorderSeparator = false,
 }: GenericInfiniteListProps<T>) {
     const [showScrollTopButton, setShowScrollTopButton] = useState<boolean>(false);
     const listRef = useRef<FlashListRef<T>>(null);
@@ -73,7 +74,12 @@ export function GenericInfiniteList<T>({
 
     const itemSeparator = () => {
         return (
-            <View style={{height: theme.gap.sm}}/>
+            <View 
+                style={[
+                    styles.separator,
+                    hasBorderSeparator && styles.borderSeparator
+                ]}
+            />
         );
     }
 
@@ -162,5 +168,12 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         gap: theme.gap.sm,
         padding: theme.padding.sm
+    },
+    separator: {
+        height: theme.gap.sm
+    },
+    borderSeparator: {
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.pseudoLightGray
     }
 });

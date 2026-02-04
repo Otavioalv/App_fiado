@@ -4,34 +4,75 @@ import { ButtonModern, ButtonModernSkeleton } from "./ButtonModern";
 import { theme } from "@/src/theme";
 
 type RelationshipActionsProps = {
-    type: RelationshipStatusType
+    type: RelationshipStatusType,
+    isLoading?: boolean
 }
 
-export function RelationshipActions({type}: RelationshipActionsProps) {
+export function RelationshipActions({
+    type,
+    isLoading
+}: RelationshipActionsProps) {
+;
+
     return (
         <View 
             style={styles.container}
         >
-            {type === "ACCEPTED" && (
-                <>
-                    <ButtonModern placeholder="Fazer Pedido" size="M" style={{flex: 1}}/>
-                    <ButtonModern placeholder="Cancelar" size="M" variant="outline" style={{flex: 1}}/>
-                </>
-            )}
+            {isLoading ? (
+                <RelationshipActionsSkeleton/>
+            ) : (<>
+                {type === "ACCEPTED" && (
+                    <>
+                        <ButtonModern 
+                            placeholder="Fazer Pedido" 
+                            size="M" 
+                            style={{flex: 1}} 
+                        />
+                        <ButtonModern 
+                            placeholder="Cancelar" 
+                            size="M" 
+                            variant="outline" 
+                            style={{flex: 1}} 
+                        />
+                    </>
+                )}
 
-            {type === "NONE" && (
-                <ButtonModern placeholder="Solicitar Parceria" size="M" variant="outline" style={{flex: 1}}/>
-            )}
+                {type === "NONE" && (
+                    <ButtonModern 
+                        placeholder="Solicitar Parceria" 
+                        size="M" 
+                        variant="outline" 
+                        style={{flex: 1}} 
+                    />
+                )}
 
-            {type === "RECEIVED" && (
-                <>
-                    <ButtonModern placeholder="Aceitar" iconName="check" size="M" style={{flex: 1}}/>
-                    <ButtonModern placeholder="Recusar" iconName="x" size="M" variant="outline" style={{flex: 1}}/>
-                </>
-            )}
-            {type === "SENT"  && (
-                <ButtonModern placeholder="Aguardando Aprovação" size="M" variant="disabled" style={{flex: 1}}/>
-            )}
+                {type === "RECEIVED" && (
+                    <>
+                        <ButtonModern 
+                            placeholder="Aceitar" 
+                            iconName="check" 
+                            size="M" 
+                            style={{flex: 1}}
+                        />
+                        <ButtonModern 
+                            placeholder="Recusar" 
+                            iconName="x" 
+                            size="M" 
+                            variant="outline" 
+                            style={{flex: 1}}
+                        />
+                    </>
+                )}
+                {type === "SENT"  && (
+                    <ButtonModern 
+                        placeholder="Aguardando Aprovação" 
+                        size="M" 
+                        variant="disabled" 
+                        style={{flex: 1}}
+                    />
+                )}
+            </>)}
+
         </View>
     );
 }

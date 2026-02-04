@@ -1,6 +1,6 @@
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { api } from "./api";
-import { responseAxiosInterfaces } from "./typesApi";
+import { BackendResponse, responseAxiosInterfaces } from "./typesApi";
 import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList } from "../types/responseServiceTypes";
 
 
@@ -54,7 +54,7 @@ export async function me(): Promise<ClienteDataType>{
         
         // await api.get("/user/delay_test/20000");
         const response = await api.post(endPoint) as responseAxiosInterfaces<ClienteDataType>;
-        
+
         return response.data.data!;
     }catch(err:any){
         throw err
@@ -73,12 +73,17 @@ export async function update(updtData: BasicFormSchema): Promise<boolean> {
     }
 }
 
-export async function productList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
+export async function productList(
+    listType: TypeUserList,
+    id?: string | number,
+    pagination: PaginationType = {page: 1, size: 10}
+): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
     try {
         const endPoint = defaultEndPoint + "/product/list/" + listType;
         
-        const response = await api.post(endPoint, {}, {
+        const response = await api.get(endPoint, {
             params: {
+                idFornecedor: id,
                 ...pagination
             }
         }) as responseAxiosInterfaces<ResultsWithPagination<ProductAndFornecedorData[]>>;
@@ -121,36 +126,38 @@ export async function partnarSent(pagination: PaginationType = {page: 1, size: 1
     }
 }
 
-export async function listPartner(pagination: PaginationType = {page: 1, size: 10}, listType: TypeUserList): Promise<ResultsWithPagination<PartnerFornecedorType[]>>{
+export async function listPartner(
+    listType: TypeUserList, 
+    id?: string | number,
+    pagination: PaginationType = {
+        page: 1, 
+        size: 10
+    },  
+): Promise<ResultsWithPagination<PartnerFornecedorType[]>>{
     try {
-        const endPoint = defaultEndPoint + "/partner/list/" + listType;
+        const endPoint = `${defaultEndPoint}/partner/list/${listType}`;
+        // const endPoint = id ? `${resourcePath}/${id}` : resourcePath;
 
-        const response = await api.get(endPoint, {
+        console.log("[IDFORNECEDOR SERVICE: ]", id);
+
+        const response = await api.get<BackendResponse<ResultsWithPagination<PartnerFornecedorType[]>>>(endPoint, {
             params: {
-                ...pagination
+                idFornecedor: id,
+                ...pagination,
+                
             }
-        }) as responseAxiosInterfaces<ResultsWithPagination<PartnerFornecedorType[]>>;
+        });
+        // console.log(response);
 
-        return response.data.data!;
+        if(!response.data.data) {
+            return {list: [], pagination: pagination}
+        }
+
+        return response.data.data;
+        
     }catch(err: any){
         throw err;
     }
 }
 
-// export async function listAllFornecedores(pagination: PaginationType = {page: 1, size: 20}): Promise<ResultsWithPagination<PartnerFornecedorType[]>> {
-//     try {
-//         const endPoint = defaultEndPoint + "/list-fornecedores";
 
-//         const response = await api.post(endPoint, {}, {
-//             params: {
-//                 ...pagination
-//             }
-//         }) as responseAxiosInterfaces<ResultsWithPagination<PartnerFornecedorType[]>>;
-
-//         // console.log(JSON.stringify(response.data.data?.list[0], null, "  "));
-
-//         return response.data.data!;
-//     }catch(err: any) {
-//         throw err;
-//     }
-// }

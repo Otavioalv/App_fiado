@@ -21,9 +21,18 @@ export interface ButtonProps extends PressableProps {
     variant?: ButtonVariant;
     size?: AppDefaultSizes; 
     iconName?: keyof typeof Feather.glyphMap;
+    isLoading?: boolean,
 };
 
-export function ButtonModern({placeholder, variant = "primary", size = "L",style, iconName, ...rest }: ButtonProps) {
+export function ButtonModern({
+    placeholder, 
+    variant = "primary", 
+    size = "L",
+    style, 
+    iconName, 
+    isLoading, 
+    ...rest 
+}: ButtonProps) {
     const buttonAnim = useRef(new Animated.Value(1)).current;
 
 
@@ -78,6 +87,11 @@ export function ButtonModern({placeholder, variant = "primary", size = "L",style
 
     const currentStyle = sizeStyle[size];
     const currentVariant = variantStyle[variant];
+
+
+    if(isLoading) {
+        return <ButtonModernSkeleton size={size}/>
+    }
 
     return (
         <Animated.View 

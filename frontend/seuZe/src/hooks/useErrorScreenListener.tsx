@@ -3,6 +3,22 @@ import { ErrorTypes } from "../types/responseServiceTypes";
 import { AppError } from "../errors/AppError";
 
 
+export function mapAppErrorToErrorType(err: unknown): ErrorTypes {
+    if (err instanceof AppError) {
+        const {message, type} = err;
+
+        console.log("[Use Error] Erro: ", message);
+        console.log("[Use Error] Type: ", type);
+        console.log("\n");
+
+        return err.type;
+    }
+
+    return "UNKNOWN";
+}
+
+
+
 export function useErrorScreenListener(
     isError: boolean,
     error: unknown,
@@ -10,19 +26,8 @@ export function useErrorScreenListener(
 ) {
     useEffect(() => {   
         if(isError) {
-            if(error instanceof AppError){
-                const {message, type} = error;
-                
-                console.log("[Load List] Erro: ", message);
-                console.log("[Load List] Type: ", type);
-                console.log("\n");
-    
-                setErrorType(type);
-            }
-            else {
-                console.log("[Load List] Erro Desconhecido: ", error, "\n");
-                setErrorType("UNKNOWN");
-            }
+            const errorHandled: ErrorTypes = mapAppErrorToErrorType(error);
+            setErrorType(errorHandled);
         } else {
             setErrorType(null);
         }

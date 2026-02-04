@@ -7,7 +7,8 @@ import { View, Text, StyleSheet, TextStyle, Animated } from "react-native";
 export interface DefaultDescriptionProps {
     text1: string,
     text2: string,
-    size: AppDefaultSizes
+    size: AppDefaultSizes,
+    isLoading?: boolean,
 };
 
 interface ComponentsStyles {
@@ -18,7 +19,12 @@ interface ComponentsStyles {
 
 type SizeStyle = Record<AppDefaultSizes, ComponentsStyles>;
 
-export function DefaultDescription({text1, text2, size}: DefaultDescriptionProps) {
+export function DefaultDescription({
+    text1, 
+    text2, 
+    size,
+    isLoading,
+}: DefaultDescriptionProps) {
 
     const sizeStyle: SizeStyle = {
         S: {
@@ -37,6 +43,9 @@ export function DefaultDescription({text1, text2, size}: DefaultDescriptionProps
 
     const currentSize = sizeStyle[size];
 
+    if(isLoading)
+        return <DefaultDescriptionSkeleton size={size}/>;
+    
     return (
         <View style={[styles.containerBase]}>
             {/* Texto de titulo*/}
@@ -79,7 +88,7 @@ const styles = StyleSheet.create({
     // Container Estilo
     containerBase: {
         // backgroundColor: "red",
-        // flex: 1
+        flex: 1
     },
     containerSkeleton: {
         flex: 1, 

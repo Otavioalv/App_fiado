@@ -1,24 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { listPartner, login, me, productList, register, shoppingList, update } from "../services/clienteService";
-import { FilterType, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
+import { FilterType, PartnerFornecedorType, ProductAndFornecedorData, ResultsWithPagination, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
-
-// export function useListAllFornecedores(filters: FilterType) {
-//     return useInfiniteList({
-//         queryKey: ['list-all-fornecedores', filters],
-//         queryFn: async ({pageParam}) => {
-
-//             return await listAllFornecedores({
-//                 page: pageParam as number, 
-//                 size: 20,
-//                 filter: filters.filter,
-//                 search: filters.search
-//             });
-//         },
-//         initialPageParam: 1
-//     });
-// }
 
 export function useListPartner(filters: FilterType, listType: TypeUserList, size: number = 20) {
     const key: string = `list-partner-fornecedor`;
@@ -28,18 +12,44 @@ export function useListPartner(filters: FilterType, listType: TypeUserList, size
         queryKey: [key, listType, filters],
         queryFn: async ({pageParam}) => {
             return await listPartner(
+                listType,
+                undefined,
                 {
                     page: pageParam as number, 
                     size: size,
                     filter: filters.filter,
                     search: filters.search
                 }, 
-                listType
             );
         },
         initialPageParam: 1,
     });
 }
+
+export function useListPartnerFromId(id: string | number) {
+    const key: string = `list-partner-fornecedor`;
+
+    return useQuery({
+        queryKey: [key, id],
+        enabled: !!id,
+        queryFn: async (): Promise<PartnerFornecedorType> => {
+            const result = await listPartner(
+                "all",
+                id,
+                {
+                    page: 1, 
+                    size: 1,
+                    filter: "Nome",
+                    search: ""
+                }, 
+            );
+
+            return result.list[0];
+        },
+    });
+}
+
+
 
 export function useProductList(filters: FilterType, listType: TypeUserList) {
     const key: string = `product-list`;
@@ -48,19 +58,44 @@ export function useProductList(filters: FilterType, listType: TypeUserList) {
         queryKey: [key, listType, filters],
         queryFn: async({pageParam}) => {
             return await productList(
+                listType,
+                undefined,
                 {
                     page: pageParam as number,
                     size: 20,
                     filter: filters.filter,
                     search: filters.search
                 },
-                listType
             )
         }, 
         initialPageParam: 1
     });
 
 }
+
+export function useProductListFromId(id: string | number, filters: FilterType) {
+    const key: string = `product-list`;
+    
+    return useInfiniteList<ResultsWithPagination<ProductAndFornecedorData[]>>({
+        queryKey: [key, id, filters],
+        enabled: !!id,
+        queryFn: async ({pageParam}) => {
+            return await productList(
+                "all",
+                id,
+                {
+                    page: pageParam as number, 
+                    size: 20,
+                    filter: "Nome do Produto",
+                    search: filters.search,
+                }, 
+            );
+        },
+        initialPageParam: 1,
+    });
+}
+
+
 
 export function useShoppingList(filters: FilterType, listType: TypeShoppingList, size: number = 20) {
     const key: string = `shopping-list`;
@@ -136,35 +171,3 @@ export function useUpdate() {
         }
     })
 }
-
-
-// import { useInfiniteList } from './useInfiniteList';
-// import { 
-//   listAssociados, 
-//   listNaoAssociados, 
-//   listAllClientes 
-// } from '@/src/services/clienteService';
-
-// // Hook 1: Todos
-// export function useClientes() {
-//   return useInfiniteList({
-//     queryKey: ['clientes', 'all'], // Query keys organizadas
-//     queryFn: ({ pageParam }) => listAllClientes({ page: pageParam, size: 20 }),
-//   });
-// }
-
-// // Hook 2: Associados
-// export function useAssociados() {
-//   return useInfiniteList({
-//     queryKey: ['clientes', 'associados'],
-//     queryFn: ({ pageParam }) => listAssociados({ page: pageParam, size: 20 }),
-//   });
-// }
-
-// // Hook 3: Não Associados
-// export function useNaoAssociados() {
-//   return useInfiniteList({
-//     queryKey: ['clientes', 'nao-associados'],
-//     queryFn: ({ pageParam }) => listNaoAssociados({ page: pageParam, size: 20 }),
-//   });
-// }

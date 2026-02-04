@@ -1,6 +1,5 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
-import { GenericInfiniteList } from "@/src/components/common/GenericInfiniteList";
-import { ListProductsType } from "@/src/components/common/ListProducts";
+import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
 import { MemoProductCard, MemoProductCardSkeleton, ProductCardProps } from "@/src/components/common/ProductCard";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
@@ -77,7 +76,7 @@ export default function Produtos() {
     const listProds = useMemo(() => {
         if (!data) return [];
 
-        const map = new Map<string, ListProductsType>();
+        const map = new Map<string, GenericInfiniteListType<ProductCardProps>>();
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
@@ -143,6 +142,7 @@ export default function Produtos() {
                 renderItem={renderItem}
                 isFetchingNextPage={isFetchingNextPage}
                 isLoading={isLoading}
+                // isLoading={true}
                 isRefetching={isRefetching}
                 keyExtractor={(i) => i.id.toString()}
                 onEndReached={() => {

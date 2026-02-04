@@ -1,94 +1,57 @@
-import { ButtonIcon } from "@/src/components/ui/ButtonIcon";
-import { DefaultDescription } from "@/src/components/ui/DefaultDescription";
-import { SpacingScreenContainer } from "@/src/components/ui/SpacingScreenContainer";
-import { theme } from "@/src/theme";
-import { useLocalSearchParams, useRouter, withLayoutContext } from "expo-router";
-import { Text, View } from "react-native";
-import {createMaterialTopTabNavigator} from "@react-navigation/material-top-tabs";
-import { HeaderBottomContainer } from "@/src/components/ui/HeaderBottomContainer";
+import { useLocalSearchParams} from "expo-router";
+import { UserDetail } from "@/src/components/common/UserDetail";
+import { TabItem } from "@/src/components/common/GenericTopTabs";
+import { useListPartnerFromId } from "@/src/hooks/useClienteQueries";
+import { useMemo } from "react";
+import { SobreTab } from "@/src/components/cliente/tabs/SobreTab";
+import { ListProdsTab } from "@/src/components/cliente/tabs/ListProdsTab";
 
-
-const Tab = createMaterialTopTabNavigator();
-// const MaterialTopTabs = withLayoutContext(Navigator);
 
 export default function FornecedorDetail() {
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const { id } = useLocalSearchParams<{ id: string }>();    
+
+    const {
+        data: userData,
+        isLoading: isLoadingUserData,
+        isError: isErrorUserData,
+    } = useListPartnerFromId(
+        id
+    );
+  
+
+    const tabList = useMemo<TabItem[]>(() => [
+        {
+            name:"Sobre" ,
+            component: SobreTab, 
+            options: {
+                title: "Sobre",
+                lazy: true,
+                lazyPreloadDistance: 0,
+            },
+        },
+        {
+            name:"Produtos" ,
+            component: ListProdsTab, 
+            options: {
+                title: "Produtos",
+                lazy: true,
+                lazyPreloadDistance: 0
+            },
+        },
+    ], []);
+
     
-    const router = useRouter();
     
-    
+    const desc: string =  `Resp: ${userData?.nome} ${userData?.apelido ? `- (${userData.apelido})` : ""}`;
 
     return (
-        <>
-            <HeaderBottomContainer
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    borderBottomWidth: 0,
-                    // backgroundColor: "red",
-                }}
-            >
-                <ButtonIcon
-                    iconName="arrow-left"
-                    variant="ghost"
-                    onPress={() => router.back()}
-                />
-
-                <DefaultDescription
-                    size="M"
-                    text1="Macedo, Pereira e Souza"
-                    text2="RESP"
-                />
-
-                <ButtonIcon
-                    iconName="phone"
-                    variant="outline"
-                />
-
-
-            </HeaderBottomContainer>
-                <Tab.Navigator
-                    screenOptions={{
-                        tabBarActiveTintColor: theme.colors.orange,
-                        tabBarInactiveTintColor: 'gray',
-                        tabBarIndicatorStyle: { 
-                            backgroundColor: theme.colors.orange, 
-                            height: 3
-                        },
-                        tabBarLabelStyle: { 
-                            fontWeight: 'bold', 
-                            textTransform: 'capitalize' 
-                        }
-                    }}
-                >
-                    <Tab.Screen 
-                        name="Sobre" 
-                        component={() => 
-                            <View>
-                                <Text>
-                                    sobre
-                                </Text>
-                            </View>
-                        } 
-                    />
-                    <Tab.Screen 
-                        name="Produtos" 
-                        component={() => 
-                            <View>
-                                <Text>
-                                    Produtos
-                                </Text>
-                            </View>
-                        } 
-                    />
-                </Tab.Navigator>
-            
-            {/* <SpacingScreenContainer>
-                <Text>
-                    {id}
-                </Text>
-            </SpacingScreenContainer> */}
-        </>
+        <UserDetail
+            title={userData?.nomeestabelecimento || ""}
+            relationShipType={userData?.relationship_status ?? "NONE"}
+            desc={desc}
+            tabList={tabList}
+            isLoading={isLoadingUserData || isErrorUserData}
+            numberPhone={userData?.telefone || ""}
+        />
     );
 }

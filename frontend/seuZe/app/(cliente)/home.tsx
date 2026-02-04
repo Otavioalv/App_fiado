@@ -5,8 +5,8 @@ import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShor
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
-import { AppError } from "@/src/errors/AppError";
 import { useListPartner, useMe, useShoppingList } from "@/src/hooks/useClienteQueries";
+import { mapAppErrorToErrorType } from "@/src/hooks/useErrorScreenListener";
 import { useFilterCategoryStore } from "@/src/stores/cliente/fornecedores.store";
 import { theme } from "@/src/theme";
 import { ErrorTypes} from "@/src/types/responseServiceTypes";
@@ -147,18 +147,8 @@ export default function Home() {
             ]);
 
         } catch(err) {
-            if(err instanceof AppError){
-                const {message, type} = err;
-                console.log("[Load Data] Erro: ", message);
-                console.log("[Load Data] Type: ", type);
-                console.log("\n");
-
-                setErrorType(type);
-            }
-            else {
-                console.log("[Load Data] Erro Desconhecido: ", err, "\n");
-                setErrorType("UNKNOWN");
-            }
+            const errorHandled: ErrorTypes = mapAppErrorToErrorType(err);
+            setErrorType(errorHandled);
         }  finally {
             setRefreshing(false);
         }
@@ -184,7 +174,7 @@ export default function Home() {
                     isLoading={meLoad}
                 />
 
-                <MyScreenContainer>    
+                <MyScreenContainer>
                     <SectionContainer title="Atalhos Rápidos">
                         <QuickShortcuts shortcuts={shortcuts}/>
                     </SectionContainer>

@@ -30,9 +30,6 @@ export const registerForbiddenAction = (fn: () => void) => {
 }
 
 
-
-
-
 // gancho q age de forma automatica a toda requisição
 api.interceptors.request.use(
     async (config) => {

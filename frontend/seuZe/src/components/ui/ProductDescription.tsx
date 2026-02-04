@@ -1,6 +1,7 @@
 import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
 import { Animated, StyleSheet, Text, View } from "react-native";
+import { TextProductPrice, TextProductPriceSkeleton } from "./TextProductPrice";
 
 export interface ProductDescriptionProps {
     prodName: string,
@@ -24,9 +25,9 @@ export function ProductDescription({
                 <Text style={[styles.titleText, styles.titleBase]} numberOfLines={1}>
                     {prodName}
                 </Text>
-                <Text style={[styles.titleText, styles.priceText]} numberOfLines={1}>
-                    R$ {price}
-                </Text>
+                <TextProductPrice
+                    price={price}
+                />
             </View>
 
 
@@ -65,7 +66,7 @@ export function ProductDescriptionSkeleton() {
         <View style={styles.container}>
             <View style={styleSkeleton.headContainer}>
                 <Animated.View style={[anmOpacity, styleSkeleton.titleTextBase, styleSkeleton.titleText]}/>
-                <Animated.View style={[anmOpacity, styleSkeleton.titleTextBase, styleSkeleton.price]}/>
+                <TextProductPriceSkeleton/>
             </View>
 
             <View style={styleSkeleton.bottomContainer}>
@@ -99,14 +100,6 @@ const styles = StyleSheet.create({
         color: theme.colors.textNeutral900,
         maxWidth: "70%"
     },
-    
-
-    priceText: {
-        color: theme.colors.orange,
-        maxWidth: "30%"
-    },
-
-    
     subTitleText: {
         color: theme.colors.textNeutral900,
         fontSize: theme.typography.textMD.fontSize,
@@ -129,9 +122,6 @@ const styleSkeleton = StyleSheet.create({
     titleText: {
         width: 180
     }, 
-    price: {
-        width: 100
-    },
     titleTextBase: {
         borderRadius: 1000,
         height: 30,

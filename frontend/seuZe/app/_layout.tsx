@@ -15,6 +15,7 @@ import { focusManager, onlineManager, QueryClient, QueryClientProvider } from "@
 import NetInfo from "@react-native-community/netinfo";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetProvider } from "@/src/context/bottomSheetContext";
+import { OfflineNotice } from "@/src/components/ui/OfflineNotice";
 
 const client = new QueryClient({
   // queryCache: new QueryCache(), // verificar config
@@ -50,6 +51,7 @@ export default function RootLayout() {
                           style={{ flex: 1}}
                           behavior={Platform.OS === "ios" ? "padding" : undefined}
                         >
+                          <OfflineNotice/>
                           <RootNavigator/>
                           {/* <StatusBar style="dark"/>    */}
                           <SystemBars style={"dark"}/>

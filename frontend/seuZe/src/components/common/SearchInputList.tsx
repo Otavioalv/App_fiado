@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     icon: {
-        fontSize: theme.typography.textLG.fontSize, // testar alterar
+        fontSize: theme.typography.textLG.fontSize,
         padding: theme.padding.xs,
         paddingLeft: theme.padding.sm,
         color: theme.colors.orange,

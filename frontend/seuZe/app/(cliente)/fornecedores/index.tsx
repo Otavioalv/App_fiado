@@ -1,6 +1,5 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
-import { GenericInfiniteList } from "@/src/components/common/GenericInfiniteList";
-import { ListUsersType } from "@/src/components/common/ListUsers";
+import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
 import { MemoUserCard, MemoUserCardSkeleton, UserCardProps } from "@/src/components/common/UserCard";
@@ -9,7 +8,6 @@ import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeUserList } from "@/src/types/responseServiceTypes";
 import { useCallback, useEffect, useMemo } from "react";
-import { View } from "react-native";
 import { useFilterCategoryStore } from "@/src/stores/cliente/fornecedores.store";
 import { useRouter } from "expo-router";
 
@@ -86,7 +84,7 @@ export default function Fornecedores() {
     const listUsers = useMemo(() => {
         if (!data) return [];
 
-        const map = new Map<string, ListUsersType>();
+        const map = new Map<string, GenericInfiniteListType<UserCardProps>>();
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
@@ -131,9 +129,7 @@ export default function Fornecedores() {
     );
 
     const renderItemSkeleton = useCallback(() => (
-            <View>
-                <MemoUserCardSkeleton/>
-            </View>
+        <MemoUserCardSkeleton/>
     ), []);
 
     useErrorScreenListener(isError, error, setErrorType);

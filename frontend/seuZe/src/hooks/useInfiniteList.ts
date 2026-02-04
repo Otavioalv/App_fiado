@@ -1,8 +1,10 @@
-import { QueryFunctionContext, QueryKey, useInfiniteQuery } from "@tanstack/react-query";
+import { QueryFunctionContext, QueryKey, useInfiniteQuery, UseInfiniteQueryOptions } from "@tanstack/react-query";
 import { PaginationResponseType } from "../types/responseServiceTypes";
 
 
-interface UseInfiniteProps<T extends PaginationResponseType>{
+interface UseInfiniteProps<T extends PaginationResponseType> extends 
+Omit<UseInfiniteQueryOptions, "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam">
+{
     queryKey: QueryKey,
     queryFn: (context: QueryFunctionContext) => Promise<T>,
     initialPageParam: number

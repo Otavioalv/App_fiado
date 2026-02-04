@@ -16,3 +16,25 @@ export const transformDateToUI = (date: string | Date): string => {
     return dateValue;
     
 }
+
+export function formatPhone(phone: string | undefined | null) {
+    if (!phone) return "";
+
+    // 1. Limpa tudo que não for número
+    const numbers = phone.replace(/\D/g, "");
+
+    // CASO 1: CELULAR (13 dígitos: 55 + 92 + 9xxxx + xxxx)
+    // Resultado: +55 (92) 96510-2273
+    if (numbers.length === 13) {
+        return numbers.replace(/^(\d{2})(\d{2})(\d{5})(\d{4})$/, "+$1 ($2) $3-$4");
+    }
+
+    // CASO 2: FIXO (12 dígitos: 55 + 92 + xxxx + xxxx)
+    // Resultado: +55 (92) 3333-4444
+    if (numbers.length === 12) {
+        return numbers.replace(/^(\d{2})(\d{2})(\d{4})(\d{4})$/, "+$1 ($2) $3-$4");
+    }
+
+    // Se vier algo estranho, devolve original
+    return phone;
+}

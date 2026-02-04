@@ -1,6 +1,5 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
-import { GenericInfiniteList } from "@/src/components/common/GenericInfiniteList";
-import { ListShoppingType } from "@/src/components/common/ListShoppingProd";
+import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
 import { MemoShoppingCard, MemoShoppingCardSkeleton, ShoppingCardProps } from "@/src/components/common/ShoppingCard";
@@ -90,7 +89,7 @@ export default function Compras() {
     const listShopping = useMemo(() => {
         if (!data) return [];
 
-        const map = new Map<string, ListShoppingType>();
+        const map = new Map<string, GenericInfiniteListType<ShoppingCardProps>>();
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
