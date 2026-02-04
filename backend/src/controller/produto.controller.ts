@@ -178,11 +178,17 @@ class ProdutoController {
             let fornecedorIdNum: number | undefined;
             let productIdNum: number | undefined;
 
-            if(idFornecedor || idProduct) {
+            
+            if(idFornecedor) {
                 fornecedorIdNum = Number(idFornecedor);
-                productIdNum = Number(idProduct);
+                if(Number.isNaN(fornecedorIdNum)) { 
+                    return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+                }
+            }
 
-                if(Number.isNaN(fornecedorIdNum) || Number.isNaN(productIdNum)) { 
+            if(idProduct) {
+                productIdNum = Number(idProduct);
+                if(Number.isNaN(productIdNum)) { 
                     return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
                 }
             }
