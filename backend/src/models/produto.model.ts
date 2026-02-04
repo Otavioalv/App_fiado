@@ -127,6 +127,7 @@ class ProdutoModel  {
         filterOpt:queryFilter,
         typeList: TypesListUser = "accepted",
         idFornecedor?: number,
+        idProduct?: number,
     ): Promise<ListProductWithFornecedor[]>{
         
         
@@ -188,6 +189,14 @@ class ProdutoModel  {
             if(idFornecedor) {  
                 values.push(idFornecedor);
                 whereCondition.push(`f.id_fornecedor = $${++paramIndex}`);
+            }
+
+
+            // console.log(idProduct, idFornecedor);
+
+            if(idProduct) {
+                values.push(idProduct);
+                whereCondition.push(`p.id_produto = $${++paramIndex}`);
             }
 
             const whereSql = whereCondition.length ? 

@@ -143,7 +143,17 @@ class ProdutoController {
 
     public async listProductsByIdFornecedor(req: FastifyRequest, res: FastifyReply):Promise<FastifyReply> {
         try {
-            const {idFornecedor, ...filterOpt} = req.query as queryFilter & { idFornecedor?: string};
+            interface QueryToIds {
+                idFornecedor?: string, 
+                idProduct?: string,
+            }
+
+            const {
+                idFornecedor, 
+                idProduct, 
+                ...filterOpt
+            } = req.query as queryFilter & QueryToIds;
+
             const {typeList} = req.params as {typeList: string | undefined};
             const idCliente:number = await getTokenIdFromRequest(req);
 
@@ -166,15 +176,18 @@ class ProdutoController {
 
 
             let fornecedorIdNum: number | undefined;
+            let productIdNum: number | undefined;
 
-            if(idFornecedor) {
+            if(idFornecedor || idProduct) {
                 fornecedorIdNum = Number(idFornecedor);
-                if(Number.isNaN(fornecedorIdNum)) { 
+                productIdNum = Number(idProduct);
+
+                if(Number.isNaN(fornecedorIdNum) || Number.isNaN(productIdNum)) { 
                     return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
                 }
             }
 
-            const listProduct = await this.produtoModel.listProductsByIdFornecedor(idCliente, filterOpt, typeList as TypesListUser, fornecedorIdNum);
+            const listProduct = await this.produtoModel.listProductsByIdFornecedor(idCliente, filterOpt, typeList as TypesListUser, fornecedorIdNum, productIdNum);
 
             // console.log(fornecedorIdNum, filterOpt, typeList, idCliente);
 
