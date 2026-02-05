@@ -201,7 +201,7 @@ SELECT
 FROM (VALUES
   (483), (456), (457), (458), (459), (460), 
   (461), (462), (463), (464), (466), (468), 
-  (469), (475), (477), (479), (481)
+  (469), (475), (477), (479), (481), (313)
 ) AS f(id);
 
 
@@ -249,11 +249,11 @@ FROM (VALUES
   (308),(309),(310),(311),(313)
 ) AS f(id)
 CROSS JOIN (VALUES
-  ('Arroz Branco Tipo 1'),
-  ('Feijão Carioca'),
-  ('Óleo de Soja 900ml'),
-  ('Açúcar Cristal 1kg'),
-  ('Café Torrado e Moído 500g')
+  ('Sabao em Barra 500g'),
+  ('Sabão em po 250 OMO'),
+  ('Leite em pó DULEVE '),
+  ('Papel higienico 4 rolos'),
+  ('Doce de léite 1L')
 ) AS p(nome_produto)
 CROSS JOIN LATERAL (
   SELECT
@@ -261,3 +261,4 @@ CROSS JOIN LATERAL (
     (random() < 0.1)  AS cancelado
 ) r;
 
+select * from produto where fk_id_fornecedor = 313 order by nome ASC;

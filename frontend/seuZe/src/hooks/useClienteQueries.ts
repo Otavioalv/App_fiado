@@ -44,7 +44,7 @@ export function useListPartnerFromId(id: string | number) {
                 }, 
             );
 
-            return result.list[0];
+            return result.list[0] || [];
         },
     });
 }
@@ -59,6 +59,7 @@ export function useProductList(filters: FilterType, listType: TypeUserList) {
         queryFn: async({pageParam}) => {
             return await productList(
                 listType,
+                undefined,
                 undefined,
                 {
                     page: pageParam as number,
@@ -83,6 +84,7 @@ export function useProductListFromId(id: string | number, filters: FilterType) {
             return await productList(
                 "all",
                 id,
+                undefined,
                 {
                     page: pageParam as number, 
                     size: 20,
@@ -94,6 +96,32 @@ export function useProductListFromId(id: string | number, filters: FilterType) {
         initialPageParam: 1,
     });
 }
+
+
+export function useProductSingleFromId(id:string | number) {
+    const key: string = `product-single`;
+    
+    return useQuery<ProductAndFornecedorData>({
+        queryKey: [key, id],
+        enabled: !!id,
+        queryFn: async () => {
+            const result = await productList(
+                "all",
+                undefined,
+                id,
+                {
+                    page: 1, 
+                    size: 1,
+                    filter: "Nome do Produto",
+                    search: "",
+                }, 
+            );
+
+            return result.list[0] || [];
+        },
+    });
+}
+
 
 
 

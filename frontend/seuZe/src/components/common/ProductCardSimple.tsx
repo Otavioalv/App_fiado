@@ -22,7 +22,7 @@ export function ProductCardSimple({
     canBuy = true,
     isLoading = false,
 }: ProductCardSimpleProps) {
-    const qtdDesc = `Disp: ${qnt}`;
+    const qtdDesc = `Estoque: ${qnt} un`;
 
     if(isLoading) 
         return <ProductCardSimpleSkeleton/>

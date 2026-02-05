@@ -10,12 +10,13 @@ type OpenSheetBottomType = (
     enableDynamicSizing?: boolean
 ) => void
 
-interface BottomSheetContextData {
+interface GlobalBottomSheetContextData {
     openSheet: OpenSheetBottomType;
+    // safeOpenSheet: OpenSheetBottomType;
     closeSheet: () => void;
 }
 
-const BottomSheetContext = createContext<BottomSheetContextData>({} as BottomSheetContextData);
+const GlobalBottomSheetContext = createContext<GlobalBottomSheetContextData>({} as GlobalBottomSheetContextData);
 
 export function BottomSheetProvider({ children }: { children: ReactNode }) {
     const insets = useSafeAreaInsets();
@@ -48,13 +49,24 @@ export function BottomSheetProvider({ children }: { children: ReactNode }) {
 
     const openSheet = useCallback<OpenSheetBottomType>((
         content: ReactNode, 
-        snaps: string[] = ['25%', '50%', "75%"],
+        snaps: string[] = ['25%', '50%', "75%", "100%"],
         enableDynamicSizing: boolean = true
     ) => {
-        setSnapPoints(snaps);
-        setSheetContent(content);
-        setDynamicSizing(enableDynamicSizing);
+        requestAnimationFrame(() => {
+            setSnapPoints(snaps);
+            setDynamicSizing(enableDynamicSizing);
+            setSheetContent(content);
+        });
     }, []);
+
+
+    // const safeOpenSheet = useCallback<OpenSheetBottomType>((
+    //     content, 
+    //     snaps,
+    //     enableDynamicSizing
+    // ) => {
+    //     requestAnimationFrame(() => openSheet(content, snaps, enableDynamicSizing));
+    // }, [openSheet]);
 
     // Fundo tranaparente segurança
     const renderBackdrop = useCallback(
@@ -72,9 +84,10 @@ export function BottomSheetProvider({ children }: { children: ReactNode }) {
     );
 
     return (
-        <BottomSheetContext.Provider
+        <GlobalBottomSheetContext.Provider
             value={{ 
                 openSheet,
+                // safeOpenSheet,
                 closeSheet 
             }}
         >
@@ -100,12 +113,12 @@ export function BottomSheetProvider({ children }: { children: ReactNode }) {
             >
                 {sheetContent}
             </BottomSheet>
-        </BottomSheetContext.Provider>
+        </GlobalBottomSheetContext.Provider>
     );
 }
 
-export function useBottomSheet() {
-    return useContext(BottomSheetContext);
+export function useGlobalBottomSheet() {
+    return useContext(GlobalBottomSheetContext);
 }
 
 const styles = StyleSheet.create({

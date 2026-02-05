@@ -1,13 +1,16 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
 import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
+import { InfoProductBottomSheet } from "@/src/components/common/InfoProductBottomSheet";
 import { MemoProductCard, MemoProductCardSkeleton, ProductCardProps } from "@/src/components/common/ProductCard";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
+import { useGlobalBottomSheet } from "@/src/context/globalBottomSheetContext";
+import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
 import { useProductList } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeUserList } from "@/src/types/responseServiceTypes";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 
 const chipList: ChipDataType<TypeUserList>[] = [
@@ -66,6 +69,26 @@ export default function Produtos() {
     );
 
 
+    // const { openSheet } = useGlobalBottomSheet();
+    const { openSheet, closeSheet } = useGlobalBottomModalSheet();
+
+    const handleOpenInfoProduct = useCallback((idProduct: number) => {
+        console.log("Tentando abrir produto:", idProduct);
+        openSheet(
+            <InfoProductBottomSheet 
+                idProduct={idProduct}
+                closeSheet={closeSheet}
+            />, 
+            ["26%"], 
+            false
+        );
+    }, [openSheet, closeSheet])
+
+    useEffect(() => {
+        return () => closeSheet();
+    }, [closeSheet]);
+
+
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
 
@@ -80,7 +103,7 @@ export default function Produtos() {
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
-                const idString = u.id_produto?.toString() || Math.random().toString();
+                const idString = u.id_produto.toString();
 
                 const fornecedorName: string = `${u.nome_fornecedor}${u.apelido ? ` - (${u.apelido})` : ""}`;
 
@@ -91,11 +114,12 @@ export default function Produtos() {
                     nome: fornecedorName,
                     relationshipType: u.relationship_status,
                     id: idString,
+                    onPress: () => handleOpenInfoProduct(u.id_produto)
                 });
             });
         });
         return Array.from(map.values());
-    }, [data]);
+    }, [data, handleOpenInfoProduct]);
 
     const renderItem = useCallback(
         ({item}: {item: ProductCardProps}) => (
@@ -105,6 +129,7 @@ export default function Produtos() {
                 price={item.price}
                 prodName={item.prodName}
                 relationshipType={item.relationshipType}
+                onPress={item.onPress}
             />
         ),
         []

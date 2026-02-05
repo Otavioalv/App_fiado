@@ -14,8 +14,10 @@ import { registerForbiddenAction } from "@/src/services/api";
 import { focusManager, onlineManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { BottomSheetProvider } from "@/src/context/bottomSheetContext";
+import { BottomSheetProvider } from "@/src/context/globalBottomSheetContext";
 import { OfflineNotice } from "@/src/components/ui/OfflineNotice";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GlobalBottomSheetModalProvider } from "@/src/context/globalBottomSheetModalContext";
 
 const client = new QueryClient({
   // queryCache: new QueryCache(), // verificar config
@@ -43,23 +45,29 @@ export default function RootLayout() {
                   <SafeAreaView style={{flex:1, backgroundColor: MyDefaultTheme.colors.background}} edges={['top']}>
 
                     {/* Verificar ordem */}
-                    <BottomSheetProvider>
-      
-                        <SplashScreenController/>
-                        
-                        <KeyboardAvoidingView
-                          style={{ flex: 1}}
-                          behavior={Platform.OS === "ios" ? "padding" : undefined}
-                        >
-                          <OfflineNotice/>
-                          <RootNavigator/>
-                          {/* <StatusBar style="dark"/>    */}
-                          <SystemBars style={"dark"}/>
+                    <BottomSheetModalProvider>
+                      <GlobalBottomSheetModalProvider>
+
+                        <BottomSheetProvider>
+        
+                          <SplashScreenController/>
                           
-                        </KeyboardAvoidingView>
-                        <Toast/>
-                    
-                    </BottomSheetProvider>
+                          <KeyboardAvoidingView
+                            style={{ flex: 1}}
+                            behavior={Platform.OS === "ios" ? "padding" : undefined}
+                          >
+                            <OfflineNotice/>
+                            <RootNavigator/>
+                            {/* <StatusBar style="dark"/>    */}
+                            <SystemBars style={"dark"}/>
+                            
+                          </KeyboardAvoidingView>
+                          <Toast/>
+                        
+                        </BottomSheetProvider>
+
+                      </GlobalBottomSheetModalProvider>
+                    </BottomSheetModalProvider>
                   
                   </SafeAreaView>
 

@@ -102,7 +102,8 @@ const styles = StyleSheet.create({
     },
     textSubtitle: {
         fontSize: theme.typography.textLG.fontSize,
-        fontWeight: "600",
+        fontWeight: "400",
+        
         color: theme.colors.textNeutral900
     }
 });

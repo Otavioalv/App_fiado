@@ -75,7 +75,8 @@ export async function update(updtData: BasicFormSchema): Promise<boolean> {
 
 export async function productList(
     listType: TypeUserList,
-    id?: string | number,
+    idFornecedor?: string | number,
+    idProduct?: string | number,
     pagination: PaginationType = {page: 1, size: 10}
 ): Promise<ResultsWithPagination<ProductAndFornecedorData[]>>{
     try {
@@ -83,7 +84,8 @@ export async function productList(
         
         const response = await api.get(endPoint, {
             params: {
-                idFornecedor: id,
+                idFornecedor: idFornecedor,
+                idProduct: idProduct,
                 ...pagination
             }
         }) as responseAxiosInterfaces<ResultsWithPagination<ProductAndFornecedorData[]>>;

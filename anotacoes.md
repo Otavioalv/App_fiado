@@ -24,6 +24,7 @@ const { session } = useSession();
             setLoading(false);
     }```
 
+- [ ] Atualizar api, usar tradoff
 
 - [ ] remover textNeutral, definir cor fonte global
 
@@ -62,6 +63,8 @@ const { session } = useSession();
 - [ ] Tratar erros de autenticação, banco de dados pode estar fora do ar, e retornar 401. tem q retornar 500 API
 
 - [ ] Fazer junção de UserHeader e ProfileHeader de alguma forma
+
+
 
 # Anotações
 ## Banco de dados (POSTGRES)

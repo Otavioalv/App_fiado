@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { Animated, Pressable, PressableProps, StyleProp, StyleSheet, Text,  TextStyle,  ViewStyle } from "react-native";
 
 type ButtonVariant = "primary" | "outline" | "disabled" | "ghost";
+
 interface ComponentsStyles {
     container: ViewStyle,
     text: TextStyle,
@@ -34,7 +35,10 @@ export function ButtonModern({
     ...rest 
 }: ButtonProps) {
     const buttonAnim = useRef(new Animated.Value(1)).current;
-
+    
+    if(isLoading) {
+        return <ButtonModernSkeleton size={size}/>
+    }
 
     const animation = (to: number) => {
         Animated.timing(buttonAnim, {
@@ -87,11 +91,7 @@ export function ButtonModern({
 
     const currentStyle = sizeStyle[size];
     const currentVariant = variantStyle[variant];
-
-
-    if(isLoading) {
-        return <ButtonModernSkeleton size={size}/>
-    }
+    
 
     return (
         <Animated.View 
@@ -149,7 +149,17 @@ export function ButtonModernSkeleton({size, style}: ButtonModernSkeletonProps) {
     const currentSize = sizeStyle[size];
 
     return (
-        <Animated.View style={[{height: currentSize}, anmOpacity, styles.baseContainer, style]}/>
+        <Animated.View 
+            style={[
+                {
+                    height: currentSize,
+                    minWidth: 80,
+                }, 
+                anmOpacity, 
+                styles.baseContainer, 
+                style
+            ]}
+        />
     );
 
 }

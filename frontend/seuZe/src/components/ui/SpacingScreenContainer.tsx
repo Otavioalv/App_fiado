@@ -1,13 +1,20 @@
 import { theme } from "@/src/theme";
 import { PropsWithChildren } from "react";
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleSheet, View, ViewProps } from "react-native";
 
 
-type SpacingScreenContainerProps = PropsWithChildren & {style?: StyleProp<ViewStyle>};
+type SpacingScreenContainerProps = PropsWithChildren & ViewProps;
 
-export function SpacingScreenContainer({children, style}: SpacingScreenContainerProps) {
+export function SpacingScreenContainer({
+    children, 
+    style,
+    ...viewProps
+}: SpacingScreenContainerProps) {
     return (
-        <View style={[defaultStyles.container, style]}>  
+        <View 
+            style={[defaultStyles.container, style]}
+            {...viewProps}
+        >  
             {children}
         </View> 
     );

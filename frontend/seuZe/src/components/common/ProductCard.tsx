@@ -4,8 +4,10 @@ import { memo } from "react";
 import { RelationshipActionProduct } from "../ui/RelationshipActionProduct";
 import { ButtonModernSkeleton } from "../ui/ButtonModern";
 import { ProductDescription, ProductDescriptionProps, ProductDescriptionSkeleton } from "../ui/ProductDescription";
+import { PressableCard } from "../ui/PressableCard";
+import { PressableProps } from "react-native";
 
-export interface ProductCardProps extends ProductDescriptionProps{
+export interface ProductCardProps extends ProductDescriptionProps, PressableProps{
     relationshipType: RelationshipStatusType
 };
 
@@ -15,10 +17,13 @@ export function ProductCard({
     marketName,
     nome,
     price,
-    prodName
+    prodName,
+    ...pressableProps
 }: ProductCardProps) {
     return (
-        <DefaultCard>
+        <PressableCard
+            {...pressableProps}
+        >
             <ProductDescription
                 marketName={marketName}
                 nome={nome}
@@ -29,8 +34,7 @@ export function ProductCard({
             <RelationshipActionProduct 
                 type={relationshipType}
             />
-
-        </DefaultCard>
+        </PressableCard>
     );
 }
 
