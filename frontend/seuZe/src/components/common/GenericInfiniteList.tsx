@@ -23,6 +23,7 @@ export interface GenericInfiniteListProps<T> extends FlashListProps<T> {
     HeaderComponent?: ReactElement,
     SkeletonList: GenericInfiniteListSkeletonProps<string>,
     emptyMessage?: string,
+    hasSeparator?: boolean,
     hasBorderSeparator?: boolean,
 };
 
@@ -40,6 +41,7 @@ export function GenericInfiniteList<T>({
     keyExtractor,
     emptyMessage = "Nenhum item encontrado",
     hasBorderSeparator = false,
+    hasSeparator = true,
 }: GenericInfiniteListProps<T>) {
     const [showScrollTopButton, setShowScrollTopButton] = useState<boolean>(false);
     const listRef = useRef<FlashListRef<T>>(null);
@@ -76,7 +78,7 @@ export function GenericInfiniteList<T>({
         return (
             <View 
                 style={[
-                    styles.separator,
+                    hasSeparator && styles.separator,
                     hasBorderSeparator && styles.borderSeparator
                 ]}
             />

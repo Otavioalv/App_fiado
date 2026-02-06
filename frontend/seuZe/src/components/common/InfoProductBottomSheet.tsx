@@ -8,17 +8,18 @@ import MyScreenContainer from "./MyScreenContainer";
 import { useProductSingleFromId } from "@/src/hooks/useClienteQueries";
 import { SectionContainer } from "./SectionContainer";
 import { Router, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Stepper, StepperSkeleton } from "./Stepper";
 
 interface InfoProductBottomSheetProps {
     idProduct: number | string,
-    closeSheet: () => void,
 }
 
 export function InfoProductBottomSheet({
     idProduct,
-    closeSheet,
 }: InfoProductBottomSheetProps) {
-
+    const router = useRouter();
+    
     const {
         data,
         isLoading,
@@ -26,7 +27,11 @@ export function InfoProductBottomSheet({
         idProduct
     );
 
-    const router = useRouter();
+
+    // Temporario lista de compras
+    const [productQnt, setProductQnt] = useState<number>(1);
+
+
 
     return (
         <BottomSheetView>
@@ -59,7 +64,7 @@ export function InfoProductBottomSheet({
                         >
                             <DefaultDescription
                                 size="S"
-                                text1={`Venido por: ${data?.nomeestabelecimento}`}
+                                text1={`Vendido por: ${data?.nomeestabelecimento}`}
                                 text2={`Estoque: ${data?.quantidade} un`}
                                 isLoading={isLoading}
                             />
@@ -69,8 +74,8 @@ export function InfoProductBottomSheet({
                                     size="S"
                                     variant="ghost"
                                     onPress={() => {
-                                        closeSheet();
-                                        router.push(`/(cliente)/fornecedores/${data?.id_fornecedor}`);
+                                        // closeSheet();
+                                        router.push(`/fornecedores/${data?.id_fornecedor}`);
                                     }}
                                     isLoading={isLoading}
                                 />
@@ -82,11 +87,18 @@ export function InfoProductBottomSheet({
                                 gap: theme.gap.md,
                             }}
                         >
-                            <ButtonModern
+                            {/* <ButtonModern
                                 size="M"
                                 placeholder="Adicionar "
                                 isLoading={isLoading}
+                            /> */}
+
+                            <Stepper
+                                quanity={productQnt}
+                                setQuanity={setProductQnt}
+                                isLoading={isLoading}
                             />
+
                             <ButtonModern
                                 style={{flex: 1}}
                                 size="M"

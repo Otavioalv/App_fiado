@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, PressableProps } from "react-native";
 import { ButtonModern, ButtonModernSkeleton } from "../ui/ButtonModern";
 import { TextProductPrice, TextProductPriceSkeleton } from "../ui/TextProductPrice";
 import { theme } from "@/src/theme";
@@ -6,7 +6,7 @@ import { DefaultDescription, DefaultDescriptionSkeleton } from "../ui/DefaultDes
 import { memo } from "react";
 
 
-export interface ProductCardSimpleProps {
+export interface ProductCardSimpleProps extends PressableProps{
     name: string,
     qnt: string,
     price: string,
@@ -21,6 +21,7 @@ export function ProductCardSimple({
     qnt,
     canBuy = true,
     isLoading = false,
+    ...pressableProps
 }: ProductCardSimpleProps) {
     const qtdDesc = `Estoque: ${qnt} un`;
 
@@ -28,8 +29,12 @@ export function ProductCardSimple({
         return <ProductCardSimpleSkeleton/>
 
     return (
-        <View
-            style={styles.container}
+        <Pressable
+            style={({pressed}) => [
+                styles.container,
+                pressed && styles.pressedContainer
+            ]}
+            {...pressableProps}
         >
             <DefaultDescription
                 text1={name}
@@ -51,7 +56,7 @@ export function ProductCardSimple({
                     size="S"
                 />
             </View>
-        </View>
+        </Pressable>
     );
 }
 export const MemoProductCardSimple = memo(ProductCardSimple);
@@ -75,17 +80,11 @@ export const MemoProductCardSimpleSkeleton = memo(ProductCardSimpleSkeleton);
 
 const styles = StyleSheet.create({
     container: {
-        // backgroundColor: "red",
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingVertical: theme.padding.sm,
-        // borderWidth: 1,
-        // borderColor: "transparent",
-        // borderBottomColor: "red",
+        paddingVertical: theme.padding.md,
     },
     desc: {
-        // backgroundColor: "blue",
-        // flexDirection: "column"
         flex: 1,
     },
     interaction: {
@@ -94,6 +93,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         gap: theme.gap.md,
-        // flex: 1,
+    },
+    pressedContainer: {
+        backgroundColor: theme.colors.orange + "11",
     }
 });

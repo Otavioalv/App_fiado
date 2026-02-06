@@ -1,12 +1,14 @@
 import { useProductListFromId } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
-import { useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useMemo, useRef } from "react";
 import { MemoProductCardSimple, MemoProductCardSimpleSkeleton, ProductCardSimpleProps } from "../../common/ProductCardSimple";
 import { GenericInfiniteList, GenericInfiniteListType } from "../../common/GenericInfiniteList";
 import { ScreenErrorGuard } from "../../common/ScreenErrorGuard";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { SearchInputList } from "../../common/SearchInputList";
+import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
+import { InfoProductBottomSheet } from "../../common/InfoProductBottomSheet";
 
 
 export function ListProdsTab() {
@@ -40,6 +42,48 @@ export function ListProdsTab() {
         }
     );
 
+    const { openSheet, closeSheet } = useGlobalBottomModalSheet();
+    
+    const lastProductSheet = useRef<{id: null | number, open: boolean}>({
+        id: null,
+        open: false
+    })
+
+
+    // Bottom Sheet
+    const handleOpenInfoProduct = useCallback((idProduct: number) => {
+        console.log("Tentando abrir produto:", idProduct);
+        
+        lastProductSheet.current.id = idProduct;
+        lastProductSheet.current.open = true;
+
+        openSheet(
+            <InfoProductBottomSheet
+                idProduct={idProduct}
+
+            />, 
+            ["26%"], 
+            false
+        );
+    }, [openSheet])
+
+    // Bottom Sheet
+    useFocusEffect(
+        useCallback(() => {
+            // requestAnimationFrame(() => {
+            //     console.log("focou: ", lastProductSheet.current);
+            //     if(lastProductSheet.current.open && lastProductSheet.current.id) {
+            //         handleOpenInfoProduct(lastProductSheet.current.id);
+            //         clearLastProduct();
+            //     }
+            // });
+            return () => {
+                console.log("Deu close sheet: ", lastProductSheet.current);
+                closeSheet();
+            }
+        }, [closeSheet])
+    );
+
     
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
     // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
@@ -63,14 +107,15 @@ export function ListProdsTab() {
                     name: p.nome_prod,
                     price: p.preco,
                     qnt: p.quantidade.toString(),
+                    onPress: () => handleOpenInfoProduct(p.id_produto)
                 });
             });
         });
         return Array.from(map.values());
-    }, [dataProduct]);
-   
+    }, [dataProduct, handleOpenInfoProduct]);
+    
 
-
+    // Flast List
     const renderItem = useCallback(
         ({item} : {item: ProductCardSimpleProps}) => (
             <MemoProductCardSimple
@@ -78,11 +123,14 @@ export function ListProdsTab() {
                 canBuy={item.canBuy}
                 price={item.price}
                 qnt={item.qnt}
+                onPress={item.onPress}
             />
         ),
         []
     );
 
+
+    // Flast List
     const renderItemSkeleton = useCallback(
         () => (
             <MemoProductCardSimpleSkeleton/>
@@ -124,9 +172,8 @@ export function ListProdsTab() {
                         fetchNextPageProduct();
                     }
                 }}
-
+                hasSeparator={false}
                 hasBorderSeparator={true}
-                
             />
         </ScreenErrorGuard>
     );
