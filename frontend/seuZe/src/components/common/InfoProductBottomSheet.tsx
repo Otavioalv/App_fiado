@@ -33,6 +33,7 @@ export function InfoProductBottomSheet({
 
 
 
+    const isActivate: boolean = data?.relationship_status === "ACCEPTED";
     return (
         <BottomSheetView>
                 <MyScreenContainer
@@ -94,16 +95,19 @@ export function InfoProductBottomSheet({
                             /> */}
 
                             <Stepper
-                                quanity={productQnt}
-                                setQuanity={setProductQnt}
+                                quantity={productQnt}
+                                setQuantity={setProductQnt}
                                 isLoading={isLoading}
+                                isInteractive={isActivate}
+                                variant={isActivate ? "primary" : "disabled"}
                             />
 
                             <ButtonModern
                                 style={{flex: 1}}
                                 size="M"
-                                placeholder="Adicionar ao Pedito"
+                                placeholder="Adicionar ao Carrinho"
                                 isLoading={isLoading}
+                                variant={isActivate ? "primary" : "disabled"}
                             />
                         </View>
                 </SectionContainer>
