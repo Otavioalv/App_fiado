@@ -313,9 +313,22 @@ class ProdutoController {
 
     public async shopList(req: FastifyRequest, res: FastifyReply, userType: UserType):Promise<void> {
         try{
-            const fromUserId = await getTokenIdFromRequest(req);
-            const {toUser, typeList} = (req.params as {toUser?: string, typeList: string});
-            const {...filterOpt} = req.query as queryFilter;
+            interface QueryToIds {
+                toIdUser?: string, 
+                idCompra?: string,
+            }
+
+            const fromIdUser = await getTokenIdFromRequest(req);
+            const {typeList} = (req.params as {toUser?: string, typeList: string});
+            const {
+                toIdUser, 
+                idCompra,
+                ...filterOpt
+            } = req.query as queryFilter & QueryToIds;
+
+            if(!fromIdUser) {
+                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
+            }
 
             filterOpt.filterList =  [
                 "Mais Recente", 
@@ -331,20 +344,34 @@ class ProdutoController {
                 filterOpt.filter = "Mais Recente" as FilterListShop;
 
             const TYPES = ["ALL", "ANALYSIS", "CANCELED", "PAID", "PENDING", "REFUSED", "WAIT_REMOVE", "REMOVED"] as AllShoppingStatusType[];
-            const uppTypeList = typeList.toUpperCase()
-
-            if(!typeList || !TYPES.includes(uppTypeList as ShoppingStatusType)){
+            const uppTypeList = typeList ? typeList.toUpperCase() : "ALL" as ShoppingStatusType;
+            
+            if(!TYPES.includes(uppTypeList as ShoppingStatusType)){
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER))
             };
 
-            if(!fromUserId) {
-                return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
-            }
-
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER, {list: [], pagination: filterOpt}));
+
             
-            const listProd:compraInterface[] = await this.produtoModel.getShopList2(fromUserId, userType, filterOpt, uppTypeList as ShoppingStatusType, toUser);
+            let toIdUserNum: number | undefined;
+            let idCompraNum: number | undefined;
+            
+            if(toIdUser) {
+                toIdUserNum = Number(toIdUser);
+                if(Number.isNaN(toIdUserNum)) { 
+                    return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+                }
+            }
+            if(idCompra) {
+                idCompraNum = Number(idCompra);
+                if(Number.isNaN(idCompraNum)) { 
+                    return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+                }
+            }
+            
+
+            const listProd:compraInterface[] = await this.produtoModel.getShopList2(fromIdUser, userType, filterOpt, uppTypeList as ShoppingStatusType, toIdUserNum, idCompraNum);
 
             return res.status(200).send(successResponse(ResponseApi.Purchace.LIST_SUCCESS, {list: listProd, pagination: filterOpt}));
         }catch(e) {

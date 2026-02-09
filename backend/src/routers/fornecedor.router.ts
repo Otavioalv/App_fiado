@@ -71,7 +71,7 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
         return await produtoController.deleteProduct(req, res);        
     });
 
-    router.post('/product/buy/list/:toUser?', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+    router.get('/product/buy/list/:typeList?', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.shopList(req, res, "fornecedor");        
     });
 

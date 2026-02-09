@@ -498,126 +498,7 @@ class ProdutoModel  {
         }
     }
 
-    public async getShopList(fromUserId: number, userType: UserType, filterOpt: queryFilter, toUser?:number | undefined): Promise<compraInterface[]> {
-        let client: PoolClient | undefined;
-
-        try {
-            client = await connection.connect();
-
-            const { size, page, search, filter } = filterOpt;
-
-            const limit = size;
-            const offset = (page - 1) * limit;
-            const params: any[] = [];
-
-            params.push(fromUserId);
-
-            let extraWhere = "";
-            if(toUser) {
-                params.push(toUser);
-                extraWhere = userType === "cliente"
-                    ? `AND fk_fornecedor_id = $${params.length}`
-                    : userType === "fornecedor"
-                    ? `AND fk_cliente_id = $${params.length}`
-                    : "";
-            }
-
-            console.log(fromUserId, userType);
-
-            const sqlFilterList: Record<FilterListShop, string> = {
-                "Mais Recente": "cp.created_at DESC",
-                "Mais Antigo": "cp.created_at ASC",
-                "Nome do Usuário": "",
-                "Nome do Produto": "",
-                "Nome do Estabelecimento": "",
-                "Apelido": "",
-            };
-
-            const sqlFilter = sqlFilterList[filter as FilterListShop];
-
-            params.push(`%${search}%`);
-            const searchIndex = params.length; 
-
-            let fkUser = "";
-
-            if(userType === "cliente") {
-                fkUser = `
-                    LEFT JOIN fornecedor AS usr
-                        ON cp.fk_fornecedor_id = usr.id_fornecedor
-                    WHERE 
-                        fk_cliente_id = $1
-                        ${extraWhere}
-                    AND (
-                        usr.nome ILIKE $${searchIndex}
-                        OR unaccent(usr.apelido) ILIKE unaccent($${searchIndex})
-                    )
-                `;
-            }else if(userType === "fornecedor") {
-                fkUser = `
-                    LEFT JOIN cliente AS usr
-                        ON cp.fk_cliente_id = usr.id_cliente
-                    WHERE 
-                        fk_fornecedor_id = $1
-                        ${extraWhere}
-                    AND (
-                        usr.nome ILIKE $${searchIndex}
-                        OR unaccent(usr.apelido) ILIKE unaccent($${searchIndex})
-                    )
-                `;
-            };
-
-            const SQL_LIST = `
-                SELECT 
-                    cp.id_compra, cp.nome_produto, cp.quantidade,
-                    cp.valor_unit, cp.quitado, cp.retirado, 
-                    cp.created_at, cp.prazo, cp.fk_cliente_id, 
-                    cp.fk_fornecedor_id, cp.aceito, cp.coletado_em,
-                    cp.cancelado,
-
-                    usr.nome AS nome_user, 
-                    usr.apelido AS apelido_user,
-                    usr.telefone AS telefone_user,
-                    
-                    CASE 
-                        WHEN cp.cancelado = TRUE THEN 'CANCELED'
-                        WHEN cp.aceito = FALSE THEN 'REFUSED'
-                        WHEN cp.aceito IS NULL THEN 'ANALYSIS'
-                        WHEN cp.retirado = FALSE THEN 'WAIT_REMOVE'
-                        WHEN cp.quitado = TRUE THEN 'PAID'
-                        ELSE 'PENDING'
-                    END AS shopping_status
-
-                FROM compra AS cp
-                ${fkUser}
-                ORDER BY ${sqlFilter}
-                LIMIT $${params.length + 1}
-                OFFSET $${params.length + 2};
-            `;
-
-            const SQL_TOTAL = `
-                SELECT COUNT(*) AS total
-                FROM compra AS cp
-                ${fkUser};
-            `;
-
-            const { total } = (await client.query(SQL_TOTAL, params)).rows[0];
-            params.push(limit, offset);
-            const result = (await client.query(SQL_LIST, params)).rows as compraInterface[];
-
-            filterOpt.total = Number(total);
-            filterOpt.totalPages = Math.ceil(total / size);
-
-            return result;
-        } catch (e) {
-            console.log("ProdutoModel >>> ", e);
-            throw new Error("Erro ao listar compra(s)");
-        } finally {
-            client?.release();
-        }
-    }
-
-
-    public async getShopList2(
+    public async getShopList(
         fromUserId: number,
         userType: UserType,
         filterOpt: queryFilter,
@@ -784,6 +665,207 @@ class ProdutoModel  {
 
             return result;
 
+        } catch (e) {
+            console.error("ProdutoModel >>>", e);
+            throw new Error("Erro ao listar compra(s)");
+        } finally {
+            client?.release();
+        }
+    }
+
+
+    public async getShopList2(
+        fromUserId: number,
+        userType: UserType,
+        filterOpt: queryFilter,
+        listType: ShoppingStatusType,
+        toUserId?: number,
+        idCompra?:number,
+    ): Promise<compraInterface[]> {
+
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const { size, page, search, filter } = filterOpt;
+
+            const sqlFilterList: Record<FilterListShop, string> = {
+                "Mais Recente": "cp.created_at DESC",
+                "Mais Antigo": "cp.created_at ASC",
+                "Nome do Usuário": "usr.nome ASC",
+                "Nome do Produto": "cp.nome_produto ASC",
+                "Apelido": "usr.apelido ASC",
+                "Nome do Estabelecimento": "usr.nomeestabelecimento ASC"
+            };
+
+            const orderBy = sqlFilterList[filter as FilterListShop] ?? "cp.created_at DESC";
+
+            const statusWhereMap: Record<AllShoppingStatusType, string> = {
+                CANCELED:
+                    "cp.cancelado = TRUE",
+
+                REFUSED:
+                    "cp.cancelado = FALSE AND cp.aceito = FALSE",
+
+                ANALYSIS:
+                    "cp.cancelado = FALSE AND cp.aceito IS NULL",
+
+                WAIT_REMOVE:
+                    "cp.cancelado = FALSE AND cp.aceito = TRUE AND cp.retirado = FALSE",
+                
+                REMOVED: 
+                    "cp.cancelado = FALSE and cp.aceito = TRUE AND cp.retirado = TRUE",
+
+                PAID:
+                    "cp.cancelado = FALSE AND cp.aceito = TRUE AND cp.quitado = TRUE",
+
+                PENDING:
+                    "cp.cancelado = FALSE AND cp.aceito = TRUE AND cp.quitado = FALSE",
+
+                ALL: ""
+            };
+
+            const limit = size;
+            const offset = (page - 1) * limit;  
+
+            const whereCondition: string[] = [];
+            const values: string[] & number[] = [];
+            let paramIndex = 1;
+
+            const statusWhere = statusWhereMap[listType];
+            if(statusWhere){
+                whereCondition.push(statusWhere);
+            };
+
+                        
+            let userWhere = userType === "cliente" ? 
+                `cp.fk_cliente_id = $${paramIndex++}`: 
+                `cp.fk_fornecedor_id = $${paramIndex++}`;
+            
+            whereCondition.push(userWhere);
+            values.push(fromUserId);
+            
+            if(toUserId) {
+                let toUserWhere = userType === "cliente" ? 
+                    `cp.fk_fornecedor_id = $${paramIndex++}` : 
+                    `cp.fk_cliente_id = $${paramIndex++}`;
+                
+                whereCondition.push(toUserWhere);
+                values.push(toUserId);
+            }
+
+            if(idCompra) {
+                let compraWhere = `cp.id_compra = $${paramIndex++}`;
+                whereCondition.push(compraWhere);
+                values.push(idCompra);
+            }
+            
+            
+            const searchParam = `$${paramIndex++}`;
+            const fromUserWhere = userType === "cliente" ? 
+                `
+                    (
+                        usr.nome ILIKE ${searchParam} OR 
+                        unaccent(usr.apelido) ILIKE unaccent(${searchParam}) OR 
+                        unaccent(cp.nome_produto) ILIKE unaccent(${searchParam}) OR
+                        unaccent(usr.nomeestabelecimento) ILIKE unaccent(${searchParam})
+                    )
+                ` : 
+                `
+                    (
+                        usr.nome ILIKE ${searchParam} OR 
+                        unaccent(usr.apelido) ILIKE unaccent(${searchParam}) OR 
+                        unaccent(cp.nome_produto) ILIKE unaccent(${searchParam})
+                    )
+                `;
+            
+            whereCondition.push(fromUserWhere);
+            values.push(`%${search}%`);
+
+            
+            const whereSql = whereCondition.length ? 
+                `WHERE ${whereCondition.join(" AND ")}` : 
+                "";
+
+            // console.log(whereCondition);
+            // console.log("WHERE SQL: ", whereSql);
+
+            let fromJoinSql = "";
+            if(userType === "cliente") {
+                fromJoinSql = `
+                    FROM compra AS cp
+                    LEFT JOIN fornecedor AS usr
+                        ON usr.id_fornecedor = cp.fk_fornecedor_id
+                `;
+            }else if(userType === "fornecedor") {
+                fromJoinSql = `
+                    FROM compra AS cp
+                    LEFT JOIN cliente AS usr
+                        ON usr.id_cliente = cp.fk_cliente_id
+                `;
+            }
+
+            const SQL_LIST = `
+                SELECT
+                    cp.id_compra,
+                    cp.nome_produto,
+                    cp.quantidade,
+                    cp.valor_unit,
+                    cp.quitado,
+                    cp.retirado,
+                    cp.created_at,
+                    cp.prazo,
+                    cp.fk_cliente_id,
+                    cp.fk_fornecedor_id,
+                    cp.aceito,
+                    cp.coletado_em,
+                    cp.cancelado,
+
+                    usr.nome AS nome_user,
+                    usr.apelido AS apelido_user,
+                    usr.telefone AS telefone_user,
+                    ${userType === "cliente" ? "usr.nomeestabelecimento," : ""}
+
+                    CASE 
+                        WHEN cp.cancelado = TRUE THEN 'CANCELED'
+                        WHEN cp.aceito = FALSE THEN 'REFUSED'
+                        WHEN cp.aceito IS NULL THEN 'ANALYSIS'
+                        WHEN cp.retirado = FALSE THEN 'WAIT_REMOVE'
+                        ELSE 'REMOVED'
+                    END AS shopping_status,
+                    CASE    
+                        WHEN cp.quitado = TRUE THEN 'PAID'
+                        ELSE 'PENDING'
+                    END AS payment_status
+                
+                ${fromJoinSql}
+                ${whereSql}
+                
+                ORDER BY ${orderBy}
+                LIMIT $${paramIndex++}
+                OFFSET $${paramIndex};
+            `;
+
+            
+            const SQL_TOTAL = `
+                SELECT COUNT(*) AS total
+                ${fromJoinSql}
+                ${whereSql};
+            `;
+
+            const { total } = (await client.query(SQL_TOTAL, values)).rows[0];
+            values.push(limit, offset);
+            const result = (await client.query(SQL_LIST, values)).rows as compraInterface[];
+
+            // console.log(SQL_LIST);
+            // console.log(SQL_TOTAL);
+            // console.log("Values: ", values);
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(total / size);
+
+            return result;
         } catch (e) {
             console.error("ProdutoModel >>>", e);
             throw new Error("Erro ao listar compra(s)");
