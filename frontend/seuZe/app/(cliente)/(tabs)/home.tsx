@@ -29,7 +29,7 @@ export default function Home() {
             idSh: "1",
             title: "Fornecedores", 
             icon: <Feather name="truck" size={32} color={theme.colors.orange}/>,
-            onPress: () => router.push("/(cliente)/fornecedores")
+            onPress: () => router.push("/fornecedores")
 
         }, 
         {
@@ -38,7 +38,7 @@ export default function Home() {
             icon: <FontAwesome name="handshake-o" size={32} color={theme.colors.orange}/>,
             onPress: () => {
                 setCategoryFornecedores("accepted");
-                router.push("/(cliente)/fornecedores");
+                router.push("/fornecedores");
             }
 
         }, 
@@ -46,13 +46,13 @@ export default function Home() {
             idSh: "3",
             title: "Produtos", 
             icon: <Feather name="package" size={32} color={theme.colors.orange}/>,
-            onPress: () => router.push("/(cliente)/produtos")
+            onPress: () => router.push("/produtos")
         }, 
         {
             idSh: "4",
             title: "Minhas Compras", 
             icon: <Feather name="shopping-cart" size={32} color={theme.colors.orange}/>,
-            onPress: () => router.push("/(cliente)/compras")
+            onPress: () => router.push("/compras")
 
         }, 
         {
@@ -65,7 +65,7 @@ export default function Home() {
             idSh: "6",
             title: "Meu Perfil", 
             icon: <Feather name="user" size={32} color={theme.colors.orange}/>,
-            onPress: () => router.push("/(cliente)/perfil")
+            onPress: () => router.push("/perfil")
         }  
     ];
 
@@ -192,11 +192,11 @@ export default function Home() {
                                     iconName={"package"}
                                     primaryAction={{
                                         label: "Ver Produtos",
-                                        onPress: () => router.push("/(cliente)/produtos")
+                                        onPress: () => router.push("/produtos")
                                     }}
                                     secondaryAction={{
                                         label: "Explorar Fornecedores",
-                                        onPress: () => router.push("/(cliente)/fornecedores")
+                                        onPress: () => router.push("/fornecedores")
                                     }}
                                 />
                             }
@@ -213,11 +213,11 @@ export default function Home() {
                                     iconName={"truck"}
                                     primaryAction={{
                                         label: "Fornecedores",
-                                        onPress: () => router.push("/(cliente)/fornecedores")
+                                        onPress: () => router.push("/fornecedores")
                                     }}
                                     secondaryAction={{
                                         label: "Explorar Compras",
-                                        onPress: () => router.push("/(cliente)/compras")
+                                        onPress: () => router.push("/compras")
                                     }}
                                 />
                             }

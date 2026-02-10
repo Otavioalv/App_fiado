@@ -2,14 +2,17 @@ import { DefaultCard } from "../ui/DefaultCard";
 import { ProductDescription, ProductDescriptionProps, ProductDescriptionSkeleton } from "../ui/ProductDescription";
 import { StatusShopping, StatusShoppingProps, StatusShoppingSkeleton } from "../ui/StatusShopping";
 import { memo } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import { Animated, PressableProps, StyleSheet, Text, View } from "react-native";
 import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
+import { formatCurrency, transformDateToUI } from "@/src/utils";
+import { PressableCard } from "../ui/PressableCard";
 import { theme } from "@/src/theme";
-import { transformDateToUI } from "@/src/utils";
 
-export interface ShoppingCardProps extends ProductDescriptionProps, StatusShoppingProps {
+export interface ShoppingCardProps extends ProductDescriptionProps, StatusShoppingProps, PressableProps {
     prazo: Date,
-    criadoEm: Date
+    criadoEm: Date,
+    quantidade: string | number,
+    valorUnit: string | number,
 }
 
 export function ShoppingCard({
@@ -21,9 +24,12 @@ export function ShoppingCard({
     shoppingStatus,
     prazo,
     paymentStatus,
-    criadoEm
+    criadoEm, 
+    quantidade,
+    valorUnit,
+    ...pressableProps
 }: ShoppingCardProps) {
-    const prazoText:string = new Date() < prazo ? "Venceu: " : "Vence: ";
+    const prazoText:string = new Date() < prazo ? "No Prazo: " : "Venceu: ";
 
     // console.log(new Date(prazo), prazo);
     
@@ -33,7 +39,9 @@ export function ShoppingCard({
     // console.log(status);
     
     return (
-        <DefaultCard>
+        <PressableCard
+            {...pressableProps}
+        >
             <ProductDescription
                 marketName={marketName}
                 nome={nome}
@@ -41,6 +49,11 @@ export function ShoppingCard({
                 prodName={prodName}
                 apelido={apelido}
             />
+            <View>
+                <Text style={styles.infoUnt}>
+                    {quantidade} un. X {formatCurrency(valorUnit || "")}
+                </Text>
+            </View>
 
             <View
                 style={styles.containerBottom}
@@ -65,8 +78,7 @@ export function ShoppingCard({
                 </View>
 
             </View>
-
-        </DefaultCard>
+        </PressableCard>
     );
 }
 
@@ -77,10 +89,9 @@ export function ShoppingCardSkeleton() {
     return (
         <DefaultCard>
             <ProductDescriptionSkeleton/>
-
+            <Animated.View style={[anmOpacity, styles.dateSkeleton]}/>
             <View style={styles.containerBottom}>
                 <StatusShoppingSkeleton/>
-                
                 <View style={[styles.dateContainer, {gap: 2}]}>
                     <Animated.View style={[anmOpacity, styles.dateSkeleton]}/>
                     <Animated.View style={[anmOpacity, styles.dateSkeleton]}/>
@@ -98,7 +109,7 @@ const styles = StyleSheet.create({
     containerBottom: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "flex-start"
+        alignItems: "flex-end"
     },
     dateSkeleton: {
         width: 75,
@@ -108,5 +119,9 @@ const styles = StyleSheet.create({
     dateContainer: {
         flexDirection: "column", 
         alignItems: "flex-end"
+    }, 
+    infoUnt: {
+        color: theme.colors.textNeutral900,
+        fontSize: theme.typography.textSM.fontSize,
     }
 });

@@ -6,7 +6,7 @@ import { theme } from "@/src/theme";
 
 export interface StatusShoppingProps {
     shoppingStatus: ShoppingStatusType,
-    paymentStatus: PaymentStatusType
+    paymentStatus: PaymentStatusType,
 }
 
 
@@ -30,6 +30,10 @@ const shoppingStatusSet:Record<ShoppingStatusType, ChipBadgeProps> = {
     WAIT_REMOVE: {
         text:"Aguardando Retirada",
         variant:"outline",
+    }, 
+    LOADING: {
+        text: "",
+        variant: "disabled"
     }
 }
 
@@ -41,6 +45,10 @@ const paymentStatusSet: Record<PaymentStatusType, ChipBadgeProps> = {
     PENDING: {
         text: "Pendente",
         variant: "outline"
+    }, 
+    LOADING: {
+        text: "",
+        variant: "disabled"
     }
 }
 // workana

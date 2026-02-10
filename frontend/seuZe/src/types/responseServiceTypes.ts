@@ -19,8 +19,8 @@ export type PaginationType = FilterType & {
 	totalPages?: number,
 }
 
-export type PaymentStatusType = "PAID" | "PENDING";
-export type ShoppingStatusType = "CANCELED"| "REFUSED" | "ANALYSIS"| "WAIT_REMOVE" | "REMOVED";
+export type PaymentStatusType = "PAID" | "PENDING" | "LOADING";
+export type ShoppingStatusType = "CANCELED"| "REFUSED" | "ANALYSIS"| "WAIT_REMOVE" | "REMOVED" | "LOADING";
 
 export type AllShoppingStatusType = ShoppingStatusType | PaymentStatusType
 export interface ShoppingData {

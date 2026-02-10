@@ -5,10 +5,11 @@ import { TextProductPrice, TextProductPriceSkeleton } from "./TextProductPrice";
 
 export interface ProductDescriptionProps {
     prodName: string,
-    price: string,
+    price: string | number,
     nome: string,
+    marketName: string,
     apelido?: string,
-    marketName: string
+    isLoading?: boolean,
 }
 
 export function ProductDescription({
@@ -16,8 +17,11 @@ export function ProductDescription({
     price,
     nome,
     apelido,
-    marketName
+    marketName, 
+    isLoading = false,
 }: ProductDescriptionProps) {
+    if(isLoading) return <ProductDescriptionSkeleton/>;
+
     return (
         <View style={styles.container}>
             

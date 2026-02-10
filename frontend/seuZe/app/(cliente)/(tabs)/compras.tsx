@@ -1,13 +1,15 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
 import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
+import { InfoShoppingBottomSheet } from "@/src/components/common/InfoShoppingBottomSheet";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
 import { MemoShoppingCard, MemoShoppingCardSkeleton, ShoppingCardProps } from "@/src/components/common/ShoppingCard";
+import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
 import { useShoppingList } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeShoppingList } from "@/src/types/responseServiceTypes";
-// import { transformDateToUI } from "@/src/utils";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useMemo } from "react";
 import { View } from "react-native";
 
@@ -78,6 +80,27 @@ export default function Compras() {
         activeCategory
     );
 
+    const {openSheet, closeSheet} = useGlobalBottomModalSheet();
+
+    const handleOpenInfoShopping = useCallback((idShopping: number) => {
+        console.log("abri bottom sheet");
+
+        openSheet(
+            <InfoShoppingBottomSheet 
+                idShopping={idShopping}
+            />,
+            ["30%"],
+            false
+        );
+    }, [openSheet]);
+
+    // Fecha o bottom sheet ao sair da tela.
+    useFocusEffect(
+        () => {
+            return () => closeSheet();
+        }
+    );
+
 
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
@@ -102,21 +125,23 @@ export default function Compras() {
                     id: idString,
                     marketName: u.nomeestabelecimento,
                     nome: u.nome_user,
-                    price: u.valor_unit,
+                    price: Number(u.valor_unit) * u.quantidade,
                     prodName: u.nome_produto,
                     shoppingStatus: u.shopping_status,
                     paymentStatus: u.payment_status,
+                    quantidade: u.quantidade,
+                    valorUnit: u.valor_unit,
                     prazo: new Date(u.prazo),
                     apelido: u.apelido_user,
-                    criadoEm: new Date(u.created_at)
+                    criadoEm: new Date(u.created_at),
+                    onPress: () => handleOpenInfoShopping(u.id_compra),
                 });
-
                 // console.log(map);
             });
         });
 
         return Array.from(map.values());
-    }, [data]);
+    }, [data, handleOpenInfoShopping]);
 
     const renderItem = useCallback(
         ({item}: {item: ShoppingCardProps}) => (
@@ -130,6 +155,9 @@ export default function Compras() {
                 apelido={item.apelido}
                 prazo={item.prazo}
                 criadoEm={item.criadoEm}
+                quantidade={item.quantidade}
+                valorUnit={item.valorUnit}
+                onPress={item.onPress}
             />
         ),
         []

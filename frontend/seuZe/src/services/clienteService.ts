@@ -2,6 +2,7 @@ import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/
 import { api } from "./api";
 import { BackendResponse, responseAxiosInterfaces } from "./typesApi";
 import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList } from "../types/responseServiceTypes";
+import { ShoppingListParams } from "./types/clienteServiceParams";
 
 
 const defaultEndPoint:string = "/cliente"
@@ -96,16 +97,27 @@ export async function productList(
     }
 }
 
-export async function shoppingList(pagination: PaginationType = {page: 1, size: 10}, listType: TypeShoppingList): Promise<ResultsWithPagination<ShoppingData[]>>{
+
+export async function shoppingList({
+    pagination = {page: 1, size: 10}, 
+    listType,
+    idCompra,
+    idFornecedor,
+}: ShoppingListParams): Promise<ResultsWithPagination<ShoppingData[]>>{
     try{
         const endPoint = defaultEndPoint + "/product/buy/list/" + listType;
         
-        const response = await api.post(endPoint, {}, {
+        const response = await api.get(endPoint, {
             params: {
+                toIdUser: idFornecedor,
+                idCompra: idCompra,
                 ...pagination
             }
         }) as responseAxiosInterfaces<ResultsWithPagination<ShoppingData[]>>;
-          
+        
+        // console.log(JSON.stringify(response.data.data, null, "  "));
+        
+
         return response.data.data!;
     }catch(err: any){
         throw err;

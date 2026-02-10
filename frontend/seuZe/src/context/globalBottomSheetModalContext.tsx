@@ -47,8 +47,8 @@ export function GlobalBottomSheetModalProvider({ children }: { children: ReactNo
                 bottomSheetRef.current?.present();
             });
         } else {
-        bottomSheetRef.current?.dismiss();
-            }
+            bottomSheetRef.current?.dismiss();
+        }
     }, [sheetContent]);
 
     const openSheet = useCallback<OpenSheetBottomType>(

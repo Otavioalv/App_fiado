@@ -5,7 +5,6 @@ import { theme } from "@/src/theme";
 import { Feather } from "@expo/vector-icons";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import FilterButton from "./FilterButton";
-import { useGlobalBottomSheet } from "@/src/context/globalBottomSheetContext";
 import { FilterOptionsBottom } from "./FilterOptionsBottom";
 import { OnSubmitSearchType } from "@/src/types/responseServiceTypes";
 import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";

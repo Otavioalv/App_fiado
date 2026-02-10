@@ -67,21 +67,11 @@ export function ListProdsTab() {
         );
     }, [openSheet])
 
-    // Bottom Sheet
+    // Fecha bottomSheet ao sair da tela
     useFocusEffect(
-        useCallback(() => {
-            // requestAnimationFrame(() => {
-            //     console.log("focou: ", lastProductSheet.current);
-            //     if(lastProductSheet.current.open && lastProductSheet.current.id) {
-            //         handleOpenInfoProduct(lastProductSheet.current.id);
-            //         clearLastProduct();
-            //     }
-            // });
-            return () => {
-                console.log("Deu close sheet: ", lastProductSheet.current);
-                closeSheet();
-            }
-        }, [closeSheet])
+        () => {
+            return () => closeSheet();
+        }
     );
 
     

@@ -6,7 +6,7 @@ import { theme } from "@/src/theme";
 export default function TabsLayout() {
     return (
         <Tabs
-            initialRouteName="produtos" 
+            initialRouteName="compras" 
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: theme.colors.orange,

@@ -1,7 +1,7 @@
 import { theme } from "@/src/theme";
 import { AppDefaultSizes } from "@/src/types/responseServiceTypes";
 import { Image } from "expo-image";
-import { ImageStyle, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
+import { ImageStyle, StyleSheet, Text, TextStyle, View } from "react-native";
 
 // import Svg, { Text as SvgText } from "react-native-svg";
 

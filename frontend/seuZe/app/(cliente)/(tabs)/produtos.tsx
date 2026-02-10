@@ -4,14 +4,13 @@ import { InfoProductBottomSheet } from "@/src/components/common/InfoProductBotto
 import { MemoProductCard, MemoProductCardSkeleton, ProductCardProps } from "@/src/components/common/ProductCard";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
-import { useGlobalBottomSheet } from "@/src/context/globalBottomSheetContext";
 import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
 import { useProductList } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeUserList } from "@/src/types/responseServiceTypes";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { View } from "react-native";
 
 const chipList: ChipDataType<TypeUserList>[] = [
@@ -77,11 +76,7 @@ export default function Produtos() {
     const lastProductSheet = useRef<{id: null | number, open: boolean}>({
         id: null,
         open: false
-    })
-    
-    // const clearLastProduct = useCallback(() => {
-    //     lastProductSheet.current = { id: null, open: false };
-    // }, []);
+    });
 
     const handleOpenInfoProduct = useCallback((idProduct: number) => {
         console.log("Tentando abrir produto:", idProduct);
@@ -93,26 +88,16 @@ export default function Produtos() {
             <InfoProductBottomSheet 
                 idProduct={idProduct}
             />, 
-            ["26%"], 
+            ["28%"], 
             false
         );
     }, [openSheet])
 
     // Fecha o bottom sheet ao sair da tela.
     useFocusEffect(
-        useCallback(() => {
-            // requestAnimationFrame(() => {
-            //     console.log("focou: ", lastProductSheet.current);
-            //     if(lastProductSheet.current.open && lastProductSheet.current.id) {
-            //         handleOpenInfoProduct(lastProductSheet.current.id);
-            //         clearLastProduct();
-            //     }
-            // });
-            return () => {
-                console.log("Deu close sheet: ", lastProductSheet.current);
-                closeSheet();
-            }
-        }, [closeSheet])
+        () => {
+            return () => closeSheet();
+        }
     );
   
 

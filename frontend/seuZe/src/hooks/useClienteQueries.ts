@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { listPartner, login, me, productList, register, shoppingList, update } from "../services/clienteService";
-import { FilterType, PartnerFornecedorType, ProductAndFornecedorData, ResultsWithPagination, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
+import { FilterType, PartnerFornecedorType, ProductAndFornecedorData, ResultsWithPagination, ShoppingData, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 
@@ -123,25 +123,43 @@ export function useProductSingleFromId(id:string | number) {
 }
 
 
-
-
 export function useShoppingList(filters: FilterType, listType: TypeShoppingList, size: number = 20) {
     const key: string = `shopping-list`;
     
     return useInfiniteList({
         queryKey: [key, listType, filters],
         queryFn: async({pageParam}) => {
-            return await shoppingList(
-                {
+            return await shoppingList({
+                pagination: {
                     page: pageParam as number,
                     size: size,
                     filter: filters.filter,
                     search: filters.search
                 },
-                listType
-            )
+                listType: listType,
+            })
         }, 
         initialPageParam: 1
+    });
+}
+
+export function useShoppingListFromid(id:string | number) {
+    const key: string = `shopping-list`;
+
+    return useQuery<ShoppingData>({
+        queryKey: [key, id],
+        enabled: !!id,
+        queryFn: async() => {
+            const result = await shoppingList({
+                listType: "all",
+                pagination: {
+                    page: 1,
+                    size: 1,
+                },
+                idCompra: id,
+            });
+            return result.list[0] || [];
+        }
     });
 }
 

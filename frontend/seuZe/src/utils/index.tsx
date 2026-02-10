@@ -38,3 +38,14 @@ export function formatPhone(phone: string | undefined | null) {
     // Se vier algo estranho, devolve original
     return phone;
 }
+
+export function formatCurrency(value: string | number) {
+    const numericValue = typeof value === 'string' ? Number(value) : value;
+
+    if(isNaN(numericValue)) return "R$ 0,00";
+
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(numericValue);
+}

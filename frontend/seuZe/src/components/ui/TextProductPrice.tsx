@@ -1,6 +1,7 @@
 import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
 import { AppDefaultSizes } from "@/src/types/responseServiceTypes";
+import { formatCurrency } from "@/src/utils";
 import { Animated, StyleProp, StyleSheet, Text, TextStyle } from "react-native";
 
 type ComponentsStyles = {
@@ -41,17 +42,7 @@ export function TextProductPrice({
     const currentStyle = sizeStyle[size];
 
 
-    // Separar isso, posso reutilizar
-    const formatCurrency = (value: string | number) => {
-        const numericValue = typeof value === 'string' ? Number(value) : value;
-
-        if (isNaN(numericValue)) return "R$ 0,00";
-
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(numericValue);
-    }
+    
 
     const formatedPrice = formatCurrency(price);
 

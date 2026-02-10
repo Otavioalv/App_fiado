@@ -8,8 +8,8 @@ export default function ClienteFornecedoresLayout() {
             <Stack 
                 screenOptions={{ 
                     headerShown: false,
-                    animation: "none"
-                    // animation: 'slide_from_left',
+                    animation: "none",
+                    // animation: 'slide_from_leftQ',
                     // animationDuration: 100,
                 }}
             >   

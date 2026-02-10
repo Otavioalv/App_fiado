@@ -1,5 +1,5 @@
-import { BottomSheetView } from "@gorhom/bottom-sheet";
-import { StyleSheet, Text, View } from "react-native";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { View } from "react-native";
 import { TextProductPrice } from "../ui/TextProductPrice";
 import { DefaultDescription } from "../ui/DefaultDescription";
 import { ButtonModern } from "../ui/ButtonModern";
@@ -7,9 +7,9 @@ import { theme } from "@/src/theme";
 import MyScreenContainer from "./MyScreenContainer";
 import { useProductSingleFromId } from "@/src/hooks/useClienteQueries";
 import { SectionContainer } from "./SectionContainer";
-import { Router, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Stepper, StepperSkeleton } from "./Stepper";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Stepper } from "./Stepper";
 
 interface InfoProductBottomSheetProps {
     idProduct: number | string,
@@ -35,7 +35,7 @@ export function InfoProductBottomSheet({
 
     const isActivate: boolean = data?.relationship_status === "ACCEPTED";
     return (
-        <BottomSheetView>
+        <BottomSheetScrollView>
                 <MyScreenContainer
                     style={{
                         alignItems: "stretch",
@@ -66,7 +66,7 @@ export function InfoProductBottomSheet({
                             <DefaultDescription
                                 size="S"
                                 text1={`Vendido por: ${data?.nomeestabelecimento}`}
-                                text2={`Estoque: ${data?.quantidade} un`}
+                                text2={`Estoque: ${data?.quantidade} un.`}
                                 isLoading={isLoading}
                             />
 
@@ -88,12 +88,6 @@ export function InfoProductBottomSheet({
                                 gap: theme.gap.md,
                             }}
                         >
-                            {/* <ButtonModern
-                                size="M"
-                                placeholder="Adicionar "
-                                isLoading={isLoading}
-                            /> */}
-
                             <Stepper
                                 quantity={productQnt}
                                 setQuantity={setProductQnt}
@@ -112,7 +106,6 @@ export function InfoProductBottomSheet({
                         </View>
                 </SectionContainer>
             </MyScreenContainer>
-        </BottomSheetView>
+        </BottomSheetScrollView>
     );
 }
-
