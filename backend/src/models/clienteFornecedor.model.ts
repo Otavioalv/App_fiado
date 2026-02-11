@@ -198,7 +198,7 @@ class ClienteFornecedorModel {
                 WHERE ${whereSql};
             `
 
-            console.log(SQL, fromUserId, toUserId);
+            // console.log(SQL, fromUserId, toUserId);
 
             await client.query("BEGIN");
             await client.query(SQL, [fromUserId, toUserId]);
@@ -251,13 +251,11 @@ class ClienteFornecedorModel {
 
             const SQL = `
                 SELECT 1 
-                FROM 
+                FROM
                     cliente_fornecedor 
                 WHERE 
                     fk_cliente_id = $1 AND 
-                    fk_fornecedor_id = $2 AND 
-                    fornecedor_check = TRUE AND
-                    cliente_check = FALSE;
+                    fk_fornecedor_id = $2;
             `;
 
             const result = await client.query(SQL, [idCliente, idFornecedor]);

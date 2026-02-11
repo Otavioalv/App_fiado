@@ -208,7 +208,7 @@ class ClienteFornecedorController {
 
             if(!idPartner || typeof idPartner !== 'number') {
                 return res.status(404).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
-            }   
+            }
 
             if(!await this.clienteFornecedorModel.findPartnerFornecedor(idPartner, id_cliente)) {
                 return res.status(404).send(errorResponse(ResponseApi.Users.SUPPLIER_INVALID));
