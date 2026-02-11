@@ -64,6 +64,7 @@ export const ResponseApi = {
         CLIENT_ALREADY_REQUESTED: "Todos estes clientes já receberam solicitação de parceria",
         PARTNER_REQUEST_SENT: "Solicitações enviadas com sucesso",
         PARTNER_ACCEPT: "Parceria aceita com sucesso",
+        PARTNER_REJECT: "Parceria rejeitada com sucesso",
         NOT_PARTNER: "Um ou mais usuários não são associados"
     },
     Product: {

@@ -1,6 +1,7 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
 import { idsPartnerInterface, clienteFornecedorInterface } from "../shared/interfaces/userInterfaces";
+import { UserType } from "../shared/interfaces/notifierInterfaces";
 
 
 class ClienteFornecedorModel {
@@ -175,6 +176,35 @@ class ClienteFornecedorModel {
 
         } catch(e) {
             await client?.query("ROLLBACK");
+            console.log(e);
+            throw new Error("Erro ao efetuar associação");
+        } finally {
+            client?.release();
+        }
+    }
+
+    public async rejectPartner(fromUserId: number, toUserId: number, userType: UserType){
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+            const whereSql = userType === "cliente" 
+                ? `fk_cliente_id = $1 AND fk_fornecedor_id = $2` 
+                : `fk_fornecedor_id = $1 AND fk_cliente_id = $2`;
+
+            const SQL = `
+                DELETE FROM cliente_fornecedor
+                WHERE ${whereSql};
+            `
+
+            console.log(SQL, fromUserId, toUserId);
+
+            await client.query("BEGIN");
+            await client.query(SQL, [fromUserId, toUserId]);
+            await client.query("COMMIT");
+
+        } catch(e) {
             console.log(e);
             throw new Error("Erro ao efetuar associação");
         } finally {

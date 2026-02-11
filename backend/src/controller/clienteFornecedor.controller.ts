@@ -6,7 +6,7 @@ import { FornecedorModel } from "../models/fornecedor.model";
 import { ClienteFornecedorModel } from "../models/clienteFornecedor.model";
 import { ClienteModel } from "../models/cliente.model";
 import { Notifications } from "../common/messages/notifications";
-import { NotificationInput } from "../shared/interfaces/notifierInterfaces";
+import { NotificationInput, UserType } from "../shared/interfaces/notifierInterfaces";
 import { ResponseApi } from "../shared/consts/responseApi";
 
 
@@ -241,6 +241,36 @@ class ClienteFornecedorController {
 
             
             return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_ACCEPT));
+        }catch(e) {
+            console.log("aceitarParceriaCliente >>> ", e);
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+    }
+
+    public async rejectPartner(req: FastifyRequest, res: FastifyReply, userType: UserType): Promise<FastifyReply>{
+        try {
+            const {idPartner} = await req.body as {idPartner: number};
+            const fromUserId: number = await getTokenIdFromRequest(req);
+
+            if(!idPartner || typeof idPartner !== 'number') {
+                return res.status(404).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }   
+
+
+            // Unificar isso em uma função
+            if(userType === "cliente") {
+                if(!await this.clienteFornecedorModel.findPartnerFornecedor(idPartner, fromUserId)) {
+                    return res.status(404).send(errorResponse(ResponseApi.Users.SUPPLIER_INVALID));
+                }
+            } else if(userType === "fornecedor") {
+                if(!await this.clienteFornecedorModel.findPartnerCliente(idPartner, fromUserId)) {
+                    return res.status(404).send(errorResponse(ResponseApi.Users.CLIENT_INVALID));
+                }
+            }
+
+            await this.clienteFornecedorModel.rejectPartner(fromUserId, idPartner, userType);
+            
+            return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_REJECT));
         }catch(e) {
             console.log("aceitarParceriaCliente >>> ", e);
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
