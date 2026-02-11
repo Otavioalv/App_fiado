@@ -85,6 +85,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
     public async findUserById(id: number): Promise<fornecedorInterface>{ 
         let client: PoolClient | undefined;
         try {
+            console.log("saf", id);
             client = await connection.connect();
             const SQL = `SELECT nome, senha, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, id_fornecedor, complemento, bairro FROM fornecedor WHERE id_fornecedor = $1`;
             const result:fornecedorInterface = (await client.query(SQL, [id])).rows[0];

@@ -218,7 +218,10 @@ class ClienteFornecedorController {
 
             // Mando notificação
             const notificationService = req.server.notificationService;
-            const clienteData = await this.fornecedorModel.findUserById(id_cliente);
+            const clienteData = await this.clienteModel.findUserById(id_cliente);
+
+            console.log(idPartner, id_cliente);
+            console.log(clienteData);
 
             const data: NotificationInput = {
                 toId: idPartner.toString(),

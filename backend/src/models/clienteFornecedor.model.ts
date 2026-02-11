@@ -155,7 +155,7 @@ class ClienteFornecedorModel {
 
         try {
 
-            console.log(idFornecedor, idCliente);
+            // console.log(idFornecedor, idCliente);
 
             client = await connection.connect();
 

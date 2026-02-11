@@ -6,7 +6,7 @@ export const Messages:MessageMap = {
         `Você recebeu uma nova solicitação de parceria de ${data.nome}${data.apelido ? ` conhecido(a) por ${data.apelido}.` : "."}`
     ),
     parceriaAceita: (data) => (
-        `Sua solicitação de parceria com: ${data.nome}, FOI ACEITA`
+        `Sua solicitação de parceria com: ${data.nome}${data.apelido ? ` conhecido(a) por ${data.apelido}` : ""}, FOI ACEITA`
     ),
     novaSolicitacaoCompra: (data) => (
         `Seu parceiro ${data.nome}${data.apelido ? ` conhecido por ${data.apelido},` : ","} está solicitando os seguintes itens:\n${data.compra.map(c => `${c.nome_produto}: ${c.quantidade}`).join("\n")}`
