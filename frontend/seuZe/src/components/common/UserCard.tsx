@@ -1,7 +1,7 @@
 import {RelationshipStatusType} from "@/src/types/responseServiceTypes"
 import { DefaultCard } from "../ui/DefaultCard";
 import { DefaultDescription, DefaultDescriptionSkeleton } from "../ui/DefaultDescription";
-import { RelationshipActions, RelationshipActionsSkeleton } from "../ui/RelationshipActions";
+import { OnPressActionFunctionType, RelationshipActions, RelationshipActionsSkeleton } from "../ui/RelationshipActions";
 import { memo } from "react";
 import { PressableProps, StyleSheet, Text } from "react-native";
 import { theme } from "@/src/theme";
@@ -11,6 +11,9 @@ export interface UserCardProps extends PressableProps {
     title: string, 
     description: string,
     relationshipType: RelationshipStatusType,
+    idUser: string | number,
+    onPressActionFunction?: OnPressActionFunctionType,
+    onPressAccepted?: (id: string | number) => void,
     date?: string,
 };
 
@@ -19,6 +22,9 @@ export function UserCard({
     title, 
     relationshipType, 
     date,
+    idUser,
+    onPressActionFunction,
+    onPressAccepted,
     ...pressableProps
 }: UserCardProps) {
     return (
@@ -35,11 +41,16 @@ export function UserCard({
                 <Text
                     style={styles.textDate}
                 >
-                    {date}
+                    Solicitado Em: {date}
                 </Text>
             }
 
-            <RelationshipActions type={relationshipType}/>
+            <RelationshipActions 
+                type={relationshipType}
+                idUser={idUser}
+                onPressAction={onPressActionFunction}
+                onPressAccepted={onPressAccepted}
+            />
         </PressableCard>
     );
 }

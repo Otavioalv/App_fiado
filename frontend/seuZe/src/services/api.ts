@@ -12,6 +12,7 @@ let forbiddenAction: () => void;
 
 export const api = axios.create({
     baseURL,
+    // baseURL: "http://192.168.1.10:8090",
     timeout: 20000,
     headers: {"Content-Type": "application/json"}
 });

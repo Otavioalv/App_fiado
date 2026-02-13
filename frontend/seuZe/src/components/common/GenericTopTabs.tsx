@@ -1,5 +1,6 @@
 import { theme } from "@/src/theme";
 import { createMaterialTopTabNavigator, MaterialTopTabNavigationOptions } from "@react-navigation/material-top-tabs";
+import { NavigatorProps } from "expo-router/build/views/Navigator";
 import { ComponentProps } from "react";
 import { Dimensions } from "react-native";
 
@@ -9,11 +10,13 @@ export type TabItem = ComponentProps<typeof Tab.Screen>;
 
 interface GenericTopTabsProps {
     tabs: TabItem[],
+    navigatorOpt?: NavigatorProps<any>
 }
 
 
 export function GenericTopTabs({
     tabs, 
+    navigatorOpt,
 }: GenericTopTabsProps) {
 
     const screenOptions: MaterialTopTabNavigationOptions = {
@@ -34,12 +37,14 @@ export function GenericTopTabs({
         }
     };
 
-
+    // console.log("NAVIGATOR: ", navigatorOpt);
+    
     return (
         <Tab.Navigator
             screenOptions={screenOptions}
             backBehavior="none"
             initialLayout={{ width: Dimensions.get('window').width }} // Testar remover isso em produção
+            {...navigatorOpt}
         >
 
             {tabs.map((item) => (

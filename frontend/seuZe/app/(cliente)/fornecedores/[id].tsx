@@ -1,14 +1,17 @@
 import { useLocalSearchParams} from "expo-router";
 import { UserDetail } from "@/src/components/common/UserDetail";
 import { TabItem } from "@/src/components/common/GenericTopTabs";
-import { useListPartnerFromId } from "@/src/hooks/useClienteQueries";
-import { useMemo } from "react";
+import { useListPartnerFromId, useUpdatePartnerInfoFornecedor } from "@/src/hooks/useClienteQueries";
+import { useCallback, useMemo } from "react";
 import { SobreTab } from "@/src/components/cliente/tabs/SobreTab";
 import { ListProdsTab } from "@/src/components/cliente/tabs/ListProdsTab";
+import { OnPressActionFunctionType } from "@/src/components/ui/RelationshipActions";
 
 
 export default function FornecedorDetail() {
-    const { id } = useLocalSearchParams<{ id: string }>();    
+    const { id, tab } = useLocalSearchParams<{ id: string, tab: string }>();
+
+   const initialTab = tab === "Produtos" ? "Produtos" : "Sobre";
 
     const {
         data: userData,
@@ -17,7 +20,21 @@ export default function FornecedorDetail() {
     } = useListPartnerFromId(
         id
     );
-  
+    
+    const { mutate } = useUpdatePartnerInfoFornecedor(id);
+
+    const handleAction: OnPressActionFunctionType = useCallback(({ id, newStatus }) => {
+        // console.log(id, newStatus);
+        mutate({ id: id, newStatus: newStatus });
+    }, [mutate]);
+
+    // const handleOnPressAccepted = useCallback((id: string | number) => {
+    //     router.push({
+    //         pathname: `/fornecedores/[id]`,
+    //         params: { tab: "Produtos", id: id}
+    //     });
+    // }, [router])
+
 
     const tabList = useMemo<TabItem[]>(() => [
         {
@@ -46,12 +63,17 @@ export default function FornecedorDetail() {
 
     return (
         <UserDetail
+            navigatorOpt={{
+                initialRouteName: initialTab
+            }}
+            idUser={id}
             title={userData?.nomeestabelecimento || ""}
             relationShipType={userData?.relationship_status ?? "NONE"}
             desc={desc}
             tabList={tabList}
             isLoading={isLoadingUserData || isErrorUserData}
             numberPhone={userData?.telefone || ""}
+            onPressAction={handleAction}
         />
     );
 }

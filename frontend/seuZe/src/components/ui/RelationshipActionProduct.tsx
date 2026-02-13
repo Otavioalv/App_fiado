@@ -2,34 +2,80 @@ import { RelationshipStatusType } from "@/src/types/responseServiceTypes";
 import { StyleSheet, View } from "react-native";
 import { ButtonModern, ButtonModernSkeleton } from "./ButtonModern";
 import { theme } from "@/src/theme";
+import { OnPressActionFunctionType, RelationshipActionsSkeleton } from "./RelationshipActions";
 
 type RelationshipActionProductProps = {
-    type: RelationshipStatusType
+    type: RelationshipStatusType,
+    idUser: string | number, 
+    isLoading?: boolean, 
+    onPressAction?: OnPressActionFunctionType,
+    onPressAccepted?: (id: number | string) => void,
 }
 
-export function RelationshipActionProduct({type}: RelationshipActionProductProps) {
+export function RelationshipActionProduct({
+    type,
+    isLoading,
+    idUser,
+    onPressAccepted,
+    onPressAction,
+}: RelationshipActionProductProps) {
+    if(isLoading) return <RelationshipActionsSkeleton/>;
+    
+    const handleOptionalButtonProps: OnPressActionFunctionType = onPressAction ? onPressAction : ({id, newStatus}) => {};
+    const handleOnPressAccepted = onPressAccepted ? onPressAccepted : (id: number | string) => {};
+
     return (
         <View 
             style={styles.container}
         >
             {type === "ACCEPTED" && (
                 <>
-                    <ButtonModern placeholder="Comprar" size="M" style={{flex: 1}}/>
+                {/* MUDAR PARA BOTAO QUE MUDA AO APERTAR E PEDE QUANTIDADE */}
+                    <ButtonModern 
+                        placeholder="Comprar" 
+                        size="M" 
+                        style={{flex: 1}}
+                        onPress={() => handleOnPressAccepted(idUser)}
+                    />
                 </>
             )}
 
             {type === "NONE" && (
-                <ButtonModern placeholder="Solicitar Parceria" size="M" variant="outline" style={{flex: 1}}/>
+                <ButtonModern 
+                    placeholder="Solicitar Parceria" 
+                    size="M" 
+                    variant="outline" 
+                    style={{flex: 1}}
+                    onPress={() => handleOptionalButtonProps({id: idUser, newStatus: "SENT"})}
+                />
             )}
 
             {type === "RECEIVED" && (
                 <>
-                    <ButtonModern placeholder="Aceitar" iconName="check" size="M" style={{flex: 1}}/>
-                    <ButtonModern placeholder="Recusar" iconName="x" size="M" variant="outline" style={{flex: 1}}/>
+                    <ButtonModern 
+                        placeholder="Aceitar" 
+                        iconName="check" 
+                        size="M" 
+                        style={{flex: 1}}
+                        onPress={() => handleOptionalButtonProps({id: idUser, newStatus: "ACCEPTED"})}
+                    />
+                    <ButtonModern 
+                        placeholder="Recusar" 
+                        iconName="x" 
+                        size="M" 
+                        variant="outline" 
+                        style={{flex: 1}}
+                        onPress={() => handleOptionalButtonProps({id: idUser, newStatus: "NONE"})}
+                    />
                 </>
             )}
             {type === "SENT"  && (
-                <ButtonModern placeholder="Aguardando Aprovação" size="M" variant="disabled" style={{flex: 1}}/>
+                <ButtonModern 
+                    placeholder="Aguardando Aprovação" 
+                    size="M" 
+                    variant="disabled" 
+                    style={{flex: 1}}
+                />
             )}
         </View>
     );

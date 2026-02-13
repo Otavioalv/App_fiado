@@ -1,8 +1,9 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { listPartner, login, me, productList, register, shoppingList, update } from "../services/clienteService";
-import { FilterType, PartnerFornecedorType, ProductAndFornecedorData, ResultsWithPagination, ShoppingData, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
+import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { acceptPartner, listPartner, login, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
+import { ActionRelationShipStatusType, FilterType, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
+import { OnPressActionParamsType } from "../components/ui/RelationshipActions";
 
 export function useListPartner(filters: FilterType, listType: TypeUserList, size: number = 20) {
     const key: string = `list-partner-fornecedor`;
@@ -216,4 +217,207 @@ export function useUpdate() {
             console.log(s);
         }
     })
+}
+
+
+export function useUpdatePartnerClienteStatus(filters: FilterType, listType: TypeUserList) {
+    type ListDataType = InfiniteData<ResultsWithPagination<PartnerFornecedorType[]>>;
+    type PartnerMutationContext = {
+        previousData: ListDataType | undefined;
+    };
+
+    const key: string = `list-partner-fornecedor`;
+    
+    const queryClient = useQueryClient();
+    const queryKey = [key, listType, filters]
+
+
+    return useMutation<any, any, OnPressActionParamsType, PartnerMutationContext>({
+        mutationFn: async ({id, newStatus}) => {
+
+            const actions:Record<
+                ActionRelationShipStatusType, 
+                (id: string | number) => Promise<boolean>
+            > = {
+                ACCEPTED: acceptPartner,
+                SENT: requestPartner,
+                NONE: rejectPartner,
+            };
+
+
+            console.log("teste: ", id, newStatus);
+            
+            // Chamar api
+            return await actions[newStatus](id);
+        },
+        onMutate: async ({id, newStatus}) => {
+            // Cancela fetchs
+            await queryClient.cancelQueries({queryKey});
+
+            // Salva estado anterior
+            const previousData = queryClient.getQueryData<ListDataType>(queryKey);
+            // console.log(JSON.stringify(previousData, null, "  "));
+            // console.log(previousData);
+
+            // Atualiza de forma otimista
+            queryClient.setQueryData<ListDataType>(queryKey, (old) => {
+                if(!old) return old;
+                
+                return {
+                    ...old, 
+                    pages: old.pages.map((page) => ({
+                        ...page, 
+                        list: page.list.map((partner) => 
+                            String(partner.id_fornecedor) === String(id)
+                                ? {...partner, relationship_status: newStatus}
+                                : partner
+                        )
+                    })),
+                };
+            });
+            return {previousData}
+        },
+        onError: (err, variables, context) => {
+            console.log(context?.previousData);
+            // retorna aos dados anteirores se der erro
+            if(context?.previousData)
+                queryClient.setQueryData(queryKey, context.previousData);
+        },
+        onSettled: () => {
+            // Sincroniza, faz refatch
+            queryClient.invalidateQueries({queryKey: ['list-partner-fornecedor']});
+            queryClient.invalidateQueries({queryKey: ['product-list'],});
+        }
+    });
+}
+
+export function useUpdatePartnerProductStatus(filters: FilterType, listType: TypeUserList) {
+    type ListDataType = InfiniteData<ResultsWithPagination<ProductAndFornecedorData[]>>;
+    type PartnerMutationContext = {
+        previousData: ListDataType | undefined;
+    };
+
+    const key: string = `product-list`;
+    
+    const queryClient = useQueryClient();
+    const queryKey = [key, listType, filters]
+
+
+    return useMutation<any, any, OnPressActionParamsType, PartnerMutationContext>({
+        mutationFn: async ({id, newStatus}) => {
+
+            const actions:Record<
+                ActionRelationShipStatusType, 
+                (id: string | number) => Promise<boolean>
+            > = {
+                ACCEPTED: acceptPartner,
+                SENT: requestPartner,
+                NONE: rejectPartner,
+            };
+
+            // Chamar api
+            return await actions[newStatus](id);
+        },
+        onMutate: async ({id, newStatus}) => {
+            // Cancela fetchs
+            await queryClient.cancelQueries({queryKey});
+
+            // Salva estado anterior
+            const previousData = queryClient.getQueryData<ListDataType>(queryKey);
+            // console.log(JSON.stringify(previousData, null, "  "));
+            // console.log(previousData);
+
+            // Atualiza de forma otimista
+            queryClient.setQueryData<ListDataType>(queryKey, (old) => {
+                if(!old) return old;
+                
+                return {
+                    ...old, 
+                    pages: old.pages.map((page) => ({
+                        ...page, 
+                        list: page.list.map((partner) => 
+                            String(partner.id_fornecedor) === String(id)
+                                ? {...partner, relationship_status: newStatus}
+                                : partner
+                        )
+                    })),
+                };
+            });
+            return {previousData}
+        },
+        onError: (err, variables, context) => {
+            console.log(context?.previousData);
+            // retorna aos dados anteirores se der erro
+            if(context?.previousData)
+                queryClient.setQueryData(queryKey, context.previousData);
+        },
+        onSettled: () => {
+            // Sincroniza, faz refatch
+            queryClient.invalidateQueries({queryKey: ['list-partner-fornecedor']});
+            queryClient.invalidateQueries({queryKey: ['product-list'],});
+        }
+    });
+}
+
+export function useUpdatePartnerInfoFornecedor(id: string | number) {
+    type PartnerMutationContext = {
+        previousData: PartnerFornecedorType | undefined;
+    };
+    
+    const key: string = `list-partner-fornecedor`;
+
+    const queryClient = useQueryClient();
+    const queryKey = [key, id]
+
+
+    return useMutation<any, any, OnPressActionParamsType, PartnerMutationContext>({
+        mutationFn: async ({id, newStatus}) => {
+            // console.log("MUTATION: ", id, newStatus);
+            
+            const actions:Record<
+                ActionRelationShipStatusType, 
+                (id: string | number) => Promise<boolean>
+            > = {
+                ACCEPTED: acceptPartner,
+                SENT: requestPartner,
+                NONE: rejectPartner,
+            };
+
+            // Chamar api
+            return await actions[newStatus](id);
+        },
+        onMutate: async ({id, newStatus}) => {
+            // Cancela fetchs
+            await queryClient.cancelQueries({queryKey});
+
+            // Salva estado anterior
+            const previousData = queryClient.getQueryData<PartnerFornecedorType>(queryKey);
+            // console.log("PREVIOUS DATA: ", JSON.stringify(previousData, null, "  "));
+            // console.log(previousData);
+
+            // Atualiza de forma otimista
+            queryClient.setQueryData<PartnerFornecedorType>(queryKey, (old) => {
+                if(!old) return old;
+
+                // console.log(JSON.stringify(old, null, "  "));
+
+                return {
+                    ...old,
+                    relationship_status: newStatus,
+                };
+            });
+            return {previousData}
+        },
+        onError: (err, variables, context) => {
+            // console.log("error: ", context?.previousData, err);
+            // retorna aos dados anteirores se der erro
+            if(context?.previousData)
+                queryClient.setQueryData(queryKey, context.previousData);
+        },
+        onSettled: () => {
+            // Sincroniza, faz refatch
+            queryClient.invalidateQueries({queryKey: ['list-partner-fornecedor']});
+            queryClient.invalidateQueries({queryKey: ['product-list'],});
+        }
+    });   
 }

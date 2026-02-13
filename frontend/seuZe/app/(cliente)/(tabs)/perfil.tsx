@@ -32,7 +32,7 @@ export default function Perfil() {
 
     const {
         mutateAsync: updateUser,
-        isPending: isUpdatingUser
+        isPending: isUpdatingUser,
     } = useUpdate();
     
     const {

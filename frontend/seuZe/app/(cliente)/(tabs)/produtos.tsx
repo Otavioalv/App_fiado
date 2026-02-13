@@ -4,12 +4,13 @@ import { InfoProductBottomSheet } from "@/src/components/common/InfoProductBotto
 import { MemoProductCard, MemoProductCardSkeleton, ProductCardProps } from "@/src/components/common/ProductCard";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
+import { OnPressActionFunctionType } from "@/src/components/ui/RelationshipActions";
 import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
-import { useProductList } from "@/src/hooks/useClienteQueries";
+import { useProductList, useUpdatePartnerClienteStatus, useUpdatePartnerProductStatus } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeUserList } from "@/src/types/responseServiceTypes";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef } from "react";
 import { View } from "react-native";
 
@@ -37,6 +38,8 @@ const chipList: ChipDataType<TypeUserList>[] = [
 ];
 
 export default function Produtos() {
+    const router = useRouter();
+
     const {
         searchQuery,
         filter,
@@ -50,6 +53,11 @@ export default function Produtos() {
         setFilter,
     } = useFilterScreen<TypeUserList>("all");
 
+    const filters = useMemo(() => ({
+        search: searchQuery,
+        filter: filter,
+    }), [searchQuery, filter]);
+
     const {
         data,
         fetchNextPage,
@@ -61,10 +69,7 @@ export default function Produtos() {
         isError,
         error
     } = useProductList(
-        {
-            search: searchQuery,
-            filter: filter,
-        },
+        filters,
         activeCategory
     );
 
@@ -72,17 +77,8 @@ export default function Produtos() {
     // const { openSheet } = useGlobalBottomSheet();
     const { openSheet, closeSheet } = useGlobalBottomModalSheet();
 
-    // Lista guarda o ultimo botom sheet 
-    const lastProductSheet = useRef<{id: null | number, open: boolean}>({
-        id: null,
-        open: false
-    });
-
     const handleOpenInfoProduct = useCallback((idProduct: number) => {
         console.log("Tentando abrir produto:", idProduct);
-        
-        lastProductSheet.current.id = idProduct;
-        lastProductSheet.current.open = true;
 
         openSheet(
             <InfoProductBottomSheet 
@@ -95,14 +91,29 @@ export default function Produtos() {
 
     // Fecha o bottom sheet ao sair da tela.
     useFocusEffect(
-        () => {
+        useCallback(() => {
             return () => closeSheet();
-        }
+        }, [closeSheet])
     );
   
 
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
+
+
+    const { mutate } = useUpdatePartnerProductStatus(filters, activeCategory);
+    
+    const handleAction: OnPressActionFunctionType = useCallback(({ id, newStatus }) => {
+        mutate({ id: id, newStatus: newStatus });
+    }, [mutate]);
+
+    const handleOnPressAccepted = useCallback((id: string | number) => {
+        console.log("Comprar Ação de adicionar ao carrinho");
+        // router.push({
+        //     pathname: `/fornecedores/[id]`,
+        //     params: { tab: "Produtos", id: id}
+        // });
+    }, []);
 
 
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
@@ -126,22 +137,27 @@ export default function Produtos() {
                     nome: fornecedorName,
                     relationshipType: u.relationship_status,
                     id: idString,
+                    idUser: u.id_fornecedor,
+                    onPressActionFunction: handleAction,
+                    onPressAccepted: handleOnPressAccepted,
                     onPress: () => handleOpenInfoProduct(u.id_produto)
                 });
             });
         });
         return Array.from(map.values());
-    }, [data, handleOpenInfoProduct]);
+    }, [data, handleAction, handleOnPressAccepted, handleOpenInfoProduct]);
 
     const renderItem = useCallback(
         ({item}: {item: ProductCardProps}) => (
             <MemoProductCard
-                nome={item.nome}
-                marketName={item.marketName}
-                price={item.price}
-                prodName={item.prodName}
-                relationshipType={item.relationshipType}
-                onPress={item.onPress}
+                {...item}
+
+                // nome={item.nome}
+                // marketName={item.marketName}
+                // price={item.price}
+                // prodName={item.prodName}
+                // relationshipType={item.relationshipType}
+                // onPress={item.onPress}
             />
         ),
         []

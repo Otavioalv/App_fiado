@@ -1,18 +1,37 @@
-import { RelationshipStatusType } from "@/src/types/responseServiceTypes";
+import { ActionRelationShipStatusType, RelationshipStatusType } from "@/src/types/responseServiceTypes";
 import { StyleSheet, View } from "react-native";
 import { ButtonModern, ButtonModernSkeleton } from "./ButtonModern";
 import { theme } from "@/src/theme";
 
-type RelationshipActionsProps = {
+
+export interface OnPressActionParamsType {
+    id: number | string,
+    newStatus: ActionRelationShipStatusType
+};
+
+export type OnPressActionFunctionType = ({
+    id, 
+    newStatus
+}:OnPressActionParamsType) => void;
+
+interface RelationshipActionsProps {
     type: RelationshipStatusType,
-    isLoading?: boolean
+    idUser: string | number,
+    isLoading?: boolean,
+    onPressAction?: OnPressActionFunctionType,
+    onPressAccepted?: (id: number | string) => void,
 }
 
 export function RelationshipActions({
     type,
-    isLoading
+    idUser,
+    isLoading,
+    onPressAction,
+    onPressAccepted,
 }: RelationshipActionsProps) {
 ;
+    const handleOptionalButtonProps: OnPressActionFunctionType = onPressAction ? onPressAction : ({id, newStatus}) => {};
+    const handleOnPressAccepted = onPressAccepted ? onPressAccepted : (id: number | string) => {};
 
     return (
         <View 
@@ -27,12 +46,14 @@ export function RelationshipActions({
                             placeholder="Fazer Pedido" 
                             size="M" 
                             style={{flex: 1}} 
+                            onPress={() => {handleOnPressAccepted(idUser)}}
                         />
                         <ButtonModern 
                             placeholder="Cancelar" 
                             size="M" 
                             variant="outline" 
                             style={{flex: 1}} 
+                            onPress={() => handleOptionalButtonProps({id: idUser, newStatus: "NONE"})}
                         />
                     </>
                 )}
@@ -43,6 +64,7 @@ export function RelationshipActions({
                         size="M" 
                         variant="outline" 
                         style={{flex: 1}} 
+                        onPress={() => handleOptionalButtonProps({id: idUser, newStatus: "SENT"})}
                     />
                 )}
 
@@ -53,6 +75,7 @@ export function RelationshipActions({
                             iconName="check" 
                             size="M" 
                             style={{flex: 1}}
+                            onPress={() => handleOptionalButtonProps({id: idUser, newStatus: "ACCEPTED"})}
                         />
                         <ButtonModern 
                             placeholder="Recusar" 
@@ -60,6 +83,7 @@ export function RelationshipActions({
                             size="M" 
                             variant="outline" 
                             style={{flex: 1}}
+                            onPress={() => handleOptionalButtonProps({id: idUser, newStatus: "NONE"})}
                         />
                     </>
                 )}
@@ -69,6 +93,8 @@ export function RelationshipActions({
                         size="M" 
                         variant="disabled" 
                         style={{flex: 1}}
+                        disabled={true}
+                        // onPress={() => {console.log("Esta aguardando, entao n tem ação nesse botao: ", idUser)}}
                     />
                 )}
             </>)}

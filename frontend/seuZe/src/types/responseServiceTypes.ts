@@ -81,6 +81,7 @@ export type AddressDataType = {
 }
 
 export type RelationshipStatusType = "ACCEPTED" | "SENT" | "RECEIVED" | "NONE";
+export type ActionRelationShipStatusType = Exclude<RelationshipStatusType, "ALL" | "RECEIVED">; // Adicionar NONE
 
 export interface PartnerStatusType {
    cliente_check: boolean,

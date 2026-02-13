@@ -96,9 +96,9 @@ export default function Compras() {
 
     // Fecha o bottom sheet ao sair da tela.
     useFocusEffect(
-        () => {
+        useCallback(() => {
             return () => closeSheet();
-        }
+        }, [closeSheet])
     );
 
 
@@ -146,18 +146,20 @@ export default function Compras() {
     const renderItem = useCallback(
         ({item}: {item: ShoppingCardProps}) => (
             <MemoShoppingCard
-                marketName={item.marketName}
-                nome={item.nome}
-                price={item.price}
-                prodName={item.prodName}
-                shoppingStatus={item.shoppingStatus}
-                paymentStatus={item.paymentStatus}
-                apelido={item.apelido}
-                prazo={item.prazo}
-                criadoEm={item.criadoEm}
-                quantidade={item.quantidade}
-                valorUnit={item.valorUnit}
-                onPress={item.onPress}
+                {...item}
+                
+                // marketName={item.marketName}
+                // nome={item.nome}
+                // price={item.price}
+                // prodName={item.prodName}
+                // shoppingStatus={item.shoppingStatus}
+                // paymentStatus={item.paymentStatus}
+                // apelido={item.apelido}
+                // prazo={item.prazo}
+                // criadoEm={item.criadoEm}
+                // quantidade={item.quantidade}
+                // valorUnit={item.valorUnit}
+                // onPress={item.onPress}
             />
         ),
         []

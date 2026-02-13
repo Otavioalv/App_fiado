@@ -3,13 +3,14 @@ import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/c
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
 import { MemoUserCard, MemoUserCardSkeleton, UserCardProps } from "@/src/components/common/UserCard";
-import { useListPartner } from "@/src/hooks/useClienteQueries";
+import { useListPartner, useUpdatePartnerClienteStatus } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeUserList } from "@/src/types/responseServiceTypes";
 import { useCallback, useEffect, useMemo } from "react";
 import { useFilterCategoryStore } from "@/src/stores/cliente/fornecedores.store";
 import { useRouter } from "expo-router";
+import { OnPressActionFunctionType } from "@/src/components/ui/RelationshipActions";
 
 const chipList: ChipDataType<TypeUserList>[] = [
     {
@@ -53,6 +54,11 @@ export default function Fornecedores() {
         handleSearch, 
     } = useFilterScreen<TypeUserList>("all");
 
+    const filters = useMemo(() => ({
+        search: searchQuery,
+        filter: filter,
+    }), [searchQuery, filter]);
+
     const {
         data,
         fetchNextPage,
@@ -64,10 +70,7 @@ export default function Fornecedores() {
         isError,
         error
     } = useListPartner(
-        {
-            search: searchQuery,
-            filter: filter,
-        },
+        filters,
         activeCategory
     );
 
@@ -77,6 +80,19 @@ export default function Fornecedores() {
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
 
+    // Dentro do seu componente de botões
+    const { mutate } = useUpdatePartnerClienteStatus(filters, activeCategory);
+
+    const handleAction: OnPressActionFunctionType = useCallback(({ id, newStatus }) => {
+        mutate({ id: id, newStatus: newStatus });
+    }, [mutate]);
+
+    const handleOnPressAccepted = useCallback((id: string | number) => {
+        router.push({
+            pathname: `/fornecedores/[id]`,
+            params: { tab: "Produtos", id: id}
+        });
+    }, [router])
 
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
     // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
@@ -104,25 +120,31 @@ export default function Fornecedores() {
                     title: u.nomeestabelecimento,
                     description: description,
                     id: idString,
+                    idUser: idString,
                     relationshipType: u.relationship_status ?? 'NONE',
                     date: dateValue,
+                    onPressActionFunction: handleAction,
+                    onPressAccepted: handleOnPressAccepted,
                     onPress: () => router.push(`/fornecedores/${u.id_fornecedor}`)
                 });
             });
         });
 
         return Array.from(map.values());
-    }, [data, router]);
+    }, [data, handleAction, handleOnPressAccepted, router]);
 
 
     const renderItem = useCallback(
         ({item}: {item: UserCardProps}) => (
             <MemoUserCard 
-                title={item.title} 
-                description={item.description} 
-                relationshipType={item.relationshipType}
-                date={item.date}
-                onPress={item.onPress}
+                {...item}
+                // idUser={item.idUser}
+                // title={item.title} 
+                // description={item.description} 
+                // relationshipType={item.relationshipType}
+                // date={item.date}
+                // onPressActionFunction={item.onPressActionFunction}
+                // onPress={item.onPress}
             />
         ),
         []

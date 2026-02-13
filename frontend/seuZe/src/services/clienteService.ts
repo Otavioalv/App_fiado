@@ -161,7 +161,7 @@ export async function listPartner(
                 
             }
         });
-        // console.log(response);
+        // console.log(JSON.stringify(response, null, "  "));
 
         if(!response.data.data) {
             return {list: [], pagination: pagination}
@@ -174,4 +174,60 @@ export async function listPartner(
     }
 }
 
+// Aceita parceria
+export async function acceptPartner(idFornecedor: string | number): Promise<boolean>{
+    try {
+        const endPoint = `${defaultEndPoint}/partner/accept`;
+        
+        const data = {
+            idPartner: Number(idFornecedor),
+        }
+        console.log(data);
 
+        const response = await api.post(endPoint, data);
+        console.log("RESPONPSE: ", JSON.stringify(response.data, null, "  "));
+
+        return true;
+    }catch(err: any){
+        throw err;
+    }
+}
+
+// Enviar solicitação de parceria
+export async function requestPartner(idFornecedor: string | number) {
+    try {
+        const endPoint = `${defaultEndPoint}/partner`;
+        
+        const data = {
+            ids: [Number(idFornecedor)],
+        };
+        console.log(data);
+
+        const response = await api.post(endPoint, data);
+
+        // console.log(response);
+
+        return true;
+    }catch(err: any){
+        throw err;
+    }
+}
+
+export async function rejectPartner(idFornecedor: string | number) {
+    try {
+        const endPoint = `${defaultEndPoint}/partner/reject`;
+        
+        const data = {
+            idPartner: Number(idFornecedor),
+        };
+        // console.log("reject: ", data);
+
+        const response = await api.post(endPoint, data);
+
+        // console.log(response);
+
+        return true;
+    }catch(err: any){
+        throw err;
+    }
+} 
