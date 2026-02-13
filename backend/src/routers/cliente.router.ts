@@ -80,5 +80,11 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
 
     router.post("/message/delete", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await notificationController.deleteMessages(req, res, "cliente");
-    }); 
+    });
+
+    router.post("/message/mark-read", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await notificationController.markReadMessage(req, res, "cliente");
+    });
+
+
 }

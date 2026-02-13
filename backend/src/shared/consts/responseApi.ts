@@ -100,6 +100,8 @@ export const ResponseApi = {
         LIST_ERROR: "Erro ao carregar lista de mensagem(s)",
         LIST_SUCCESS: "Lista de mensagem(s) listada(s) com sucesso",
         NOT_FOUND: "Nenhuma mensagem foi encontrada",
-        DELETE_SUCCESS: "Mansagem(s) deletada(s) com sucesso",
+        DELETE_SUCCESS: "Mensagem(s) deletada(s) com sucesso",
+        READ_MESSAGES_SUCCESS: "Mensagem(s) marcadas como lida(s) com sucesso",
+        READ_MESSAGES_ERROR: "Erro ao marcar mensgem(s) como lida(s)",
     }
 } as const;

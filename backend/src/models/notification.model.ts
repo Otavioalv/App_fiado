@@ -3,7 +3,6 @@ import connection from "../database/connection";
 import { MessageInterface, UserType } from "../shared/interfaces/notifierInterfaces";
 import { queryFilter } from "../shared/interfaces/utilsInterfeces";
 
-
 export class NotificationModel{
     public async saveNotification(dataNot: MessageInterface):Promise<void> {
         let client: PoolClient | undefined;
@@ -117,6 +116,33 @@ export class NotificationModel{
             await client?.query('ROLLBACK');
             // console.log("Erro ao listar notificações: ", err);
             throw new Error("Erro ao listar notificações");
+        }finally {
+            client?.release();
+        }
+    }
+
+
+    public async markReadMessage(userId: number, listIds: number[]): Promise<number>{
+        let client: PoolClient | undefined;
+        try{
+            client = await connection.connect();     
+
+            const SQL: string = `
+                UPDATE mensagens
+                SET read_at = NOW()
+                WHERE 
+                    id_mensagem = ANY($1::int[]) AND
+                    to_user_id = $2 AND 
+                    read_at IS NULL;
+            `;
+
+            const values = [listIds, userId];
+
+            const result = await client.query(SQL, values);
+            return result.rowCount || 0;
+        }catch(err) {
+            console.log("Erro ao marcar como lida as notificações: ", err);
+            throw new Error("Erro ao marcar como lida as notificações");
         }finally {
             client?.release();
         }

@@ -63,4 +63,33 @@ export class NotificationController {
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
+
+    // Talvez precise do userType
+    public async markReadMessage(req: FastifyRequest, res: FastifyReply, userType: UserType): Promise<FastifyReply>{
+        try{
+            const userId = await getTokenIdFromRequest(req);
+            const {ids} = await req.body as {ids: number[]};
+            
+            // Fazer verificação de ids
+            if (!Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }
+
+            if (!ids.every(id => Number.isInteger(id) && id > 0)) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }
+
+            // limite de 100 ids na array
+            if (ids.length > 100) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.OUT_OF_RANGE));
+            }
+
+            const result = await this.notificationModel.markReadMessage(userId, ids);
+
+            return res.status(200).send(successResponse(ResponseApi.Messages.READ_MESSAGES_SUCCESS, {updatedCount: result}));
+        }catch(e) {
+            console.log(e);
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+    }
 }
