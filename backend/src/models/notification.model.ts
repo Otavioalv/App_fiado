@@ -50,7 +50,7 @@ export class NotificationModel{
             // const sqlFilter = sqlFilter
             
             const SQL_LIST = `
-                SELECT id_mensagem, mensagem, created_at, from_user_id, type 
+                SELECT id_mensagem, mensagem, created_at, from_user_id, type, read_at
                 FROM mensagens 
                 WHERE to_user_id = $1 AND to_user_type = $2
                 ORDER BY created_at DESC

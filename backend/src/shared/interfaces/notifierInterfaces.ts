@@ -95,5 +95,6 @@ export interface MessageInterface {
     to_user_id: number,
     from_user_type: UserType,
     to_user_type: UserType, 
-    type: string
+    type: string,
+    read_at?: string,
 };
