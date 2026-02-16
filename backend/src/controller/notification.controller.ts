@@ -30,7 +30,7 @@ export class NotificationController {
             
 
             // return res.status(200).send(successResponse("Listado com sucesso", {list: listPartner, pagination: filterOpt}));
-            return res.status(200).send(successResponse(ResponseApi.Messages.LIST_SUCCESS, {list: listMsg, paginetion: filterOpt}));
+            return res.status(200).send(successResponse(ResponseApi.Messages.LIST_SUCCESS, {list: listMsg, pagination: filterOpt}));
 
         } catch(e) {
             console.error(e);
