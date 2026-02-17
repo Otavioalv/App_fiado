@@ -11,7 +11,9 @@ export interface productInterface {
 
 export type PaymentStatusType = "PAID" | "PENDING";
 export type ShoppingStatusType = "CANCELED"| "REFUSED" | "ANALYSIS"| "WAIT_REMOVE" | "REMOVED" | "ALL" ;
-export type AllShoppingStatusType = ShoppingStatusType | PaymentStatusType
+export type AllShoppingStatusType = ShoppingStatusType | PaymentStatusType;
+
+export type MessageListType = "read" | "unread" | "all";
 
 export interface compraInterface {
     id_compra: number;

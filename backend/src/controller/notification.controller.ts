@@ -6,6 +6,7 @@ import { verifyQueryOptList } from "../shared/utils/verifyQueryOptList";
 import { errorResponse, successResponse } from "../common/responses/api.response";
 import { NotificationModel } from "../models/notification.model";
 import { ResponseApi } from "../shared/consts/responseApi";
+import { MessageListType } from "../shared/interfaces/productInterface";
 
 export class NotificationController {
     private notificationModel: NotificationModel = new NotificationModel();
@@ -15,6 +16,14 @@ export class NotificationController {
             const {...filterOpt} = req.query as queryFilter;
             const id:number = await getTokenIdFromRequest(req);
 
+            const {typeList} = req.params as {typeList?: string};
+               
+            const TYPES_LIST = ["all", "read", "unread"] as MessageListType[];
+            const uppTypeList: MessageListType = typeList ? typeList.toLocaleLowerCase() as MessageListType : "all" as MessageListType;
+            
+            if(!TYPES_LIST.includes(uppTypeList as MessageListType)){
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+            }
 
             if(!filterOpt.search)
                 filterOpt.search = "";
@@ -26,7 +35,12 @@ export class NotificationController {
                 return res.status(404).send(errorResponse(ResponseApi.Messages.LIST_ERROR));
             }
 
-            const listMsg: MessageInterface[] = await this.notificationModel.getNotification(id, userType, filterOpt);
+            const listMsg: MessageInterface[] = await this.notificationModel.getNotification({
+                toUserId: id, 
+                toUserType: userType, 
+                filterOpt: filterOpt, 
+                typeList: uppTypeList
+            });
             
 
             // return res.status(200).send(successResponse("Listado com sucesso", {list: listPartner, pagination: filterOpt}));

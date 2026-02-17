@@ -2,11 +2,22 @@ import { PoolClient } from "pg";
 import connection from "../database/connection";
 import { MessageInterface, UserType } from "../shared/interfaces/notifierInterfaces";
 import { queryFilter } from "../shared/interfaces/utilsInterfeces";
+import { MessageListType } from "../shared/interfaces/productInterface";
+
+
+interface GetNotificationParams {
+    toUserId: number, 
+    toUserType: UserType, 
+    filterOpt: queryFilter,
+    typeList: MessageListType,
+} 
 
 export class NotificationModel{
+
+
     public async saveNotification(dataNot: MessageInterface):Promise<void> {
         let client: PoolClient | undefined;
-
+        
         try {
             client = await connection.connect();
 
@@ -36,7 +47,13 @@ export class NotificationModel{
         }
     }
 
-    public async getNotification(toUserId: number, toUserType: UserType, filterOpt: queryFilter): Promise<MessageInterface[]> {
+
+    public async getNotification({
+        toUserId,
+        toUserType,
+        filterOpt,
+        typeList,
+    }: GetNotificationParams): Promise<MessageInterface[]> {
         let client: PoolClient | undefined;
 
         try{
@@ -46,28 +63,47 @@ export class NotificationModel{
             
             const limit: number = size;
             const offset: number = (page -1) * limit;
+            const whereCondition: string[] = [];
             // const searchSql: string = `%${search}%`;
             // const sqlFilter = sqlFilter
+
+
+            const listWhereMap: Record<MessageListType, string> = {
+                all: "",
+                read: "read_at IS NOT NULL",
+                unread: "read_at IS NULL",
+            };
+
+
+            const listWhere = listWhereMap[typeList];
+            
+            if(listWhere) whereCondition.push(listWhere);
+            
+            whereCondition.push("to_user_id = $1 AND to_user_type = $2");
+            
+            const whereSQL = whereCondition.length ? 
+                `WHERE ${whereCondition.join(" AND ")}`:
+                 "";
             
             const SQL_LIST = `
                 SELECT id_mensagem, mensagem, created_at, from_user_id, type, read_at
                 FROM mensagens 
-                WHERE to_user_id = $1 AND to_user_type = $2
-                ORDER BY created_at DESC
+                ${whereSQL}
+                ORDER BY 
+                    (read_at IS NULL) ASC, 
+                    created_at DESC
                 LIMIT $3
                 OFFSET $4;
             `;
-
-            console.log(SQL_LIST, [toUserId, toUserType,limit, offset]);
+            
+            console.log(typeList, SQL_LIST);
 
             const SQL_TOTAL = `
                 SELECT 
                     COUNT(*) as total
                 FROM 
                     mensagens as m
-                WHERE   
-                    m.to_user_id = $1 AND
-                    m.to_user_type = $2;
+                ${whereSQL};
             `;
 
             const listMsg = (await client.query(SQL_LIST, [toUserId, toUserType,limit, offset])).rows as MessageInterface[];
@@ -78,7 +114,7 @@ export class NotificationModel{
 
             return listMsg;
         }catch(err) {
-            // console.log("Erro ao listar notificações: ", err);
+            console.log("Erro ao listar notificações: ", err);
             throw new Error("Erro ao listar notificações");
         }finally {
             client?.release();

@@ -74,7 +74,7 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
         return await produtoController.cancelPurchaces(req, res);
     });
 
-    router.post("/message/list", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
+    router.post("/message/list/:typeList?", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await notificationController.listMessages(req, res, "cliente");
     }); 
 
