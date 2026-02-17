@@ -1,6 +1,6 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { acceptPartner, listPartner, login, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
-import { ActionRelationShipStatusType, FilterType, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
+import { acceptPartner, listMessages, listPartner, login, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
+import { ActionRelationShipStatusType, FilterType, NotificationInterface, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { OnPressActionParamsType } from "../components/ui/RelationshipActions";
@@ -97,6 +97,24 @@ export function useProductListFromId(id: string | number, filters: FilterType) {
         initialPageParam: 1,
     });
 }
+
+export function useListMessages(filters: FilterType, size: number = 20) {
+    const key: string = 'list-messages';
+
+    return useInfiniteList<ResultsWithPagination<NotificationInterface[]>>({
+        queryKey: [key, filters],
+        queryFn: async ({pageParam}) => {
+            return await listMessages({
+                page: pageParam as number, 
+                size: size,
+                filter: filters.filter,
+                search: filters.search
+            });
+        },
+        initialPageParam: 1,
+    }); 
+}
+
 
 
 export function useProductSingleFromId(id:string | number) {

@@ -122,3 +122,14 @@ export type OnSubmitSearchType = (search: string, filter?: string) => void;
 
 export type TypeUserList = "all" | "received" | "sent" | "accepted" | "none";
 export type TypeShoppingList = "canceled" | "refused" | "analysis" | "wait_remove" | "paid" | "pending" | "all" | "removed";
+
+
+export type NotificationType = "new_partner"
+export interface NotificationInterface {
+   id_mensagem: number,
+	mensagem: string,
+	created_at: string,
+	from_user_id: number,
+	type: NotificationType,
+   read_at?: string,
+}

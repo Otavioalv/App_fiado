@@ -25,6 +25,7 @@ export interface GenericInfiniteListProps<T> extends FlashListProps<T> {
     emptyMessage?: string,
     hasSeparator?: boolean,
     hasBorderSeparator?: boolean,
+    hasPaddingList?: boolean,
 };
 
 export function GenericInfiniteList<T>({
@@ -42,6 +43,7 @@ export function GenericInfiniteList<T>({
     emptyMessage = "Nenhum item encontrado",
     hasBorderSeparator = false,
     hasSeparator = true,
+    hasPaddingList = true, 
 }: GenericInfiniteListProps<T>) {
     const [showScrollTopButton, setShowScrollTopButton] = useState<boolean>(false);
     const listRef = useRef<FlashListRef<T>>(null);
@@ -120,7 +122,10 @@ export function GenericInfiniteList<T>({
                 ListFooterComponent={renderFooter}
                 ListEmptyComponent={renderEmpty}
                 ItemSeparatorComponent={itemSeparator}
-                contentContainerStyle={styles.contentContainer}
+                contentContainerStyle={[
+                    styles.contentContainer,
+                    hasPaddingList && styles.contentContainerPadding
+                ]}
                 style={styles.container} // Verificar se faz falta
             />
 
@@ -137,15 +142,18 @@ export function GenericInfiniteList<T>({
 interface GenericInfiniteListSkeletonProps<T>{
     data: T[],
     renderItem: FlatListProps<T>["renderItem"],
-    HeaderComponent?: ReactElement;
-    keyExtractor: (item: T) => string;
+    HeaderComponent?: ReactElement,
+    keyExtractor: (item: T) => string,
+    hasPaddingList?: boolean
+
 };
 
 export function GenericInfiniteListSkeleton<T>({
     HeaderComponent,
     renderItem,
     data,
-    keyExtractor
+    keyExtractor,
+    hasPaddingList = true,
 }: GenericInfiniteListSkeletonProps<T>) {
 
     return (
@@ -155,7 +163,11 @@ export function GenericInfiniteListSkeleton<T>({
             renderItem={renderItem}
             ListHeaderComponent={HeaderComponent}
             style={styles.container}
-            contentContainerStyle={styles.contentContainer}
+            contentContainerStyle={[
+                styles.contentContainer,
+                hasPaddingList && styles.contentContainerPadding
+
+            ]}
         />
     )
 }
@@ -169,6 +181,8 @@ const styles = StyleSheet.create({
     contentContainer: {
         flexGrow: 1,
         gap: theme.gap.sm,
+    },
+    contentContainerPadding: {
         padding: theme.padding.sm
     },
     separator: {

@@ -35,7 +35,7 @@ export default function Home() {
         {
             idSh: "2",
             title: "Minhas Parcerias", 
-            icon: <FontAwesome name="handshake-o" size={32} color={theme.colors.orange}/>,
+            icon: <Feather name="users" size={32} color={theme.colors.orange}/>,
             onPress: () => {
                 setCategoryFornecedores("accepted");
                 router.push("/fornecedores");
@@ -59,7 +59,7 @@ export default function Home() {
             idSh: "5",
             title: "Notificações", 
             icon: <Feather name="bell" size={32} color={theme.colors.orange}/>,
-            onPress: () => Alert.alert("Teste", "Vai para lista de notificações")
+            onPress: () => router.push("/notificacoes")
         }, 
         {
             idSh: "6",

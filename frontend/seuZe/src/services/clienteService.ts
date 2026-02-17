@@ -1,7 +1,7 @@
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { api } from "./api";
 import { BackendResponse, responseAxiosInterfaces } from "./typesApi";
-import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList } from "../types/responseServiceTypes";
+import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList, NotificationInterface } from "../types/responseServiceTypes";
 import { ShoppingListParams } from "./types/clienteServiceParams";
 
 
@@ -231,3 +231,28 @@ export async function rejectPartner(idFornecedor: string | number) {
         throw err;
     }
 } 
+
+
+export async function listMessages(
+    pagination: PaginationType = {page: 1, size: 20}
+): Promise<ResultsWithPagination<NotificationInterface[]>> {
+    try{
+        const endPoint = `${defaultEndPoint}/message/list`;
+
+        const response = await api.post<BackendResponse<ResultsWithPagination<NotificationInterface[]>>>(endPoint, {}, {
+            params: {
+                ...pagination
+            }
+        });
+
+        console.log(JSON.stringify(response.data.data?.list, null, "  "));
+
+        if(!response.data.data) {
+            return {list: [], pagination: pagination}
+        }
+
+        return response.data.data
+    }catch(err: any){
+        throw err;
+    }
+}

@@ -12,6 +12,8 @@ export default function ClienteLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="notificacoes"/>
+      {/* <Stack.Screen name="fornecedores" /> */}
     </Stack>
   );
 }
