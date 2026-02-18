@@ -90,7 +90,7 @@ export class NotificationModel{
                 FROM mensagens 
                 ${whereSQL}
                 ORDER BY 
-                    (read_at IS NULL) ASC, 
+                    (read_at IS NULL) DESC, 
                     created_at DESC
                 LIMIT $3
                 OFFSET $4;
@@ -173,6 +173,30 @@ export class NotificationModel{
             `;
 
             const values = [listIds, userId];
+
+            const result = await client.query(SQL, values);
+            return result.rowCount || 0;
+        }catch(err) {
+            console.log("Erro ao marcar como lida as notificações: ", err);
+            throw new Error("Erro ao marcar como lida as notificações");
+        }finally {
+            client?.release();
+        }
+    }
+
+    public async markAllReadMessage(userId: number): Promise<number>{
+        let client: PoolClient | undefined;
+        try{
+            client = await connection.connect();     
+
+            const SQL: string = `
+                UPDATE mensagens
+                SET read_at = NOW()
+                WHERE to_user_id = $1
+                AND read_at IS NULL;
+            `;
+
+            const values = [userId];
 
             const result = await client.query(SQL, values);
             return result.rowCount || 0;

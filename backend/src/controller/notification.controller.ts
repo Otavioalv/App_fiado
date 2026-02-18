@@ -106,4 +106,17 @@ export class NotificationController {
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
         }
     }
+
+    public async markAllReadMessage(req: FastifyRequest, res: FastifyReply, userType: UserType): Promise<FastifyReply>{
+        try{
+            const userId = await getTokenIdFromRequest(req);
+
+            const result = await this.notificationModel.markAllReadMessage(userId);
+
+            return res.status(200).send(successResponse(ResponseApi.Messages.READ_MESSAGES_SUCCESS, {updatedCount: result}));
+        }catch(e) {
+            console.log(e);
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+    }
 }
