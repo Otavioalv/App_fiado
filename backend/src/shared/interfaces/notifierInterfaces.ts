@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { compraInterface } from "./productInterface";
+import { TypeNotification } from "../consts/typeNotificationList";
 
 export type NotificationFn<TInput, TOutput> = (input: TInput) => TOutput;
 
@@ -33,8 +34,9 @@ export interface NotificationPayloadAndInput {
 }   
 
 export interface NotificationPayload extends NotificationPayloadAndInput {
-    type: string;
+    type: TypeNotification;
     message: string;
+    title: string;
 }
 
 export interface NotificationInput extends NotificationPayloadAndInput {
@@ -54,15 +56,16 @@ export interface NotifierBroadcastParams {
 
 export interface NotifierToUserParams extends NotifierBroadcastParams{
     toId: string;
+    userType: UserType
 }
 
 export type UserType = "cliente" | "fornecedor" | "all" | "system";
 
 
-export interface TypeNotification {
-    newPartner: string
-    acceptedPartner: string
-}
+// export interface TypeNotification {
+//     newPartner: string
+//     acceptedPartner: string
+// }
 
 // Menssagens
 export interface MessageCompraInterface extends UserDataNotfy {
@@ -96,5 +99,6 @@ export interface MessageInterface {
     from_user_type: UserType,
     to_user_type: UserType, 
     type: string,
+    title_notification: string,
     read_at?: string,
 };

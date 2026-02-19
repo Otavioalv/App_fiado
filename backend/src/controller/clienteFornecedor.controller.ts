@@ -39,18 +39,24 @@ class ClienteFornecedorController {
 
             // Procura associações existentes com basse na array de ids de fornecedores, e id do cliente
             const listPartner: clienteFornecedorInterface[] = await this.clienteFornecedorModel.findMultPartner(ids, id_cliente);
-            
-            // Verifica se associação ja existe
+
+            console.log("ids antes if: ", ids);
+            // Verifica se associação ja existe 
             if(listPartner.length > 0) {
                 // verifica quais ids existem no listPartner e os retorna
                 const foundIds = new Set(listPartner.map(partner => partner.fk_fornecedor_id));
 
                 ids.ids = ids.ids.filter(id => !foundIds.has(id)); 
                 
+                console.log("ids no if: ", ids);
+                console.log("encontrados: ", foundIds);
+
                 if(!ids.ids.length) {
                     return res.status(400).send(errorResponse(ResponseApi.Partner.SUPPLIER_ALREADY_REQUESTED))
                 }
             }
+
+            console.log("ids depois if: ", ids);
 
             await this.clienteFornecedorModel.associarComFornecedor(ids, id_cliente);
 
@@ -58,24 +64,29 @@ class ClienteFornecedorController {
             const notificationService = req.server.notificationService;
             const clienteData = await this.clienteModel.findUserById(id_cliente);
 
-            for(const fornecedor of listFornecedor) {
-                const data: NotificationInput = {
-                    toId: fornecedor.id_fornecedor!.toString(),
-                    created_at: new Date(),
-                    fromUserType: "cliente",
-                    toUserType: "fornecedor",
-                    user: {
-                        id: id_cliente,
-                        nome: clienteData.nome,
-                        apelido: clienteData.apelido
-                    }
-                };
+            await Promise.all(
+                listFornecedor
+                    .filter((lf => ids.ids.includes(lf.id_fornecedor || 0)))
+                    .map(fornecedor => {
+                        const data: NotificationInput = {
+                            toId: fornecedor.id_fornecedor!.toString(),
+                            created_at: new Date(),
+                            fromUserType: "cliente",
+                            toUserType: "fornecedor",
+                            user: {
+                                id: id_cliente,
+                                nome: clienteData.nome,
+                                apelido: clienteData.apelido
+                            }
+                        };
 
-                await notificationService.saveAndSendPrepared(
-                    Notifications.novaSolicitacaoParceria(data),
-                    data
-                );
-            };
+                        notificationService.saveAndSendPrepared(
+                            Notifications.novaSolicitacaoParceria(data),
+                            data
+                        );
+
+                    })
+            );
 
             return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_REQUEST_SENT));
         } catch(e) {
@@ -127,24 +138,29 @@ class ClienteFornecedorController {
             const notificationService = req.server.notificationService;
             const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
 
-            for(const cliente of listCliente){
-                const data: NotificationInput = {
-                    toId: cliente.id_cliente!.toString(),
-                    created_at: new Date(),
-                    fromUserType: "fornecedor",
-                    toUserType: "cliente",
-                    user: {
-                        id: id_fornecedor,
-                        nome: fornecedorData.nome,
-                        apelido: fornecedorData.apelido
-                    }
-                };
+            await Promise.all(
+                listCliente
+                    .filter(lc => ids.ids.includes(lc.id_cliente || 0))
+                    .map(cliente => {
+                        const data: NotificationInput = {
+                            toId: cliente.id_cliente!.toString(),
+                            created_at: new Date(),
+                            fromUserType: "fornecedor",
+                            toUserType: "cliente",
+                            user: {
+                                id: id_fornecedor,
+                                nome: fornecedorData.nome,
+                                apelido: fornecedorData.apelido
+                            }
+                        }
 
-                await notificationService.saveAndSendPrepared
-                    (Notifications.novaSolicitacaoParceria(data),
-                    data
-                );
-            };
+                        notificationService.saveAndSendPrepared
+                            (Notifications.novaSolicitacaoParceria(data),
+                            data
+                        );
+
+                    })
+            );
 
             return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_REQUEST_SENT));
         }catch(e) {

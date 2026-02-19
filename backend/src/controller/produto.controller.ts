@@ -236,9 +236,11 @@ class ProdutoController {
 
             // Verificar se produto existe pelo id, e pegar os valores como nome, valor_unt
             const compraData:compraInterface[] = [];
-
+            
+            
             for(const pd of productData) {
                 const produto:productInterface = await this.produtoModel.getProductExists(pd.id_compra, pd.id_fornecedor);
+                console.log(produto);
 
                 if(!produto) {
                     return res.status(404).send(errorResponse(ResponseApi.Product.NOT_FOUND));
@@ -255,7 +257,6 @@ class ProdutoController {
             }
             
             await this.produtoModel.addCompra(compraData);
-
 
             // Preparar enviar notificação
             const compraAgrupada = compraData.reduce<Record<number, compraInterface[]>>((acc, item) => {
@@ -278,6 +279,7 @@ class ProdutoController {
             // Mandar notificação
             const notificationService = req.server.notificationService;
             const clienteData = await this.clienteModel.findUserById(id_cliente);
+
 
             for(const [id_fornecedor, compra] of Object.entries(compraAgrupada)) {
                 // console.log(id_fornecedor, compra);
@@ -510,27 +512,48 @@ class ProdutoController {
             // Notifica a desgraça do usuario
             const notificationService = req.server.notificationService;
             const fornecedorData = await this.fornecedorModel.findUserById(idUser);
-            const clientesUk = [...new Set(existentes.map(e => e.id_cliente))];            
+            const clientesUk = [...new Set(existentes.map(e => e.id_cliente))];       
+            
+            await Promise.all(
+                clientesUk.map(cliente => {
+                    const data:NotificationInput = {
+                        toId: cliente!.toString(),
+                        created_at: new Date(),
+                        fromUserType: "fornecedor",
+                        toUserType: "cliente",
+                        user: {
+                            id: idUser,
+                            nome: fornecedorData.nome,
+                            apelido: fornecedorData.apelido
+                        }
+                    };
 
-            for(const cliente of clientesUk) {
-                // console.log(cliente);
-                const data:NotificationInput = {
-                    toId: cliente!.toString(),
-                    created_at: new Date(),
-                    fromUserType: "fornecedor",
-                    toUserType: "cliente",
-                    user: {
-                        id: idUser,
-                        nome: fornecedorData.nome,
-                        apelido: fornecedorData.apelido
-                    }
-                };
+                    notificationService.saveAndSendPrepared(
+                        Notifications.atualizarCompra(data),
+                        data
+                    )    
+                })
+            );
 
-                await notificationService.saveAndSendPrepared(
-                    Notifications.atualizarCompra(data),
-                    data
-                )
-            }
+            // for(const cliente of clientesUk) {
+            //     // console.log(cliente);
+            //     const data:NotificationInput = {
+            //         toId: cliente!.toString(),
+            //         created_at: new Date(),
+            //         fromUserType: "fornecedor",
+            //         toUserType: "cliente",
+            //         user: {
+            //             id: idUser,
+            //             nome: fornecedorData.nome,
+            //             apelido: fornecedorData.apelido
+            //         }
+            //     };
+
+            //     await notificationService.saveAndSendPrepared(
+            //         Notifications.atualizarCompra(data),
+            //         data
+            //     )
+            // }
 
 
             return res.status(200).send(successResponse(ResponseApi.Purchace.UPDATE_PURCHACE));

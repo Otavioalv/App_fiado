@@ -23,15 +23,21 @@ export class NotificationModel{
 
             console.log("Dentro do model: ", dataNot);
 
-            const SQL = `INSERT INTO mensagens 
-            (mensagem, created_at, 
-            from_user_id, to_user_id, 
-            from_user_type, to_user_type,
-            type) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+            const SQL = `
+                INSERT INTO mensagens (
+                    mensagem, 
+                    created_at, 
+                    from_user_id, 
+                    to_user_id, 
+                    from_user_type, 
+                    to_user_type,
+                    type,
+                    title_notification
+                ) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
 
-            const {created_at, from_user_id, from_user_type, mensagem, to_user_id, to_user_type, type} = dataNot;
-            const VALUES = [mensagem, created_at, from_user_id, to_user_id, from_user_type, to_user_type, type];
+            const {created_at, from_user_id, from_user_type, mensagem, to_user_id, to_user_type, type, title_notification} = dataNot;
+            const VALUES = [mensagem, created_at, from_user_id, to_user_id, from_user_type, to_user_type, type, title_notification];
 
 
             await client.query("BEGIN");
@@ -86,7 +92,7 @@ export class NotificationModel{
                  "";
             
             const SQL_LIST = `
-                SELECT id_mensagem, mensagem, created_at, from_user_id, type, read_at
+                SELECT id_mensagem, mensagem, created_at, from_user_id, type, read_at, title_notification
                 FROM mensagens 
                 ${whereSQL}
                 ORDER BY 

@@ -17,8 +17,9 @@ export const socketAuth = (app: FastifyInstance) => {
 
             const payload = await getPayloadFromToken(token);
 
-            // Salva id em data 
+            // Salva id em data  e tipo do usuario
             socket.data.userId = payload.id.toString();
+            socket.data.userType = payload.usuario;
             
             return next();
         } catch(err) {

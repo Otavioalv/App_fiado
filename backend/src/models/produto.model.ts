@@ -481,7 +481,7 @@ class ProdutoModel  {
             client = await connection.connect();
 
             const SQL = `   
-                SELECT id_produto, nome, preco, fk_id_fornecedor
+                SELECT id_produto, nome as nome_prod, preco, fk_id_fornecedor
                 FROM produto  
                 WHERE 
                     id_produto = $1 AND fk_id_fornecedor = $2;
@@ -969,6 +969,7 @@ class ProdutoModel  {
                 WHERE ${sqlUserFk}
                 AND id_compra = ANY($2)
             `;
+            
 
             const result = (await client.query(SQL, [idUser, ids])).rows as compraInterface[];
 

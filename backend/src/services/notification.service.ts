@@ -24,7 +24,8 @@ export class NotificationService {
                 to_user_id: parseInt(inputNot.toId),
                 from_user_type: inputNot.fromUserType,
                 to_user_type: inputNot.toUserType,
-                type: notification.payload.type
+                type: notification.payload.type,
+                title_notification: notification.payload.title,
             }
 
             

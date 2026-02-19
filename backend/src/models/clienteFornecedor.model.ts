@@ -135,8 +135,9 @@ class ClienteFornecedorModel {
                     fornecedor_check = TRUE
                 WHERE   
                     fk_fornecedor_id = $1 AND
-                    fk_cliente_id = $2
+                    fk_cliente_id = $2;
             `
+
 
             await client.query("BEGIN");
             await client.query(SQL, [idFornecedor, idCliente]);
@@ -224,9 +225,7 @@ class ClienteFornecedorModel {
                     cliente_fornecedor 
                 WHERE 
                     fk_fornecedor_id = $1 AND 
-                    fk_cliente_id = $2 AND 
-                    cliente_check = TRUE AND
-                    fornecedor_check = FALSE;
+                    fk_cliente_id = $2;
             `;
 
             const result = await client.query(SQL, [idFornecedor, idCliente]);
