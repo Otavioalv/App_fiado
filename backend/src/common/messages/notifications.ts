@@ -24,7 +24,7 @@ export const Notifications: NotificationsMap = {
         payload: {
             message: Messages.parceriaAceita(data.user),
             type: typeNotificationList.acceptedPartner.type,
-            title: typeNotificationList.newPartner.title,
+            title: typeNotificationList.acceptedPartner.title,
             created_at: data.created_at,
             user: data.user,
         }        
@@ -36,7 +36,7 @@ export const Notifications: NotificationsMap = {
         payload: {
             message: Messages.novaSolicitacaoCompra({...data.user, compra: data.produtos}),
             type: typeNotificationList.purchaseRequest.type,
-            title: typeNotificationList.newPartner.title,
+            title: typeNotificationList.purchaseRequest.title,
             created_at: data.created_at,
             user: data.user,
         }        
@@ -48,7 +48,7 @@ export const Notifications: NotificationsMap = {
         payload: {
             message: Messages.aceitarCompra(data.user),
             type: typeNotificationList.purchaseAccepted.type,
-            title: typeNotificationList.newPartner.title,
+            title: typeNotificationList.purchaseAccepted.title,
             created_at: data.created_at,
             user: data.user,
         }        
@@ -60,7 +60,7 @@ export const Notifications: NotificationsMap = {
         payload: {
             message: Messages.recusarCompra(data.user),
             type: typeNotificationList.purchaseRejected.type,
-            title: typeNotificationList.newPartner.title,
+            title: typeNotificationList.purchaseRejected.title,
             created_at: data.created_at,
             user: data.user,
         }        
@@ -72,7 +72,7 @@ export const Notifications: NotificationsMap = {
         payload: {
             message: Messages.atualizarCompra(data.user),
             type: typeNotificationList.purchaseUpdated.type,
-            title: typeNotificationList.newPartner.title,
+            title: typeNotificationList.purchaseUpdated.title,
             created_at: data.created_at,
             user: data.user,
         }        
