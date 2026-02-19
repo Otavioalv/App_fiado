@@ -10,6 +10,7 @@ interface GetNotificationParams {
     toUserType: UserType, 
     filterOpt: queryFilter,
     typeList: MessageListType,
+    idMenssagem?: number,
 } 
 
 export class NotificationModel{
@@ -59,6 +60,7 @@ export class NotificationModel{
         toUserType,
         filterOpt,
         typeList,
+        idMenssagem,
     }: GetNotificationParams): Promise<MessageInterface[]> {
         let client: PoolClient | undefined;
 
@@ -69,7 +71,10 @@ export class NotificationModel{
             
             const limit: number = size;
             const offset: number = (page -1) * limit;
+            
             const whereCondition: string[] = [];
+            const values: (string | number)[] = [];
+            let paramIndex = 1;
             // const searchSql: string = `%${search}%`;
             // const sqlFilter = sqlFilter
 
@@ -85,7 +90,14 @@ export class NotificationModel{
             
             if(listWhere) whereCondition.push(listWhere);
             
-            whereCondition.push("to_user_id = $1 AND to_user_type = $2");
+            whereCondition.push(`to_user_id = $${paramIndex++} AND to_user_type = $${paramIndex++}`);
+            values.push(toUserId, toUserType);
+
+            if(idMenssagem) {
+                values.push(idMenssagem);
+                whereCondition.push(`id_mensagem = $${paramIndex++}`);
+            }
+
             
             const whereSQL = whereCondition.length ? 
                 `WHERE ${whereCondition.join(" AND ")}`:
@@ -98,22 +110,26 @@ export class NotificationModel{
                 ORDER BY 
                     (read_at IS NULL) DESC, 
                     created_at DESC
-                LIMIT $3
-                OFFSET $4;
+                LIMIT $${paramIndex++}
+                OFFSET $${paramIndex++};
             `;
             
-            console.log(typeList, SQL_LIST);
-
+            
             const SQL_TOTAL = `
                 SELECT 
                     COUNT(*) as total
                 FROM 
-                    mensagens as m
+                mensagens as m
                 ${whereSQL};
             `;
 
-            const listMsg = (await client.query(SQL_LIST, [toUserId, toUserType,limit, offset])).rows as MessageInterface[];
-            const {total} = (await client.query(SQL_TOTAL, [toUserId, toUserType])).rows[0] as {total: number};
+            // console.log(values);
+
+            const {total} = (await client.query(SQL_TOTAL, values)).rows[0] as {total: number};
+            values.push(limit, offset);
+            const listMsg = (await client.query(SQL_LIST, values)).rows as MessageInterface[];
+            
+            // console.log(values, SQL_LIST);
 
             filterOpt.total = Number(total);
             filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);            

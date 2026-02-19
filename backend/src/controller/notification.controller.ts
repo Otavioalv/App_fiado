@@ -13,7 +13,7 @@ export class NotificationController {
 
     public async listMessages(req: FastifyRequest, res: FastifyReply, userType: UserType): Promise<FastifyReply> { 
         try {
-            const {...filterOpt} = req.query as queryFilter;
+            const {idMenssagem, ...filterOpt} = req.query as queryFilter & {idMenssagem?: string};
             const id:number = await getTokenIdFromRequest(req);
 
             const {typeList} = req.params as {typeList?: string};
@@ -35,13 +35,22 @@ export class NotificationController {
                 return res.status(404).send(errorResponse(ResponseApi.Messages.LIST_ERROR));
             }
 
+            let idMenssagemForm: number | undefined;
+            if(idMenssagem){
+                idMenssagemForm = Number(idMenssagem);
+                if(Number.isNaN(idMenssagemForm)) {
+                    return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+                }
+            }
+
+
             const listMsg: MessageInterface[] = await this.notificationModel.getNotification({
                 toUserId: id, 
                 toUserType: userType, 
                 filterOpt: filterOpt, 
-                typeList: uppTypeList
+                typeList: uppTypeList,
+                idMenssagem: idMenssagemForm,
             });
-            
 
             // return res.status(200).send(successResponse("Listado com sucesso", {list: listPartner, pagination: filterOpt}));
             return res.status(200).send(successResponse(ResponseApi.Messages.LIST_SUCCESS, {list: listMsg, pagination: filterOpt}));

@@ -161,7 +161,7 @@ class ClienteController extends UserController{
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }
     }
-
+    
     public async partnerList(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> { 
         try {
             const {idFornecedor, ...filterOpt} = req.query as queryFilter & { idFornecedor?: string};
