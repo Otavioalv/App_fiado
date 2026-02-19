@@ -13,7 +13,7 @@ export class NotificationController {
 
     public async listMessages(req: FastifyRequest, res: FastifyReply, userType: UserType): Promise<FastifyReply> { 
         try {
-            const {idMensaagem, ...filterOpt} = req.query as queryFilter & {idMensaagem?: string};
+            const {idMensagem, ...filterOpt} = req.query as queryFilter & {idMensagem?: string};
             const id:number = await getTokenIdFromRequest(req);
 
             const {typeList} = req.params as {typeList?: string};
@@ -36,8 +36,8 @@ export class NotificationController {
             }
 
             let idMenssagemForm: number | undefined;
-            if(idMensaagem){
-                idMenssagemForm = Number(idMensaagem);
+            if(idMensagem){
+                idMenssagemForm = Number(idMensagem);
                 if(Number.isNaN(idMenssagemForm)) {
                     return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
                 }
