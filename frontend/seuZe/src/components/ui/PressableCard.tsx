@@ -1,6 +1,7 @@
 import { theme } from "@/src/theme";
 import { PropsWithChildren } from "react";
 import { Pressable, PressableProps, StyleSheet } from "react-native";
+import { PressablePress } from "./PressablePress";
 
 type PressableCardProps = PropsWithChildren & PressableProps
 
@@ -10,15 +11,13 @@ export function PressableCard({
 }: PressableCardProps) {
     
     return(
-        <Pressable
-            style={({pressed}) => [
-                styles.container,
-                pressed && styles.pressedContainer
-            ]}
+        <PressablePress
+            style={styles.container}
             {...props}
         >   
             {children}
-        </Pressable>
+
+        </PressablePress>
     );
 }
 

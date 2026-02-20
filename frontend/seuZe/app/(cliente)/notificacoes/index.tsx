@@ -1,23 +1,25 @@
+import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
 import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
+import { NotificationBottomSheet, NotificationBottomSheetProps } from "@/src/components/common/NotificationBottomSheet";
 import { MemoNotificationCard, NotificationCardProps, NotificationCardSkeleton } from "@/src/components/common/NotificationCard";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { ButtonIcon } from "@/src/components/ui/ButtonIcon";
+import { ButtonModern } from "@/src/components/ui/ButtonModern";
 import { HeaderBottomContainer } from "@/src/components/ui/HeaderBottomContainer";
-import { useListMessages } from "@/src/hooks/useClienteQueries";
+import { SpacingScreenContainer } from "@/src/components/ui/SpacingScreenContainer";
+import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
+import { useDeleteNotification, useListMessages, useMarkAllReadNotification, useMarkNotificationById } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
+import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { theme } from "@/src/theme";
-import { ErrorTypes } from "@/src/types/responseServiceTypes";
+import { PaginationType, TypeMessageList } from "@/src/types/responseServiceTypes";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {Pressable, StyleSheet, Text, View } from "react-native";
 
-
-
 import ReanimatedSwipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
-
-
 
 interface SwipeableDeleteItemProps extends PropsWithChildren{
     itemId: number | string,
@@ -40,6 +42,7 @@ const SwipeableDeleteItem = ({
     return (
         <ReanimatedSwipeable
             // key={item.id}
+            overshootRight={false}
             ref={swipeableRef}
             renderRightActions={renderRightActions}
             onSwipeableWillOpen={() => onOpen(swipeableRef.current)}
@@ -52,10 +55,38 @@ const SwipeableDeleteItem = ({
 
 
 
+const chipList: ChipDataType<TypeMessageList>[] = [
+    {
+        id: "all",
+        label: "Todos"
+    },
+    {
+        id: "unread",
+        label: "Não lidas"
+    },
+    {
+        id: "read",
+        label: "Lidas"
+    },
+];
+
+
+
 export default function Notificacoes() {
     const router = useRouter();
 
-    const [errorType, setErrorType] = useState<ErrorTypes | null>(null);
+    const {
+        errorType,
+        setErrorType,
+
+        activeCategory,
+        setActiveCategory,
+    } = useFilterScreen<TypeMessageList>("all");
+
+    const filter: PaginationType = {
+        page: 1,
+        size: 20,
+    }
 
     const {
         data: dataMessages,
@@ -67,10 +98,40 @@ export default function Notificacoes() {
         hasNextPage,
         isFetchingNextPage,
         fetchNextPage,
-    } = useListMessages({
-        filter: "",
-        search: ""
-    });
+    } = useListMessages(
+        filter,
+        activeCategory
+    );
+
+    const { 
+        mutateAsync: fetchMarkAllNotifications,
+        // isPending: isPendingMarkAllNotifications,
+    } = useMarkAllReadNotification();
+    
+    const { mutate } = useDeleteNotification(filter, activeCategory);
+    const {mutate: markNotificationById} = useMarkNotificationById(filter, activeCategory)
+
+    const { closeSheet, openSheet } = useGlobalBottomModalSheet();
+
+
+    const handleOpenInfoProduct = useCallback((notification: NotificationBottomSheetProps) => {
+        // marcar a menssagem como lido
+        if(notification.isRead) markNotificationById({id: Number(notification.notificationId)});
+
+        openSheet(
+            <NotificationBottomSheet
+                {...notification}
+            />, 
+            ["100%"], 
+            false
+        );
+    }, [openSheet, markNotificationById]);
+
+    useFocusEffect(
+        useCallback(() => {
+            return () => closeSheet();
+        }, [closeSheet])
+    );
 
     // const swipeRef = useRef<SwipeableMethods | null>(null);
     // let rowRef: SwipeableMethods | null = null;
@@ -95,17 +156,16 @@ export default function Notificacoes() {
         return (
             <Animated.View
                 onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-                style={[
-                    {
+                style={[animatedStyle]}
+            >
+                <Pressable
+                    style={{
+                        flex: 1,
                         backgroundColor: "red",
                         alignItems: "center",
                         justifyContent: "center",
                         padding: theme.padding.md
-                    },
-                    animatedStyle
-                ]}
-            >
-                <Pressable
+                    }}
                     onPress={() => {
                         onDelete(); 
                     }}
@@ -131,6 +191,10 @@ export default function Notificacoes() {
         openedSwipeable.current = currentRef;
     }
 
+    const DeleteNotification = useCallback(async (id: number) => {
+        openedSwipeable.current?.close();
+        mutate({id: id});
+    }, [mutate]);
 
     const renderItem = useCallback(
         ({item, index}: {item: NotificationCardProps, index: number}) => {
@@ -139,7 +203,7 @@ export default function Notificacoes() {
                     itemId={item.itemId}
                     renderRightActions={(progress, dragX) => (
                         <RightAction 
-                            onDelete={() => {console.log(item.id);}}
+                            onDelete={() => DeleteNotification(Number(item.itemId))}
                             dragX={dragX}
                             progress={progress}
                         />
@@ -153,15 +217,12 @@ export default function Notificacoes() {
                 </SwipeableDeleteItem>
             )
         }, 
-        []
+        [DeleteNotification]
     );
 
     const renderItemSkeleton = useCallback(() => (
         <NotificationCardSkeleton/>
     ), []);
-
-
-
 
     const listMessages = useMemo(() => {
         if (!dataMessages) return [];
@@ -172,19 +233,32 @@ export default function Notificacoes() {
             page.list.forEach(u => {
                 const idString = u.id_mensagem?.toString();
 
+                const notification: NotificationBottomSheetProps = {
+                    dateTime: u.created_at,
+                    message: u.mensagem,
+                    title: u.title_notification,
+                    type: u.type,
+                    userId: u.from_user_id,
+                    notificationId: idString, 
+                    routerName: `/fornecedores/${u.from_user_id}`,
+                    isRead: !u.read_at,
+                }
+
                 map.set(idString, {
                     id: idString, 
                     itemId: idString,
                     isRead: !!u.read_at,
                     notification: u.mensagem,
+                    title: u.title_notification,
                     time: u.created_at,
                     type: u.type,
+                    onPress: () => handleOpenInfoProduct(notification)
                 });
             });
         });
 
         return Array.from(map.values());
-    }, [dataMessages]);
+    }, [dataMessages, handleOpenInfoProduct]);
 
     useErrorScreenListener(isError, error, setErrorType);
 
@@ -200,11 +274,20 @@ export default function Notificacoes() {
                     <Text style={styles.title}>
                         Notificações
                     </Text>
-                    <ButtonIcon
+                    {/* <ButtonIcon
                         iconName="check"
                         variant="ghost"
                         onPress={() => router.back()}
+                    /> */}
+                    <ButtonModern
+                        placeholder="Marcar todas como lido"
+                        size="S"
+                        variant="ghost"
+                        onPress={async () => {
+                            await fetchMarkAllNotifications()
+                        }}
                     />
+                    
                 </View>
                 <Text   
                     style={{
@@ -212,7 +295,7 @@ export default function Notificacoes() {
                         color: theme.colors.darkGray
                     }}
                 >
-                    Mensagens lidas são apagadas automaticamente após 30 dias.
+                    Notificações lidas são apagadas automaticamente após 30 dias.
                 </Text>
             </HeaderBottomContainer>
 
@@ -222,7 +305,9 @@ export default function Notificacoes() {
                     SkeletonList={{
                         data: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
                         keyExtractor: (i) => i,
-                        renderItem: renderItemSkeleton
+                        renderItem: renderItemSkeleton,
+                        HeaderComponent: <ChipListSkeleton/>,
+                        hasPaddingList: false, 
                     }}
                     data={listMessages}
                     renderItem={renderItem}
@@ -240,14 +325,16 @@ export default function Notificacoes() {
                     hasSeparator={false}
                     hasPaddingList={false}
                     onRefresh={refetch}
-                    // HeaderComponent={
-                    //     <ChipList 
-                    //         chipList={chipList}
-                    //         itemSelected={activeCategory} 
-                    //         setItemSelected={setActiveCategory}
-                    //     />
-                    // }
-                    emptyMessage={"Nenhuma menssagem encontrada"}
+                    HeaderComponent={
+                        <SpacingScreenContainer style={{paddingVertical: 0}}>
+                            <ChipList 
+                                chipList={chipList}
+                                itemSelected={activeCategory} 
+                                setItemSelected={setActiveCategory}
+                            />
+                        </SpacingScreenContainer>
+                    }
+                    emptyMessage={"Nenhuma notificação encontrada"}
                 />
             </ScreenErrorGuard>
         </>

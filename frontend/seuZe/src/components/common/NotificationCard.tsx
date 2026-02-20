@@ -1,11 +1,12 @@
 import { theme } from "@/src/theme";
 import { NotificationType } from "@/src/types/responseServiceTypes";
-import { Feather } from "@expo/vector-icons";
 import { memo } from "react";
 import { View, Text, PressableProps, StyleSheet, Animated } from "react-native";
 import { format, isYesterday, isToday, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
+import { PressablePress } from "../ui/PressablePress";
+import { NotificationIcon, NotificationIconSkeleton } from "../ui/NotificationIcon";
 
 
 
@@ -13,6 +14,7 @@ export interface NotificationCardProps extends PressableProps {
     type: NotificationType, 
     time: string,
     notification: string,
+    title: string,
     isRead: boolean,
     itemId: string | number, 
 }
@@ -21,13 +23,11 @@ export function NotificationCard({
     isRead,
     notification,
     time,
+    title,
     type,
+    itemId,
+    ...pressableProps
 }: NotificationCardProps) {
-    const notificationTypeMap: Record<NotificationType, string> = {
-        new_partner: "Solicitação de Parceria"
-    }
-
-    const textTitle = notificationTypeMap[type];
 
     // Colocar isso em um utils
     const formatRelativeDate = (dateString: string): string  => {
@@ -52,72 +52,64 @@ export function NotificationCard({
         return format(date, "dd 'de' MMM", { locale: ptBR });
     }
 
-
     return (
-        <View
-            style={[
-                styles.container,
-                isRead && styles.alertContainer,
-            ]}
+        <PressablePress
+            {...pressableProps}
         >
-            {/* Definir icone de acorde com o tipo da menssagem */}
-            {/* Definir estilo de menssagem lida e nao lida */}
-            <Feather
-                name="users"
+            <View
                 style={[
-                    styles.icon,
-                    isRead && (styles.iconAlert)
+                    styles.container,
+                    !isRead && styles.alertContainer,
                 ]}
-            />
-
-            <View 
-                style={styles.messageContainer}
             >
-                <View style={styles.footerMessage}>
-                    {/* Definir titulo de acordo com o tipo (backend tem q fazer isso)*/}
-                    <Text
-                        style={styles.titleText}
-                    >
-                        {textTitle}
-                    </Text>
+                <NotificationIcon
+                    isActivate={!isRead}
+                    type={type}
+                />
 
-                    <View
-                        style={styles.infoNotification}
-                    >
+                <View 
+                    style={styles.messageContainer}
+                >
+                    <View style={styles.footerMessage}>
+                        {/* Definir titulo de acordo com o tipo (backend tem q fazer isso)*/}
                         <Text
-                            style={styles.textTime}
+                            style={styles.titleText}
                         >
-                            {formatRelativeDate(time)}
-                            {/* {time} */}
+                            {title}
                         </Text>
-                        {isRead && (
-                            <View style={styles.isReadIcon}/>
-                        )}
+
+                        <View
+                            style={styles.infoNotification}
+                        >
+                            <Text
+                                style={styles.textTime}
+                            >
+                                {formatRelativeDate(time)}
+                                {/* {time} */}
+                            </Text>
+                            {!isRead && (
+                                <View style={styles.isReadIcon}/>
+                            )}
+                        </View>
+                    </View>
+
+                    <View style={{
+                        flexDirection: "row"
+                    }}>
+                        <Text 
+                            style={[
+                                styles.textNotification,
+                                !isRead && (styles.textNotificationAlert)
+                            ]}
+                            numberOfLines={3}
+                            ellipsizeMode="tail"
+                        >
+                            {notification}
+                        </Text>
                     </View>
                 </View>
-
-                <View style={{
-                    flexDirection: "row"
-                }}>
-                    <Text 
-                        style={[
-                            styles.textNotification,
-                            isRead && (styles.textNotificationAlert)
-                        ]}
-                        numberOfLines={3}
-                        ellipsizeMode="tail"
-                    >
-                        {notification}
-                        Um pouco da menssagem Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure, iste. Velit labore nisi officia iste itaque esse dolor natus totam ducimus sed laudantium voluptas cumque saepe sunt facilis, odit tempora.
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt, mollitia in porro, ullam itaque, sequi dignissimos voluptas ut perferendis debitis modi nulla veniam quisquam? Eveniet ducimus assumenda inventore ab accusantium.
-                        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Veniam eum ducimus atque dolorem eaque error. Ipsum cum facilis accusantium quo, recusandae, officiis animi error adipisci dolore ullam sunt quisquam quis?.
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatum, impedit inventore! Rem tempore beatae dolorem. Error laboriosam quam quaerat molestias alias expedita unde nam tempore, harum, ea aspernatur minus esse.
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Esse voluptatum quidem eaque laudantium et. Saepe, ipsa. Quaerat autem commodi modi molestiae, officia, voluptatibus aliquid voluptates libero, doloremque quasi iure ipsa.
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum pariatur tempora modi, qui culpa ullam corporis unde dolore, dolor quo necessitatibus placeat illo nisi, sit vitae veritatis animi earum totam!
-                    </Text>
-                </View>
             </View>
-        </View>
+        </PressablePress>
     );
 }
 
@@ -130,9 +122,7 @@ export function NotificationCardSkeleton() {
     return (
         <View style={styles.container}>
 
-            <Animated.View
-                style={[anmOpacity, styles.iconSkeleton]}
-            />
+            <NotificationIconSkeleton/>
             
             
             <View style={styles.messageContainer}>
@@ -162,33 +152,13 @@ const styles = StyleSheet.create({
         // padding: 1,
     },
     alertContainer: {
-        backgroundColor: theme.colors.orange + "11",
+        // backgroundColor: theme.colors.orange + "11",
     },
     messageContainer: {
         // backgroundColor: "red",
         flex: 1,
         gap: theme.gap.xs,
     },
-    
-    // ICONES
-    icon: {
-        fontSize: theme.typography.textXL.fontSize,
-        backgroundColor: theme.colors.pseudoLightGray,
-        color: theme.colors.darkGray,
-        borderRadius: 1000,
-        padding: theme.padding.sm,
-    },
-    iconSkeleton: {
-        width: 55,
-        height: 55,
-        borderRadius: 1000,
-    },
-    
-    iconAlert: {
-        backgroundColor: theme.colors.orange,
-        color: "white",
-    },
-
 
     // Texto
     titleText: {

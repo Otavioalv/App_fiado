@@ -1,8 +1,14 @@
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { api } from "./api";
 import { BackendResponse, responseAxiosInterfaces } from "./typesApi";
-import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList, NotificationInterface } from "../types/responseServiceTypes";
+import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList, NotificationInterface, TypeMessageList } from "../types/responseServiceTypes";
 import { ShoppingListParams } from "./types/clienteServiceParams";
+
+interface ListMessagesParams {
+    listType: TypeMessageList, 
+    pagination: PaginationType,
+    id?: string | number,
+}
 
 
 const defaultEndPoint:string = "/cliente"
@@ -194,7 +200,7 @@ export async function acceptPartner(idFornecedor: string | number): Promise<bool
 }
 
 // Enviar solicitação de parceria
-export async function requestPartner(idFornecedor: string | number) {
+export async function requestPartner(idFornecedor: string | number):Promise<boolean> {
     try {
         const endPoint = `${defaultEndPoint}/partner`;
         
@@ -233,19 +239,24 @@ export async function rejectPartner(idFornecedor: string | number) {
 } 
 
 
-export async function listMessages(
-    pagination: PaginationType = {page: 1, size: 20}
-): Promise<ResultsWithPagination<NotificationInterface[]>> {
+export async function listMessages({
+    listType,
+    id,
+    pagination = {page: 1, size: 20},
+}: ListMessagesParams): Promise<ResultsWithPagination<NotificationInterface[]>> {
     try{
-        const endPoint = `${defaultEndPoint}/message/list`;
+        const endPoint = `${defaultEndPoint}/message/list/` + listType;
 
-        const response = await api.post<BackendResponse<ResultsWithPagination<NotificationInterface[]>>>(endPoint, {}, {
+        console.log("[ID MENSAGEM SERVICE]: ", Number(id) || null);
+
+        const response = await api.get<BackendResponse<ResultsWithPagination<NotificationInterface[]>>>(endPoint, {
             params: {
+                idMensagem: Number(id) || null, // Transformar temporariamente para numero
                 ...pagination
             }
         });
 
-        console.log(JSON.stringify(response.data.data?.list, null, "  "));
+        // console.log(JSON.stringify(response.data.data?.list, null, "  "));
 
         if(!response.data.data) {
             return {list: [], pagination: pagination}
@@ -253,6 +264,51 @@ export async function listMessages(
 
         return response.data.data
     }catch(err: any){
+        throw err;
+    }
+}
+
+
+export async function deleteNotification(listIds: number[]):Promise<boolean>{
+    try {
+        const endPoint = `${defaultEndPoint}/message/delete`;
+        // console.log("Lista de ids", listIds);
+        
+        const response = await api.post<BackendResponse<ResultsWithPagination<null>>>(endPoint, listIds);
+
+        return true;
+    } catch(err: any){
+        throw err;
+    }
+}
+
+
+export async function markReadNotification(listIds: number[]): Promise<boolean>{
+    try {
+        const endPoint = `${defaultEndPoint}/message/mark-read`;
+
+        const data = {
+            ids: listIds
+        }
+        // console.log("Lista de ids", listIds);
+        
+        const response = await api.post<BackendResponse<ResultsWithPagination<null>>>(endPoint, data);
+
+        return true;
+    } catch(err: any){
+        throw err;
+    }
+}
+
+export async function markReadAllNotifications(): Promise<boolean>{
+    try {   
+        const endPoint = `${defaultEndPoint}/message/mark-all-read`;
+        // console.log("Lista de ids", listIds);
+        
+        const response = await api.post<BackendResponse<ResultsWithPagination<null>>>(endPoint);
+
+        return true;
+    } catch(err: any) {
         throw err;
     }
 }

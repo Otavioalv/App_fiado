@@ -1,6 +1,6 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { acceptPartner, listMessages, listPartner, login, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
-import { ActionRelationShipStatusType, FilterType, NotificationInterface, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
+import { acceptPartner, deleteNotification, listMessages, listPartner, login, markReadAllNotifications, markReadNotification, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
+import { ActionRelationShipStatusType, FilterType, NotificationInterface, PaginationType, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeMessageList, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { OnPressActionParamsType } from "../components/ui/RelationshipActions";
@@ -98,23 +98,48 @@ export function useProductListFromId(id: string | number, filters: FilterType) {
     });
 }
 
-export function useListMessages(filters: FilterType, size: number = 20) {
+
+export function useListMessages(filters: PaginationType, listType: TypeMessageList, size: number = 20) {
     const key: string = 'list-messages';
 
     return useInfiniteList<ResultsWithPagination<NotificationInterface[]>>({
-        queryKey: [key, filters],
+        queryKey: [key, filters, listType],
         queryFn: async ({pageParam}) => {
             return await listMessages({
-                page: pageParam as number, 
-                size: size,
-                filter: filters.filter,
-                search: filters.search
+                listType: listType,
+                pagination: {
+                    page: pageParam as number, 
+                    size: size,
+                    filter: filters.filter,
+                    search: filters.search
+                },
             });
         },
         initialPageParam: 1,
     }); 
 }
 
+
+export function useListNotificationsById(id: string | number) {
+    const key: string = 'list-messages';
+
+    return useQuery({
+        queryKey: [key, id],
+        enabled: !!id,
+        queryFn: async (): Promise<NotificationInterface>=> {
+            const result = await listMessages({
+                listType: "all",
+                pagination: {
+                    page: 1,
+                    size: 1,
+                },
+                id: id
+            });
+
+            return result.list[0] || [];
+        }
+    });
+}
 
 
 export function useProductSingleFromId(id:string | number) {
@@ -235,6 +260,19 @@ export function useUpdate() {
             console.log(s);
         }
     })
+}
+
+export function useMarkAllReadNotification() {
+    const queryCliente = useQueryClient();
+
+    return useMutation<boolean, any>({
+        mutationFn: async () => {
+            return await markReadAllNotifications();
+        },
+        onSuccess:(s) => {
+            if(s) queryCliente.invalidateQueries({queryKey: ['list-messages']});
+        }
+    });
 }
 
 
@@ -435,7 +473,98 @@ export function useUpdatePartnerInfoFornecedor(id: string | number) {
         onSettled: () => {
             // Sincroniza, faz refatch
             queryClient.invalidateQueries({queryKey: ['list-partner-fornecedor']});
-            queryClient.invalidateQueries({queryKey: ['product-list'],});
+            queryClient.invalidateQueries({queryKey: ['product-list']});
         }
     });   
+}
+
+export function useDeleteNotification(filters: PaginationType, listType: TypeMessageList) {
+    type ListDataType = InfiniteData<ResultsWithPagination<NotificationInterface[]>>;
+    type mutationFnType = {id: number}
+    type ErrorContextType = {
+        previousData: ListDataType | undefined,
+    }
+
+    const key: string = 'list-messages';
+
+    const queryClient = useQueryClient();
+    const queryKey = [key, filters, listType];
+
+    return useMutation<any, any, mutationFnType, ErrorContextType>({
+        mutationFn: async ({id}) => {
+            return await deleteNotification([id]);
+        },
+        onMutate: async ({id}) => {
+            await queryClient.cancelQueries({queryKey});
+
+            const previousData = queryClient.getQueryData<ListDataType>(queryKey);
+
+
+            
+            queryClient.setQueryData<ListDataType>(queryKey, (old) => {
+                if(!old) return old;
+                return {
+                    ...old,
+                    pages: old.pages.map((page) => ({
+                        ...page,
+                        list: page.list.filter((not) => not.id_mensagem !== id)
+                    }))
+                }
+            });
+
+            return {previousData}
+        },
+        onError:(err, variables, context) => {
+            if(context?.previousData)  queryClient.setQueryData(queryKey, context.previousData);
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({queryKey: ['list-messages']});
+        }
+    });
+}
+
+
+export function useMarkNotificationById(filters: PaginationType, listType: TypeMessageList) {
+    type ListDataType = InfiniteData<ResultsWithPagination<NotificationInterface[]>>;
+    type mutationFnType = {id: number}
+    type ErrorContextType = {
+        previousData: ListDataType | undefined,
+    }
+
+    const key: string = 'list-messages';
+
+    const queryClient = useQueryClient();
+    const queryKey = [key, filters, listType];
+
+    return useMutation<any, any, mutationFnType, ErrorContextType>({
+        mutationFn: async ({id}) => {
+            return await markReadNotification([id]);
+        },
+        onMutate: async ({id}) => {
+            await queryClient.cancelQueries({queryKey});
+
+            const previousData = queryClient.getQueryData<ListDataType>(queryKey);
+
+
+            
+            queryClient.setQueryData<ListDataType>(queryKey, (old) => {
+                if(!old) return old;
+                return {
+                    ...old,
+                    pages: old.pages.map((page) => ({
+                        ...page,
+                        list: page.list.filter((not) => not.id_mensagem !== id)
+                    }))
+                }
+            });
+
+            return {previousData};
+        },
+        onError:(err, variables, context) => {
+            if(context?.previousData)  queryClient.setQueryData(queryKey, context.previousData);
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({queryKey: ['list-messages']});
+        }
+    });
 }

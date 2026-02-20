@@ -6,12 +6,12 @@ import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
 import { OnPressActionFunctionType } from "@/src/components/ui/RelationshipActions";
 import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
-import { useProductList, useUpdatePartnerClienteStatus, useUpdatePartnerProductStatus } from "@/src/hooks/useClienteQueries";
+import { useProductList, useUpdatePartnerProductStatus } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { TypeUserList } from "@/src/types/responseServiceTypes";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo, useRef } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useMemo } from "react";
 import { View } from "react-native";
 
 const chipList: ChipDataType<TypeUserList>[] = [
@@ -38,7 +38,6 @@ const chipList: ChipDataType<TypeUserList>[] = [
 ];
 
 export default function Produtos() {
-    const router = useRouter();
 
     const {
         searchQuery,
@@ -78,7 +77,7 @@ export default function Produtos() {
     const { openSheet, closeSheet } = useGlobalBottomModalSheet();
 
     const handleOpenInfoProduct = useCallback((idProduct: number) => {
-        console.log("Tentando abrir produto:", idProduct);
+        // console.log("Tentando abrir produto:", idProduct);
 
         openSheet(
             <InfoProductBottomSheet 

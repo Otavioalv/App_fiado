@@ -6,6 +6,7 @@ export const colors = {
 
  
   orange: "#FD5300",
+  lightOrange: "#FFF6F0",
   orangeOpacity: "#FD530011",
   bgBttDefault: "#000000",
   
