@@ -76,7 +76,12 @@ export const ResponseApi = {
         NOT_EXIST: "Um ou mais produtos não existem ou foram deletados",
         ALL_NOT_FOUND: "Nenhum produto foi encontrado",
     },
-
+    Cart: {
+        ADD_SUCCESS: "Protudo(s) adicionado(s) com sucesso",
+        ADD_ERROR: "Erro ao adicionar produto(s)",
+        LIST_SUCCESS: "Carrinho de compras listado",
+        LIST_ERROR: "Erro ao listar carrinho de compras",
+    },
     Purchace: {
         PURCHACE_REQUEST_SENT: "Compra solicitada com sucesso",
         UPDATE_STATUS: "Status atualizado com sucesso", 

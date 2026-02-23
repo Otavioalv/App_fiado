@@ -213,6 +213,41 @@ class ProdutoController {
         } 
     }
 
+    public async cartList(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+        try {
+            const {...filterOpt} = req.query as queryFilter;
+            const idCliente:number = await getTokenIdFromRequest(req);
+
+            if(!filterOpt.search)
+                filterOpt.search = "";
+
+            if(!await verifyQueryOptList(filterOpt))
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+
+            if(!idCliente || typeof idCliente != "number" || idCliente < 0) {
+               return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FORMAT));
+            }
+
+            const listCartResult = await this.produtoModel.listCart(idCliente, filterOpt);
+
+            return res
+            .status(200)
+            .send(
+                successResponse(
+                    ResponseApi.Cart.LIST_SUCCESS,
+                    { 
+                        list: listCartResult,
+                        pagination: filterOpt,
+                    }
+                )
+            );
+
+            
+        } catch (e) {
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
+        }
+    }
+
     public async cartAdd(req: FastifyRequest, res: FastifyReply) {
         try {
             const id_cliente: number = await getTokenIdFromRequest(req);
@@ -258,7 +293,7 @@ class ProdutoController {
 
             await this.produtoModel.addToCart(data, id_cliente);
             // Definir resposta depois
-            return res.status(200).send(successResponse("Produtos adicionados com sucesso"));
+            return res.status(200).send(successResponse(ResponseApi.Cart.ADD_SUCCESS));
         } catch(e) {
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }

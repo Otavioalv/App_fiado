@@ -52,3 +52,16 @@ export interface ProdFornecedorInterface {
 }
 
 export type ListProductWithFornecedor = productInterface & ProdFornecedorInterface;
+
+export interface CartListInterface {
+    cart_id: number,
+    id_product: number,
+    id_fornecedor: number,
+    quantidade: number,
+    preco: number,
+    prazo: string,
+    created_at: string,
+    nome_prod: string,
+    nome_fornecedor: string,
+    nome_estabelecimento: string
+}

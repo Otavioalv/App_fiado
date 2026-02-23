@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
 import connection from "../database/connection";
-import { AllShoppingStatusType, compraInterface, ListProductWithFornecedor, productInterface, ShoppingStatusType } from "../shared/interfaces/productInterface";
+import { AllShoppingStatusType, CartListInterface, compraInterface, ListProductWithFornecedor, productInterface, ShoppingStatusType } from "../shared/interfaces/productInterface";
 import { FilterListShop, queryFilter } from "../shared/interfaces/utilsInterfeces";
 import { UserType } from "../shared/interfaces/notifierInterfaces";
 import { TypesListUser } from "../shared/interfaces/userInterfaces";
@@ -40,13 +40,79 @@ class ProdutoModel  {
         }
     }
 
+    public async listCart(idCliente: number, filterOpt:queryFilter): Promise<CartListInterface[]>{
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+
+            const {size, page, search} = filterOpt;
+
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+
+            // console.log(limit, offset, idCliente, filterOpt);
+
+            const whereSql = `
+                WHERE c.fk_id_cliente = $1
+            `;
+
+            const SQL_LIST = `  
+                SELECT 
+                    ci.fk_cart_id AS cart_id,
+                    ci.fk_id_produto AS id_product,
+                    ci.fk_id_fornecedor AS id_fornecedor,
+                    ci.quantidade,
+                    ci.prazo,
+                    ci.created_at,
+                    p.nome AS nome_prod,
+                    p.preco,
+                    f.nome AS nome_fornecedor,
+                    f.nomeestabelecimento AS nome_estabelecimento
+                FROM cart_items ci
+                JOIN cart c 
+                    ON c.id_cart = ci.fk_cart_id
+                JOIN produto p 
+                    ON ci.fk_id_produto = p.id_produto
+                JOIN fornecedor f 
+                    ON ci.fk_id_fornecedor = f.id_fornecedor
+                ${whereSql}
+                LIMIT $2
+                OFFSET $3;
+            `;
+
+            const SQL_TOTAL = ` 
+                SELECT COUNT(*) as total
+                FROM cart_items ci
+                JOIN cart c 
+                    ON c.id_cart = ci.fk_cart_id
+                ${whereSql};
+            `;
+            
+
+            const listCart = (await client.query<CartListInterface>(SQL_LIST, [idCliente, limit, offset])).rows;
+
+            const {total} = (await client.query<{total: number}>(SQL_TOTAL, [idCliente])).rows[0];
+            
+            
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
+            
+            return listCart;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao listar produtos");
+        } finally {
+            client?.release();
+        }
+    }
+
     public async addToCart(prodData:compraInterface[], id_cliente: number) {
         // const client = await this.connection.connect();
         const client = await connection.connect();
 
         try {
 
-            console.log("no model: ", prodData[0], id_cliente);
+            // console.log("no model: ", prodData[0], id_cliente);
 
             await client.query('BEGIN');
 
