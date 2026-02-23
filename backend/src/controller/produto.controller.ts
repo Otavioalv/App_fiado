@@ -213,10 +213,65 @@ class ProdutoController {
         } 
     }
 
+    public async cartAdd(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const id_cliente: number = await getTokenIdFromRequest(req);
+            let data = req.body as compraInterface[];
+
+            // Verifica o tipo do dado
+            if(!Array.isArray(data)) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.REQUIRED_FIELDS));
+            }
+
+            // Verifica dados, quantidade, data, etc. Se der erro, vai pro catch
+            data = await this.compraDataValidate(data);
+
+            // Verificar se cliente e fornecedor são associados
+            const ids:number[] = [... new Set(data.map(p => p.id_fornecedor))];
+
+            for(const idFornecedor of ids) {
+                if(!await this.clienteFornecedorModel.getPartnerAccepted(idFornecedor, id_cliente))
+                    return res.status(400).send(errorResponse(ResponseApi.Partner.NOT_PARTNER));
+            }
+
+            // Verificar se produto existe pelo id, e pegar os valores como nome, valor_unt
+            const compraData:compraInterface[] = [];
+            
+            for(const pd of data) {
+                const produto:productInterface = await this.produtoModel.getProductExists(pd.id_compra, pd.id_fornecedor);
+                // console.log(produto);
+
+                if(!produto) {
+                    return res.status(404).send(errorResponse(ResponseApi.Product.NOT_FOUND));
+                }
+
+                const compra: compraInterface = {
+                    ...pd,
+                    nome_produto: produto.nome_prod.trim(),
+                    valor_unit: produto.preco,
+                    id_cliente: id_cliente
+                }
+
+                compraData.push(compra);
+            }
+
+
+            await this.produtoModel.addToCart(data, id_cliente);
+            // Definir resposta depois
+            return res.status(200).send(successResponse("Produtos adicionados com sucesso"));
+        } catch(e) {
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
+        }
+    }
+
     public async buyProducts(req: FastifyRequest, res: FastifyReply) {
         try {
             const id_cliente: number = await getTokenIdFromRequest(req);
             let productData = await req.body as compraInterface[];
+
+            /* 
+            Ao inves de passar array de produtos, ele so coleta direto do carrinho de compras
+            */
 
             // Verifica o tipo do dado
             if(!productData.length || !Array.isArray(productData)) {

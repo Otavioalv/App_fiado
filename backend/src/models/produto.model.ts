@@ -40,6 +40,68 @@ class ProdutoModel  {
         }
     }
 
+    public async addToCart(prodData:compraInterface[], id_cliente: number) {
+        // const client = await this.connection.connect();
+        const client = await connection.connect();
+
+        try {
+
+            console.log("no model: ", prodData[0], id_cliente);
+
+            await client.query('BEGIN');
+
+            // criar ou pegar carrinho
+            const SQL_CART_RESULT = `
+                INSERT INTO cart (fk_id_cliente)
+                VALUES ($1)
+                ON CONFLICT (fk_id_cliente)
+                DO UPDATE SET updated_at = NOW()
+                RETURNING id_cart;
+            `;
+            const cartResult = await client.query(SQL_CART_RESULT, [id_cliente]);
+            
+            const id_cart = cartResult.rows[0].id_cart as number;
+
+            // Deleta todos os itens para atualizar 
+            const SQL_DELETE_CART = `DELETE FROM cart_items WHERE fk_cart_id = $1`;
+            await client.query(SQL_DELETE_CART,[id_cart]);
+
+            if(prodData.length > 0) {
+                const sqlValues:string = await this.createSqlValues(prodData);
+
+                const values = prodData.flatMap(prod => [
+                    id_cart,
+                    prod.id_compra, 
+                    prod.id_fornecedor, 
+                    prod.quantidade,
+                    prod.prazo ?? null, 
+                ]);
+
+                // Inserir ou atualizar item
+                const SQL_INSERT = `
+                    INSERT INTO cart_items (
+                        fk_cart_id,
+                        fk_id_produto,
+                        fk_id_fornecedor,
+                        quantidade,
+                        prazo
+                    )
+                    VALUES ${sqlValues};
+                `
+
+                await client.query(SQL_INSERT, values);
+            }
+
+            await client.query('COMMIT');
+        } catch (err) {
+            await client.query('ROLLBACK');
+            console.log(err);
+            throw err;
+        } finally {
+            client.release();
+        }
+    }
+
     public async addCompra(compra: compraInterface[]): Promise<void>{
         let client: PoolClient | undefined;
 
