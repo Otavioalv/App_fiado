@@ -403,6 +403,31 @@ class ProdutoController {
         } 
     }
 
+    public async buyProduct2(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const id_cliente: number = await getTokenIdFromRequest(req);
+
+            await this.produtoModel.finalizarCompra(id_cliente);
+
+            return res.status(200).send(
+                successResponse(ResponseApi.Purchace.PURCHACE_REQUEST_SENT)
+            );
+
+        } catch (e: any) {
+            // console.error("Erro ao finalizar compra >>>", e);
+
+            if (e.code === 'P0001') {
+                return res.status(400).send(
+                    errorResponse(ResponseApi.Validation.INVALID_DATA, e.message)
+                );
+            }
+
+            return res.status(500).send(
+                errorResponse(ResponseApi.Server.INTERNAL_ERROR)
+            );
+        }
+    }
+
     public async shopList(req: FastifyRequest, res: FastifyReply, userType: UserType):Promise<void> {
         try{
             interface QueryToIds {
@@ -736,6 +761,7 @@ class ProdutoController {
             throw new Error("Erro ao validar dados");
         }
     }
+    
 }
 
 

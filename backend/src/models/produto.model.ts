@@ -111,9 +111,7 @@ class ProdutoModel  {
         const client = await connection.connect();
 
         try {
-
             // console.log("no model: ", prodData[0], id_cliente);
-
             await client.query('BEGIN');
 
             // criar ou pegar carrinho
@@ -124,6 +122,7 @@ class ProdutoModel  {
                 DO UPDATE SET updated_at = NOW()
                 RETURNING id_cart;
             `;
+            
             const cartResult = await client.query(SQL_CART_RESULT, [id_cliente]);
             
             const id_cart = cartResult.rows[0].id_cart as number;
@@ -1164,6 +1163,24 @@ class ProdutoModel  {
             client.release();
         }
     }
+
+
+    public async finalizarCompra(id_cliente: number): Promise<void> {
+        const client = await connection.connect();
+
+        try {
+            await client.query(
+                'SELECT finalizar_compra($1)',
+                [id_cliente]
+            );
+        } catch(e: any) {
+            throw e;
+        } finally {
+            client.release();
+        }
+    }
+
+
 
     private async createSqlValues(arrObjs: Record<string, any>[], plus:number = 1): Promise<string>{
         
