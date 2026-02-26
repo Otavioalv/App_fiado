@@ -428,6 +428,22 @@ class ProdutoController {
         }
     }
 
+    public async totalCart(req: FastifyRequest, res: FastifyReply) {
+        try{
+            const id_cliente: number = await getTokenIdFromRequest(req);
+
+            const totalCart = await this.produtoModel.totalCart(id_cliente);
+
+            return res.status(200).send(
+                successResponse(ResponseApi.Cart.LIST_SUCCESS, {totalCart: totalCart})
+            );
+
+        }catch(e: any) {
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR));
+        }
+
+    }
+
     public async shopList(req: FastifyRequest, res: FastifyReply, userType: UserType):Promise<void> {
         try{
             interface QueryToIds {

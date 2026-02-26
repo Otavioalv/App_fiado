@@ -406,6 +406,8 @@ class ProdutoModel  {
 
 
 
+
+
     public async updateProtucts(products: productInterface[], id_fornecedor: number) {
         let client: PoolClient | undefined;
         try {
@@ -432,6 +434,35 @@ class ProdutoModel  {
         } catch (e) {
             await client?.query("ROLLBACK");
             throw new Error(`Erro ao atualizar produto`);
+        } finally {
+            client?.release();
+        }
+    }
+
+    public async totalCart(
+        idCliente: number, 
+    ) {
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+            const SQL = `
+                SELECT 
+                    COALESCE(SUM(p.preco * ci.quantidade), 0) AS total_carrinho
+                FROM cart c
+                LEFT JOIN cart_items ci 
+                    ON ci.fk_cart_id = c.id_cart
+                LEFT JOIN produto p 
+                    ON p.id_produto = ci.fk_id_produto
+                WHERE c.fk_id_cliente = $1;
+            `;
+
+            const result = await client.query<{ total_carrinho: string }>(SQL, [idCliente]);
+            const total = result.rows[0]?.total_carrinho ?? "0";
+            return Number(total);
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao listar produtos");
         } finally {
             client?.release();
         }
