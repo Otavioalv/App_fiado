@@ -1,5 +1,5 @@
 import { theme } from "@/src/theme";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Feather from '@expo/vector-icons/Feather';
 import { DefaultDescription, DefaultDescriptionSkeleton } from "../ui/DefaultDescription";
 import { HeaderBottomContainer } from "../ui/HeaderBottomContainer";
@@ -7,10 +7,16 @@ import { HeaderBottomContainer } from "../ui/HeaderBottomContainer";
 interface UserHeaderProps {
     nome: string,
     apelido?: string,
+    hasNotification?: boolean,
     isLoading?:boolean,
 }
 
-export function UserHeader({apelido, nome, isLoading=false}: UserHeaderProps) {
+export function UserHeader({
+    apelido, 
+    nome, 
+    isLoading=false,
+    hasNotification=false,
+}: UserHeaderProps) {
     if(isLoading) {
         return <UserHeaderSkeleton/>
     }
@@ -27,11 +33,13 @@ export function UserHeader({apelido, nome, isLoading=false}: UserHeaderProps) {
             <View style={styles.bellNotify}>
                 <Feather name="bell" size={24} color={theme.colors.textNeutral900} />
                 
-                <View style={styles.notifyCounter}>
-                    <Text style={styles.textCounter}>
-                        3
-                    </Text>
-                </View>
+                {hasNotification && (
+                    <View style={styles.notifyCounter}>
+                        {/* <Text style={styles.textCounter}>
+                            3
+                        </Text> */}
+                    </View>
+                )}
             </View>
         </HeaderBottomContainer>
     );
@@ -64,10 +72,10 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         backgroundColor: theme.colors.orange,
         borderRadius: theme.radius.full,
-        minWidth: 20,
-        height: 20,
-        left: 9,
-        top: -3
+        minWidth: 10,
+        height: 10,
+        left: 13,
+        top: 0
     },
     textCounter: {
         color: "white",

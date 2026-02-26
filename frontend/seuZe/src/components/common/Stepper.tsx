@@ -2,7 +2,7 @@ import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
 import { Feather } from "@expo/vector-icons";
 import { Dispatch, SetStateAction } from "react";
-import { Animated, Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
+import { Animated, Pressable, StyleSheet, Text, TextInput, TextStyle, View, ViewStyle } from "react-native";
 
 
 type StepperVariantType = "primary" | "disabled";
@@ -45,6 +45,27 @@ export function Stepper({
     const handleMinusQnt = () => {
         if(quantity > 1) {
             setQuantity(quantity-1);
+        }
+    }
+
+    const handleInputChange = (text: string) => {
+        const numericValue = text.replace(/[^0-9]/g, '');
+        
+        if (numericValue === '') {
+            setQuantity(0);
+            return;
+        }
+
+        const num = parseInt(numericValue, 10);
+
+        if (num <= 999) {
+            setQuantity(num);
+        }
+    }
+
+    const handleBlur = () => {
+        if (quantity < 1) {
+            setQuantity(1);
         }
     }
 
@@ -96,14 +117,22 @@ export function Stepper({
                     ]}
                 />
             </Pressable>
-            <Text
+            
+            
+            <TextInput
                 style={[
                     styles.count,
                     currentVariant.text,
                 ]}
-            >
-                {quantity}
-            </Text>
+                keyboardType="numeric"
+                value={quantity === 0 ? "" : quantity.toString()}
+                onChangeText={handleInputChange}
+                onBlur={handleBlur}
+                maxLength={3}
+                editable={isInteractive}
+            />
+
+
             <Pressable
                 disabled={!isInteractive}
                 onPress={handlePlusQnt}
@@ -166,7 +195,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
+        // justifyContent: "center",
         gap: theme.gap.xs
         // backgroundColor: "blue"
     },

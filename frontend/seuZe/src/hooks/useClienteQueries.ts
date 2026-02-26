@@ -1,9 +1,10 @@
-import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { acceptPartner, deleteNotification, listMessages, listPartner, login, markReadAllNotifications, markReadNotification, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
-import { ActionRelationShipStatusType, FilterType, NotificationInterface, PaginationType, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeMessageList, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
+import { InfiniteData, useMutation, UseMutationOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { acceptPartner, addShoppingCard, buyProducts, deleteNotification, getTotalPriceShop, listMessages, listPartner, listShoppingCard, login, markReadAllNotifications, markReadNotification, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
+import { ActionRelationShipStatusType, AddShoppingCartParams, CartInfoInterface, CartLocalItem, FilterType, NotificationInterface, PaginationType, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeMessageList, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { OnPressActionParamsType } from "../components/ui/RelationshipActions";
+import { getDefaultPrazo, useShoppingCartStore } from "../stores/cliente/shoppingCart.store";
 
 export function useListPartner(filters: FilterType, listType: TypeUserList, size: number = 20) {
     const key: string = `list-partner-fornecedor`;
@@ -97,6 +98,49 @@ export function useProductListFromId(id: string | number, filters: FilterType) {
         initialPageParam: 1,
     });
 }
+
+/* 
+export function useListPartner(filters: FilterType, listType: TypeUserList, size: number = 20) {
+    const key: string = `list-partner-fornecedor`;
+    // console.log(JSON.stringify(filters, null, "  "), listType, key);
+
+    return useInfiniteList({
+        queryKey: [key, listType, filters],
+        queryFn: async ({pageParam}) => {
+            return await listPartner(
+                listType,
+                undefined,
+                {
+                    page: pageParam as number, 
+                    size: size,
+                    filter: filters.filter,
+                    search: filters.search
+                }, 
+            );
+        },
+        initialPageParam: 1,
+    });
+}
+
+*/
+
+
+export function useListShoppingCard(pagination: PaginationType) {
+    const key: string = `shopping-cart`;
+
+    return useInfiniteList({
+        queryKey: [key, pagination],
+        queryFn: async ({pageParam}) => {
+            return await listShoppingCard({
+                page: pageParam as number, 
+                size: pagination.size,
+
+            });
+        },
+        initialPageParam: 1
+    });
+}
+
 
 
 export function useListMessages(filters: PaginationType, listType: TypeMessageList, size: number = 20) {
@@ -566,5 +610,151 @@ export function useMarkNotificationById(filters: PaginationType, listType: TypeM
         onSettled: () => {
             queryClient.invalidateQueries({queryKey: ['list-messages']});
         }
+    });
+}
+
+
+export function useGetTotalShop() {
+    const key: string = "total-shop";
+
+    return useQuery({
+        queryKey: [key],
+        queryFn: async() => {
+            return getTotalPriceShop();
+            // return 129
+        }
+    });
+}
+
+
+export function useCartActions() {
+    const setCart = useShoppingCartStore(s => s.setCart);
+    const key = ['shopping-cart'];
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: async () => {
+            const currentItems = useShoppingCartStore.getState().cartItems
+
+            const payload: AddShoppingCartParams[] = currentItems.map(item => ({
+                id_compra: item.id_product,
+                id_fornecedor: item.id_fornecedor,
+                quantidade: item.quantidade,
+                prazo: item.prazo!,
+            }))
+
+            console.log("Valores atuais: ", currentItems.length);
+
+            await addShoppingCard(payload)
+        },
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: key })
+
+            const previousData = queryClient.getQueryData(key)
+
+            const currentItems = useShoppingCartStore.getState().cartItems;
+
+            queryClient.setQueryData(key, currentItems);
+
+            return { previousData }
+        },
+        onError: (_err, _vars, context) => {
+            if (context?.previousData) {
+                queryClient.setQueryData(key, context.previousData);
+            }
+        }
+    });
+
+    function addProductToCart(product: CartLocalItem) {
+        const currentItems = useShoppingCartStore.getState().cartItems
+
+        console.log("Produto adicionado: ", product);
+        
+        const productWithPrazo = {
+            ...product,
+            prazo: product.prazo ?? getDefaultPrazo()
+        }
+        const existing = currentItems.find(
+            item => item.id_product === product.id_product
+        )
+
+        let updatedList: CartLocalItem[]
+
+        if(existing) {
+            updatedList = currentItems.map(item =>
+                item.id_product === product.id_product
+                ? productWithPrazo
+                : item
+            )
+        } else {
+            updatedList = [...currentItems, productWithPrazo]
+        }
+
+        
+        setCart(updatedList)
+
+        
+        mutation.mutate()
+    }
+
+    // -------- REMOVE --------
+    function removeProductFromCart(productId: number) {
+        const currentItems = useShoppingCartStore.getState().cartItems
+
+        const updatedList = currentItems.filter(
+            item => item.id_product !== productId
+        )
+        setCart(updatedList)
+        mutation.mutate()
+    }
+
+    return {
+        addProductToCart,
+        removeProductFromCart,
+        ...mutation
+    }
+}
+
+
+export function useSaveCart() {
+    const queryClient = useQueryClient();
+    const setCart = useShoppingCartStore(s => s.setCart);
+
+    return useMutation({
+        mutationFn: async (items: CartInfoInterface[]) => {
+            const payload: AddShoppingCartParams[] = items.map(item => ({
+                id_compra: item.id_product,
+                id_fornecedor: item.id_fornecedor,
+                quantidade: item.quantidade,
+                prazo: item.prazo!,
+            }));
+
+            await addShoppingCard(payload);
+
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['shopping-cart'] });
+            setCart(variables);
+        }
+    });
+}
+
+export function useBuyProducts(
+    options?: UseMutationOptions<any, any, void, unknown>
+) {
+    const queryClient = useQueryClient();
+    
+    const clearCart = useShoppingCartStore(s => s.clearCart);
+    const externalOnSuccess = options?.onSuccess;
+
+    return useMutation({
+        mutationFn: buyProducts,
+        ...options,
+        onSuccess: (data, variables, onMutateResult, context) => {
+            queryClient.invalidateQueries({ queryKey: ['shopping-cart'] });
+            clearCart();
+            
+            externalOnSuccess?.(data, variables, onMutateResult, context);
+        },
     });
 }

@@ -1,7 +1,7 @@
-import { useProductListFromId } from "@/src/hooks/useClienteQueries";
+import { useCartActions, useProductListFromId } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { MemoProductCardSimple, MemoProductCardSimpleSkeleton, ProductCardSimpleProps } from "../../common/ProductCardSimple";
 import { GenericInfiniteList, GenericInfiniteListType } from "../../common/GenericInfiniteList";
 import { ScreenErrorGuard } from "../../common/ScreenErrorGuard";
@@ -9,6 +9,8 @@ import { useFilterScreen } from "@/src/hooks/useFilterScreen";
 import { SearchInputList } from "../../common/SearchInputList";
 import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
 import { InfoProductBottomSheet } from "../../common/InfoProductBottomSheet";
+import { useShoppingCartStore } from "@/src/stores/cliente/shoppingCart.store";
+import { CartLocalItem, ProductAndFornecedorData } from "@/src/types/responseServiceTypes";
 
 
 export function ListProdsTab() {
@@ -74,6 +76,26 @@ export function ListProdsTab() {
         }
     );
 
+    const {
+        addProductToCart,
+    } = useCartActions();
+    
+    
+    const addProductHandle = useCallback((product: ProductAndFornecedorData) => {
+        // console.log("Comprar Ação de adicionar ao carrinho: ", JSON.stringify(product, null, "  "));
+        const cartData: CartLocalItem = {
+            id_fornecedor: product.id_fornecedor,
+            id_product: product.id_produto,
+            nome_estabelecimento: product.nomeestabelecimento,
+            nome_fornecedor: product.nome_fornecedor,
+            nome_prod: product.nome_prod,
+            preco: product.preco,
+            quantidade: 1,
+        };
+        addProductToCart(cartData);
+        // addItemToCartStore(cartData);
+    }, [addProductToCart]);
+
     
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
     // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
@@ -97,23 +119,20 @@ export function ListProdsTab() {
                     name: p.nome_prod,
                     price: p.preco,
                     qnt: p.quantidade.toString(),
-                    onPress: () => handleOpenInfoProduct(p.id_produto)
+                    onPress: () => handleOpenInfoProduct(p.id_produto),
+                    onPressAddProduct: () => addProductHandle(p)
                 });
             });
         });
         return Array.from(map.values());
-    }, [dataProduct, handleOpenInfoProduct]);
+    }, [dataProduct, handleOpenInfoProduct, addProductHandle]);
     
 
     // Flast List
     const renderItem = useCallback(
         ({item} : {item: ProductCardSimpleProps}) => (
             <MemoProductCardSimple
-                name={item.name}
-                canBuy={item.canBuy}
-                price={item.price}
-                qnt={item.qnt}
-                onPress={item.onPress}
+                {...item}
             />
         ),
         []

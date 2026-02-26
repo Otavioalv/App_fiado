@@ -76,7 +76,8 @@ const styles = StyleSheet.create({
     textTitle: {
         ...theme.typography.textXL,
         color: theme.colors.textNeutral900,
-        fontWeight: "bold"
+        fontWeight: "bold",
+        textAlign: "center",
     },
     textDesc: {
         fontSize: theme.typography.textMD.fontSize,

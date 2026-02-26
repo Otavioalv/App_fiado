@@ -6,12 +6,13 @@ import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
 import { OnPressActionFunctionType } from "@/src/components/ui/RelationshipActions";
 import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
-import { useProductList, useUpdatePartnerProductStatus } from "@/src/hooks/useClienteQueries";
+import { useCartActions, useProductList, useUpdatePartnerProductStatus } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
-import { TypeUserList } from "@/src/types/responseServiceTypes";
+import { useShoppingCartStore } from "@/src/stores/cliente/shoppingCart.store";
+import { CartLocalItem, ProductAndFornecedorData, TypeUserList } from "@/src/types/responseServiceTypes";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { View } from "react-native";
 
 const chipList: ChipDataType<TypeUserList>[] = [
@@ -106,13 +107,35 @@ export default function Produtos() {
         mutate({ id: id, newStatus: newStatus });
     }, [mutate]);
 
-    const handleOnPressAccepted = useCallback((id: string | number) => {
-        console.log("Comprar Ação de adicionar ao carrinho");
-        // router.push({
-        //     pathname: `/fornecedores/[id]`,
-        //     params: { tab: "Produtos", id: id}
-        // });
-    }, []);
+
+    // const {
+    //     cartItems, 
+    //     addItemToCartStore,
+    // } = useShoppingCartStore();
+    
+    // useEffect(() => {
+    //     console.log("Carrinho de compras", JSON.stringify(cartItems, null, "  "));
+    // }, [cartItems]);
+
+    const {
+        addProductToCart,
+    } = useCartActions();
+
+
+    const handleOnPressAccepted = useCallback((product: ProductAndFornecedorData) => {
+        // console.log("Comprar Ação de adicionar ao carrinho: ", JSON.stringify(product, null, "  "));
+        const cartData: CartLocalItem = {
+            id_fornecedor: product.id_fornecedor,
+            id_product: product.id_produto,
+            nome_estabelecimento: product.nomeestabelecimento,
+            nome_fornecedor: product.nome_fornecedor,
+            nome_prod: product.nome_prod,
+            preco: product.preco,
+            quantidade: 1,
+        };
+        addProductToCart(cartData);
+        // addItemToCartStore(cartData);
+    }, [addProductToCart]);
 
 
     // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
@@ -138,7 +161,7 @@ export default function Produtos() {
                     id: idString,
                     idUser: u.id_fornecedor,
                     onPressActionFunction: handleAction,
-                    onPressAccepted: handleOnPressAccepted,
+                    onPressAccepted: () => handleOnPressAccepted(u),
                     onPress: () => handleOpenInfoProduct(u.id_produto)
                 });
             });

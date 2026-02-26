@@ -12,7 +12,7 @@ export interface ProductCardProps extends ProductDescriptionProps, PressableProp
     relationshipType: RelationshipStatusType, 
     idUser: string | number,
     onPressActionFunction?: OnPressActionFunctionType,
-    onPressAccepted?: (id: string | number) => void,
+    onPressAccepted?: () => void,
 };
 
 export function ProductCard({

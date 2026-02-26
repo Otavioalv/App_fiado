@@ -135,3 +135,29 @@ export interface NotificationInterface {
    title_notification: "Nova solicitação de compra",
    read_at?: string,
 }
+
+export interface CartInfoInterface {
+   cart_id: number,
+   id_product: number,
+   id_fornecedor: number,
+   quantidade: number,
+   prazo: string,
+   created_at: string,
+   nome_prod: string,
+   preco: string,
+   nome_fornecedor: string,
+   nome_estabelecimento: string,
+}
+
+export type CartLocalItem = Omit<CartInfoInterface, 'cart_id' | 'created_at' | 'prazo'> & {
+  cart_id?: number
+  created_at?: string,
+  prazo?: string,
+}
+
+export interface AddShoppingCartParams {
+   id_compra: number | string,
+   id_fornecedor: number | string,
+   quantidade: number,
+   prazo: string
+}

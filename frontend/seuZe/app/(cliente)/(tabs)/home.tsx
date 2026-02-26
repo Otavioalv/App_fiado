@@ -5,16 +5,16 @@ import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShor
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
-import { useListPartner, useMe, useShoppingList } from "@/src/hooks/useClienteQueries";
+import { useListMessages, useListPartner, useMe, useShoppingList } from "@/src/hooks/useClienteQueries";
 import { mapAppErrorToErrorType } from "@/src/hooks/useErrorScreenListener";
 import { useFilterCategoryStore } from "@/src/stores/cliente/fornecedores.store";
 import { theme } from "@/src/theme";
 import { ErrorTypes} from "@/src/types/responseServiceTypes";
 import { transformDateToUI } from "@/src/utils";
-import {Feather, FontAwesome} from "@expo/vector-icons";
+import {Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Alert, RefreshControl, ScrollView } from "react-native";
+import { RefreshControl, ScrollView } from "react-native";
 
 
 export default function Home() {
@@ -23,6 +23,25 @@ export default function Home() {
     const {request: setCategoryFornecedores} = useFilterCategoryStore();
     
     const router = useRouter();
+
+
+    const {
+        data: dataMessages,
+        refetch: fetchMessages,
+        isError, 
+        error, 
+        isLoading,
+        isRefetching,
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+    } = useListMessages(
+        {
+            page: 1,
+            size: 1
+        },
+        "unread"
+    );
     
     const shortcuts: ShortcutsType[] = [
         {   
@@ -32,6 +51,12 @@ export default function Home() {
             onPress: () => router.push("/fornecedores")
 
         }, 
+        {
+            idSh: "7",
+            title: "Carinho", 
+            icon: <Feather name="shopping-cart" size={32} color={theme.colors.orange}/>,
+            onPress: () => router.push("/shopping_cart")
+        },
         {
             idSh: "2",
             title: "Minhas Parcerias", 
@@ -51,7 +76,7 @@ export default function Home() {
         {
             idSh: "4",
             title: "Minhas Compras", 
-            icon: <Feather name="shopping-cart" size={32} color={theme.colors.orange}/>,
+            icon: <Feather name="shopping-bag" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/compras")
 
         }, 
@@ -60,13 +85,7 @@ export default function Home() {
             title: "Notificações", 
             icon: <Feather name="bell" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/notificacoes")
-        }, 
-        {
-            idSh: "6",
-            title: "Meu Perfil", 
-            icon: <Feather name="user" size={32} color={theme.colors.orange}/>,
-            onPress: () => router.push("/perfil")
-        }  
+        }
     ];
 
     const {
@@ -144,6 +163,7 @@ export default function Home() {
                 fetchMe({ throwOnError: true }),
                 fetchShoppingList({ throwOnError: true }),
                 fetchPartnerSent({ throwOnError: true }),
+                fetchMessages({throwOnError: true}),
             ]);
 
         } catch(err) {
@@ -152,7 +172,7 @@ export default function Home() {
         }  finally {
             setRefreshing(false);
         }
-    }, [fetchMe, fetchShoppingList, fetchPartnerSent]);
+    }, [fetchMe, fetchShoppingList, fetchPartnerSent, fetchMessages]);
     
     return (
         <ScreenErrorGuard errorType={errorType} onRetry={loadData}>
@@ -172,6 +192,7 @@ export default function Home() {
                     nome={userData?.nome || ""} 
                     apelido={userData?.apelido || ""}
                     isLoading={meLoad}
+                    hasNotification={!!dataMessages?.pages[0].list.length}
                 />
 
                 <MyScreenContainer>

@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import Feather from '@expo/vector-icons/Feather';
 import { theme } from "@/src/theme";
 
-
 export default function TabsLayout() {
     return (
         <Tabs
@@ -49,7 +48,7 @@ export default function TabsLayout() {
                 options={{
                     title: "Compras",
                     tabBarIcon: ({color}) => 
-                        <Feather name="shopping-cart" size={24} color={color}/>,
+                        <Feather name="shopping-bag" size={24} color={color}/>,
                 }}
             />
 
@@ -65,9 +64,7 @@ export default function TabsLayout() {
             <Tabs.Screen
                 name="teste"
                 options={{
-                    title: "Teste",
-                    tabBarIcon: ({color}) => 
-                        <Feather name="code" size={24} color={color}/>,
+                    href: null,
                 }}
             />
         </Tabs>

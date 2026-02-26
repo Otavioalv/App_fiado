@@ -12,6 +12,7 @@ export interface ProductCardSimpleProps extends PressableProps{
     price: string,
     canBuy: boolean,
     isLoading?: boolean,
+    onPressAddProduct?: () => void
 }
 
 
@@ -21,6 +22,7 @@ export function ProductCardSimple({
     qnt,
     canBuy = true,
     isLoading = false,
+    onPressAddProduct,
     ...pressableProps
 }: ProductCardSimpleProps) {
     const qtdDesc = `Estoque: ${qnt} un`;
@@ -54,6 +56,7 @@ export function ProductCardSimple({
                     placeholder="Adicionar"
                     variant={canBuy ? "outline" : "disabled"}
                     size="S"
+                    onPress={onPressAddProduct}
                 />
             </View>
         </Pressable>

@@ -5,11 +5,12 @@ import { DefaultDescription } from "../ui/DefaultDescription";
 import { ButtonModern } from "../ui/ButtonModern";
 import { theme } from "@/src/theme";
 import MyScreenContainer from "./MyScreenContainer";
-import { useProductSingleFromId } from "@/src/hooks/useClienteQueries";
+import { useCartActions, useProductSingleFromId } from "@/src/hooks/useClienteQueries";
 import { SectionContainer } from "./SectionContainer";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Stepper } from "./Stepper";
+import { useCallback } from "react";
+// import { useShoppingCartStore } from "@/src/stores/cliente/shoppingCart.store";
+import { CartLocalItem } from "@/src/types/responseServiceTypes";
 
 interface InfoProductBottomSheetProps {
     idProduct: number | string,
@@ -27,9 +28,29 @@ export function InfoProductBottomSheet({
         idProduct
     );
 
+    
 
-    // Temporario lista de compras
-    const [productQnt, setProductQnt] = useState<number>(1);
+    const {
+        addProductToCart,
+    } = useCartActions();
+
+
+    const addToCart = useCallback(() => {
+        if(!data) return;
+        // console.log("Comprar Ação de adicionar ao carrinho: ", JSON.stringify(product, null, "  "));
+        const cartData: CartLocalItem = {
+            id_fornecedor: data.id_fornecedor,
+            id_product: data.id_produto,
+            nome_estabelecimento: data.nomeestabelecimento,
+            nome_fornecedor: data.nome_fornecedor,
+            nome_prod: data.nome_prod,
+            preco: data.preco,
+            quantidade: 1,
+        };
+        addProductToCart(cartData);
+        // addItemToCartStore(cartData);
+    }, [addProductToCart, data]);
+    
 
 
 
@@ -88,13 +109,13 @@ export function InfoProductBottomSheet({
                                 gap: theme.gap.md,
                             }}
                         >
-                            <Stepper
+                            {/* <Stepper
                                 quantity={productQnt}
                                 setQuantity={setProductQnt}
                                 isLoading={isLoading}
                                 isInteractive={isActivate}
                                 variant={isActivate ? "primary" : "disabled"}
-                            />
+                            /> */}
 
                             <ButtonModern
                                 style={{flex: 1}}
@@ -102,6 +123,8 @@ export function InfoProductBottomSheet({
                                 placeholder="Adicionar ao Carrinho"
                                 isLoading={isLoading}
                                 variant={isActivate ? "primary" : "disabled"}
+                                disabled={!isActivate || isLoading}
+                                onPress={addToCart}
                             />
                         </View>
                 </SectionContainer>

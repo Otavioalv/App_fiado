@@ -1,7 +1,7 @@
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { api } from "./api";
 import { BackendResponse, responseAxiosInterfaces } from "./typesApi";
-import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, TypeShoppingList, NotificationInterface, TypeMessageList } from "../types/responseServiceTypes";
+import { ClienteDataType, TypeUserList, PaginationType, PartnerFornecedorType, ResultsWithPagination, ShoppingData, ProductAndFornecedorData, NotificationInterface, TypeMessageList, CartInfoInterface, AddShoppingCartParams } from "../types/responseServiceTypes";
 import { ShoppingListParams } from "./types/clienteServiceParams";
 
 interface ListMessagesParams {
@@ -71,6 +71,7 @@ export async function me(): Promise<ClienteDataType>{
 export async function update(updtData: BasicFormSchema): Promise<boolean> {
     try {
         const endPoint = defaultEndPoint + "/update";
+        
         // const response = await api.post(endPoint, dataToUser) as responseAxiosInterfaces<{token: string}>;
         await api.post(endPoint, updtData) as responseAxiosInterfaces<null>;
 
@@ -312,3 +313,63 @@ export async function markReadAllNotifications(): Promise<boolean>{
         throw err;
     }
 }
+
+
+
+export async function listShoppingCard(pagination: PaginationType = {page: 1, size: 10}): Promise<ResultsWithPagination<CartInfoInterface[]>> {
+    try {
+        const endPoint = defaultEndPoint + "/cart";
+
+        const response = await api.get<BackendResponse<ResultsWithPagination<CartInfoInterface[]>>>(endPoint, {
+            params: {
+                ...pagination,
+            }
+        });
+
+        // console.log(JSON.stringify(response.data.data, null, "  "));
+
+        if(!response.data.data) {
+            return {list: [], pagination: pagination}
+        }
+
+        return response.data.data
+    }catch(err: any) {
+        throw err;
+    }
+}
+
+
+export async function addShoppingCard(products: AddShoppingCartParams[]): Promise<boolean>{
+    try {
+        const endPoint = defaultEndPoint + "/cart";
+        await api.put(endPoint, products);
+        return true
+    }catch(err: any) {
+        throw err;
+    } 
+}
+
+export async function buyProducts() {
+    try {
+        const endPoint = defaultEndPoint + "/product/buy";
+        const { data } = await api.put(endPoint);
+        return data;
+    }catch(err: any) {
+        throw err;
+    }
+}
+
+export async function getTotalPriceShop() {
+    try{
+        const endPoint = defaultEndPoint + "/product/buy/total_cart";
+        const {data} = await api.get<BackendResponse<{totalCart: number}>>(endPoint);
+        
+        if(!data.data?.totalCart)
+            return 0;
+
+        return data.data.totalCart
+    }catch(err: any) {
+        throw err;
+    }
+}
+    

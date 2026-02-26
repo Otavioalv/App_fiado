@@ -9,7 +9,7 @@ type RelationshipActionProductProps = {
     idUser: string | number, 
     isLoading?: boolean, 
     onPressAction?: OnPressActionFunctionType,
-    onPressAccepted?: (id: number | string) => void,
+    onPressAccepted?: () => void,
 }
 
 export function RelationshipActionProduct({
@@ -22,7 +22,7 @@ export function RelationshipActionProduct({
     if(isLoading) return <RelationshipActionsSkeleton/>;
     
     const handleOptionalButtonProps: OnPressActionFunctionType = onPressAction ? onPressAction : ({id, newStatus}) => {};
-    const handleOnPressAccepted = onPressAccepted ? onPressAccepted : (id: number | string) => {};
+    const handleOnPressAccepted = onPressAccepted ? onPressAccepted : () => {};
 
     return (
         <View 
@@ -32,10 +32,10 @@ export function RelationshipActionProduct({
                 <>
                 {/* MUDAR PARA BOTAO QUE MUDA AO APERTAR E PEDE QUANTIDADE */}
                     <ButtonModern 
-                        placeholder="Comprar" 
+                        placeholder="Adicionar ao carirnho" 
                         size="M" 
                         style={{flex: 1}}
-                        onPress={() => handleOnPressAccepted(idUser)}
+                        onPress={handleOnPressAccepted}
                     />
                 </>
             )}
