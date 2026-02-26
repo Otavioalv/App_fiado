@@ -107,9 +107,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     color: theme.colors.orange,
     fontSize: theme.typography.textSM.fontSize,
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 999,
     fontWeight: "bold",
+    borderWidth: 1,
+    borderColor: theme.colors.orange,
   },
 });
