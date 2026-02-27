@@ -40,6 +40,7 @@ class FornecedorController extends UserController{
 
             return res.status(201).send(successResponse(ResponseApi.Auth.REGISTER_SUCCESS));
         } catch(err) {
+            console.log(err);
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, err));
         }
     }
@@ -139,6 +140,63 @@ class FornecedorController extends UserController{
 
             return res.status(200).send(successResponse(ResponseApi.Users.LIST_USER_DATA, data));
         } catch(e) {
+            return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
+        }
+    }
+
+    public async update(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+        try {
+            // Fazer função de atualização-
+            const id:number = await getTokenIdFromRequest(req);
+            const dataUpdate: fornecedorInterface = await req.body as fornecedorInterface;
+            
+            
+            // Verifica se dados recebidos esta vazio
+            if(Object.keys(dataUpdate).length === 0) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA));
+            }
+
+            // Verifica os dados recebidos
+            const message = await this.validateDatasUser.validateDatasUpdateFornecedor(dataUpdate);
+            if(message.length) {
+                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA, message));
+            }
+
+            // Verifica se usuario existe no banco de dados (ATUALIZAR COM URGENCIA) 
+            // retorno do controler deve ter tipo undefined ou null para melhor verificação dos dados
+            // Deve ser mais concreto com os dados (codigo feito  antes de obter mais experiencia)
+            const currentUser = await this.fornecedorModel.findUserById(id);
+            if(Object.keys(currentUser || {}).length === 0) {
+                return res.status(400).send(errorResponse(ResponseApi.Auth.USER_NOT_FOUND));
+            }
+
+            // Verifica se nome existe, pois e um dado unico. Futuramente numero de telefone verificar tmb
+            const dataUser = await this.fornecedorModel.findByUsername(dataUpdate.nome);
+
+            /* 
+                se o nome for igual ao recebido: nao enviar erro
+                se o nome existir enviar erro
+
+                nome tem q ser diferente, 
+            */
+            if(Object.keys(dataUser || {}).length > 0 && currentUser.nome !== dataUser.nome) {
+                return res.status(400).send(errorResponse(ResponseApi.Auth.USER_ALREADY_EXISTS_UPD));
+            }
+            
+            /* 
+                {
+                    "id_cliente": 153,
+                    "nome": "otavio",
+                    "telefone": "92992348389",
+                    "apelido": "senhapadrao"
+                }
+            */
+
+            await this.fornecedorModel.update(dataUpdate, id);
+
+            return res.status(200).send(successResponse(ResponseApi.Users.UPDATE_SUCCESS));
+        } catch(e) {
+            console.log(e);
             return res.status(500).send(errorResponse(ResponseApi.Server.INTERNAL_ERROR, e));
         }
     }

@@ -19,8 +19,8 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                         complemento, 
                         logradouro, 
                         nome, 
-                        nomeEstabelecimento, 
-                        numeroImovel, 
+                        nomeestabelecimento, 
+                        numeroimovel, 
                         senha, 
                         telefone, 
                         uf
@@ -33,8 +33,8 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                     complemento, 
                     logradouro, 
                     nome, 
-                    nomeEstabelecimento, 
-                    numeroImovel, 
+                    nomeestabelecimento, 
+                    numeroimovel, 
                     senha, 
                     telefone, 
                     uf
@@ -47,15 +47,18 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                 complemento, 
                 logradouro, 
                 nome, 
-                nomeEstabelecimento, 
-                numeroImovel, 
+                nomeestabelecimento, 
+                numeroimovel, 
                 senha, 
                 telefone, 
                 uf
             ];
+            console.log(SQL, VALUES);
+            
 
             await client.query('BEGIN');
             await client.query(SQL, VALUES);
+
             await client.query('COMMIT');
             
         } catch(e){
@@ -65,6 +68,49 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
         } finally {
             client?.release();
         }
+    }
+
+    public async update(datasUpdate: fornecedorInterface, idFornecedor: number) {
+        let client: PoolClient | undefined;
+
+        try {
+            client = await connection.connect();
+
+
+            console.log(datasUpdate, idFornecedor);
+            const SQL = `
+                UPDATE fornecedor 
+                SET 
+                    nome = $1, 
+                    apelido = $2, 
+                    telefone = $3,
+                    numeroimovel = $4,
+                    logradouro = $5,
+                    cep = $6,
+                    nomeestabelecimento = $7,
+                    uf = $8,
+                    complemento = $9,
+                    bairro = $10
+                WHERE 
+                    id_fornecedor = $11
+            `;
+
+            const {nome, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, complemento, bairro} = datasUpdate;
+            const values = [nome, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, complemento, bairro, idFornecedor];
+
+            console.log(SQL, values);
+
+            await client.query('BEGIN');
+            await client.query(SQL, values);
+            await client.query('COMMIT');
+
+            return;
+        } catch (e) {
+            console.log(e);
+            throw new Error("Erro ao salvar usuario no banco de dados");
+        } finally {
+            client?.release();
+        }   
     }
 
     public async findByUsername(nome: string): Promise<fornecedorInterface>{
@@ -324,7 +370,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                             ? last.nome
                             : filter === "Apelido"
                                 ? last.apelido!
-                                : last.nomeEstabelecimento,
+                                : last.nomeestabelecimento,
                     id: last.id_fornecedor!,
                 },
             };

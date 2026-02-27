@@ -61,32 +61,32 @@ class ClienteFornecedorController {
             await this.clienteFornecedorModel.associarComFornecedor(ids, id_cliente);
 
 
-            const notificationService = req.server.notificationService;
-            const clienteData = await this.clienteModel.findUserById(id_cliente);
+            // const notificationService = req.server.notificationService;
+            // const clienteData = await this.clienteModel.findUserById(id_cliente);
 
-            await Promise.all(
-                listFornecedor
-                    .filter((lf => ids.ids.includes(lf.id_fornecedor || 0)))
-                    .map(fornecedor => {
-                        const data: NotificationInput = {
-                            toId: fornecedor.id_fornecedor!.toString(),
-                            created_at: new Date(),
-                            fromUserType: "cliente",
-                            toUserType: "fornecedor",
-                            user: {
-                                id: id_cliente,
-                                nome: clienteData.nome,
-                                apelido: clienteData.apelido
-                            }
-                        };
+            // await Promise.all(
+            //     listFornecedor
+            //         .filter((lf => ids.ids.includes(lf.id_fornecedor || 0)))
+            //         .map(fornecedor => {
+            //             const data: NotificationInput = {
+            //                 toId: fornecedor.id_fornecedor!.toString(),
+            //                 created_at: new Date(),
+            //                 fromUserType: "cliente",
+            //                 toUserType: "fornecedor",
+            //                 user: {
+            //                     id: id_cliente,
+            //                     nome: clienteData.nome,
+            //                     apelido: clienteData.apelido
+            //                 }
+            //             };
 
-                        notificationService.saveAndSendPrepared(
-                            Notifications.novaSolicitacaoParceria(data),
-                            data
-                        );
+            //             notificationService.saveAndSendPrepared(
+            //                 Notifications.novaSolicitacaoParceria(data),
+            //                 data
+            //             );
 
-                    })
-            );
+            //         })
+            // );
 
             return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_REQUEST_SENT));
         } catch(e) {
@@ -134,33 +134,33 @@ class ClienteFornecedorController {
             // Envia no banco de dados
             await this.clienteFornecedorModel.associarComCliente(ids, id_fornecedor);
 
-            // Envia notificação
-            const notificationService = req.server.notificationService;
-            const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
+            // // Envia notificação
+            // const notificationService = req.server.notificationService;
+            // const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
 
-            await Promise.all(
-                listCliente
-                    .filter(lc => ids.ids.includes(lc.id_cliente || 0))
-                    .map(cliente => {
-                        const data: NotificationInput = {
-                            toId: cliente.id_cliente!.toString(),
-                            created_at: new Date(),
-                            fromUserType: "fornecedor",
-                            toUserType: "cliente",
-                            user: {
-                                id: id_fornecedor,
-                                nome: fornecedorData.nome,
-                                apelido: fornecedorData.apelido
-                            }
-                        }
+            // await Promise.all(
+            //     listCliente
+            //         .filter(lc => ids.ids.includes(lc.id_cliente || 0))
+            //         .map(cliente => {
+            //             const data: NotificationInput = {
+            //                 toId: cliente.id_cliente!.toString(),
+            //                 created_at: new Date(),
+            //                 fromUserType: "fornecedor",
+            //                 toUserType: "cliente",
+            //                 user: {
+            //                     id: id_fornecedor,
+            //                     nome: fornecedorData.nome,
+            //                     apelido: fornecedorData.apelido
+            //                 }
+            //             }
 
-                        notificationService.saveAndSendPrepared
-                            (Notifications.novaSolicitacaoParceria(data),
-                            data
-                        );
+            //             notificationService.saveAndSendPrepared
+            //                 (Notifications.novaSolicitacaoParceria(data),
+            //                 data
+            //             );
 
-                    })
-            );
+            //         })
+            // );
 
             return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_REQUEST_SENT));
         }catch(e) {
@@ -191,24 +191,24 @@ class ClienteFornecedorController {
 
 
             // Mandar notificação
-            const notificationService = req.server.notificationService;
-            const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
+            // const notificationService = req.server.notificationService;
+            // const fornecedorData = await this.fornecedorModel.findUserById(id_fornecedor);
 
-            const data: NotificationInput = {
-                toId: idPartner.toString(),
-                created_at: new Date(),
-                fromUserType: "fornecedor",
-                toUserType: "cliente",
-                user: {
-                    id: id_fornecedor,
-                    nome: fornecedorData.nome,
-                    apelido: fornecedorData.apelido
-                }
-            };
-            await notificationService.saveAndSendPrepared
-                (Notifications.parceriaAceita(data),
-                data
-            );
+            // const data: NotificationInput = {
+            //     toId: idPartner.toString(),
+            //     created_at: new Date(),
+            //     fromUserType: "fornecedor",
+            //     toUserType: "cliente",
+            //     user: {
+            //         id: id_fornecedor,
+            //         nome: fornecedorData.nome,
+            //         apelido: fornecedorData.apelido
+            //     }
+            // };
+            // await notificationService.saveAndSendPrepared
+            //     (Notifications.parceriaAceita(data),
+            //     data
+            // );
             
             return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_ACCEPT));
         }catch(e) {
@@ -233,27 +233,27 @@ class ClienteFornecedorController {
             await this.clienteFornecedorModel.aceitarParceriaFornecedor(id_cliente, idPartner);
 
             // Mando notificação
-            const notificationService = req.server.notificationService;
-            const clienteData = await this.clienteModel.findUserById(id_cliente);
+            // const notificationService = req.server.notificationService;
+            // const clienteData = await this.clienteModel.findUserById(id_cliente);
 
-            console.log(idPartner, id_cliente);
-            console.log(clienteData);
+            // console.log(idPartner, id_cliente);
+            // console.log(clienteData);
 
-            const data: NotificationInput = {
-                toId: idPartner.toString(),
-                created_at: new Date(),
-                fromUserType: "cliente",
-                toUserType: "fornecedor",
-                user: {
-                    id: id_cliente,
-                    nome: clienteData.nome,
-                    apelido: clienteData.apelido
-                }
-            };
-            await notificationService.saveAndSendPrepared
-                (Notifications.parceriaAceita(data),
-                data
-            );
+            // const data: NotificationInput = {
+            //     toId: idPartner.toString(),
+            //     created_at: new Date(),
+            //     fromUserType: "cliente",
+            //     toUserType: "fornecedor",
+            //     user: {
+            //         id: id_cliente,
+            //         nome: clienteData.nome,
+            //         apelido: clienteData.apelido
+            //     }
+            // };
+            // await notificationService.saveAndSendPrepared
+            //     (Notifications.parceriaAceita(data),
+            //     data
+            // );
 
             
             return res.status(201).send(successResponse(ResponseApi.Partner.PARTNER_ACCEPT));

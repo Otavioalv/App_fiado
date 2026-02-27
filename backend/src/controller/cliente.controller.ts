@@ -153,7 +153,7 @@ class ClienteController extends UserController{
                     "apelido": "senhapadrao"
                 }
             */
-
+           
             await this.clienteModel.update(dataUpdate, id);
 
             return res.status(200).send(successResponse(ResponseApi.Users.UPDATE_SUCCESS));

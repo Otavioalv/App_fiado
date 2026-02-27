@@ -34,14 +34,16 @@ class ValidateDatasUser {
             datasRegister.senha = datasRegister.senha.trim();
             datasRegister.apelido = datasRegister.apelido?.trim();
             datasRegister.telefone = this.normalizePhone(datasRegister.telefone.trim());
-
+            
             // dados relacionados a fornecedor
-            datasRegister.nomeEstabelecimento = datasRegister.nomeEstabelecimento.trim();
+            datasRegister.nomeestabelecimento = datasRegister.nomeestabelecimento.trim();
             datasRegister.logradouro = datasRegister.logradouro.trim();
             datasRegister.bairro = datasRegister.bairro.trim();
             datasRegister.uf = datasRegister.uf.trim();
             datasRegister.cep = datasRegister.cep.trim();
             datasRegister.complemento = datasRegister.complemento?.trim();
+            datasRegister.numeroimovel = datasRegister.numeroimovel?.trim();
+            
 
             const nomeVerificado = await this.validarNome(datasRegister.nome);
             const senhaValidada = await this.validarSenha(datasRegister.senha);
@@ -53,7 +55,7 @@ class ValidateDatasUser {
                 !datasRegister.senha || 
                 !datasRegister.telefone || 
                 
-                !datasRegister.nomeEstabelecimento || 
+                !datasRegister.nomeestabelecimento || 
                 !datasRegister.logradouro || 
                 !datasRegister.bairro || 
                 !datasRegister.cep || 
@@ -65,9 +67,9 @@ class ValidateDatasUser {
                     messages.push(objMenssage);
             } 
 
-            if(!validator.isLength(datasRegister.nomeEstabelecimento, { min: 3})) {        
+            if(!validator.isLength(datasRegister.nomeestabelecimento, { min: 3})) {        
                 const objMenssage = {
-                    nomeEstabelecimento: ["Nome do estabelecimento invalido"]
+                    nomeestabelecimento: ["Nome do estabelecimento invalido"]
                 };
 
                 messages.push(objMenssage);
@@ -136,9 +138,16 @@ class ValidateDatasUser {
                 messages.push(objMenssage);
             }
 
-            // if(typeof datasRegister.numeroImovel != "number"){
+            if(datasRegister.numeroimovel && datasRegister.numeroimovel.length > 5) {
+                const objMessage = {
+                    numeroimovel: ["Numero de imovel muito grande"]
+                }
+                messages.push(objMessage);
+            }
+
+            // if(typeof datasRegister.numeroimovel != "number"){
             //     const objMenssage = {
-            //         numeroImovel: ["numero do imovel invalido"]
+            //         numeroimovel: ["numero do imovel invalido"]
             //     }
 
             //     messages.push(objMenssage);
@@ -226,6 +235,108 @@ class ValidateDatasUser {
             return messages
         } catch (e) {
             throw new Error('Erro ao validar dados');
+        }
+    }
+
+    public async validateDatasUpdateFornecedor(datasRegister: fornecedorInterface):Promise<Record<string, string[]>[]>{
+        try {
+            const messages: Record<string, string[]>[] = [];
+
+            
+            // dados relacionados a fornecedor e cliente
+            datasRegister.nome = datasRegister.nome.trim().toLowerCase();
+            // datasRegister.nome = datasRegister.nome.trim();
+            datasRegister.apelido = datasRegister.apelido?.trim();
+            datasRegister.telefone = this.normalizePhone(datasRegister.telefone.trim());
+            
+            // dados relacionados a fornecedor
+            datasRegister.nomeestabelecimento = datasRegister.nomeestabelecimento.trim();
+            datasRegister.logradouro = datasRegister.logradouro.trim();
+            datasRegister.bairro = datasRegister.bairro.trim();
+            datasRegister.uf = datasRegister.uf.trim();
+            datasRegister.cep = datasRegister.cep.trim();
+            datasRegister.complemento = datasRegister.complemento?.trim();
+            
+
+            const nomeVerificado = await this.validarNome(datasRegister.nome);
+            const apelidoValidado = await this.validarApelido(datasRegister.apelido);
+            const telefoneValidado = await this.validarTelefone(datasRegister.telefone);
+
+
+            if(!validator.isLength(datasRegister.nomeestabelecimento, { min: 3})) {        
+                const objMenssage = {
+                    nomeestabelecimento: ["Nome do estabelecimento invalido"]
+                };
+
+                messages.push(objMenssage);
+            }
+
+            if(nomeVerificado.nome.length) {
+                messages.push(nomeVerificado);
+            }
+
+            if(apelidoValidado.apelido.length) {
+                messages.push(apelidoValidado);
+            }
+            
+            if(telefoneValidado.telefone.length) {
+                messages.push(telefoneValidado);
+            }
+            
+            if(!validator.isLength(datasRegister.logradouro, {min: 2})) {
+                const objMenssage = {
+                    logradouro: ["Nome do logradouro invalido"]
+                };
+
+                messages.push(objMenssage);
+            }
+            
+            if(!validator.isLength(datasRegister.bairro, {min: 2})) {
+                const objMenssage = {
+                    bairro: ["Nome do bairro invalido"]
+                };
+
+                messages.push(objMenssage);
+            }
+            
+            if(!validator.isLength(datasRegister.cep, {max: 8, min: 8})) {
+                const objMenssage = {
+                    cep: ["CEP deve conter exatamente 8 numeros"]
+                };
+
+                messages.push(objMenssage);
+            }
+            
+            if(!validator.isLength(datasRegister.uf, {max: 2, min: 2})) {
+                const objMenssage = {
+                    uf: ["Uf deve conter exatamente 2 caracteres"]
+                };
+
+                messages.push(objMenssage);
+            }
+
+            if(datasRegister.complemento && 
+                (
+                    !validator.isLength(datasRegister.complemento, {min: 1}) ||
+                    /\s\s/.test(datasRegister.complemento)
+                )
+            ) {
+                const objMenssage = {
+                    complemento: ["Complemento invalido"]
+                }
+                messages.push(objMenssage);
+            }
+
+            if(datasRegister.numeroimovel && datasRegister.numeroimovel.length > 5) {
+                const objMessage = {
+                    numeroimovel: ["Numero de imovel muito grande"]
+                }
+                messages.push(objMessage);
+            }
+
+            return messages
+        } catch(err) {
+            throw new Error("Erro ao validar dados");
         }
     }
 

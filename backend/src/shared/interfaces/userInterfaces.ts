@@ -4,7 +4,7 @@ export interface addressInterface {
     uf: string;
     cep: string
     complemento?: string;
-    numeroImovel?: number;
+    numeroimovel?: string;
 }
 
 
@@ -30,7 +30,7 @@ export interface clienteInterface extends userInterface {
 
 export interface fornecedorInterface extends userInterface, addressInterface{
     id_fornecedor?: number;
-    nomeEstabelecimento:string;
+    nomeestabelecimento:string;
 }
 
 export interface clienteFornecedorInterface {
