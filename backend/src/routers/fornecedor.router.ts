@@ -43,18 +43,6 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
         return await fornecedorController.partnerList(req, res);
     });
 
-    // router.post("/partner/list/reseived", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-    //     return await fornecedorController.partnerList(req, res, "received");
-    // });
-
-    // router.post("/partner/list/sent", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-    //     return await fornecedorController.partnerList(req, res, "sent");
-    // }); 
-
-    // router.post("/partner/list/accepted", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-    //     return await fornecedorController.partnerList(req, res, "accepted");
-    // }); 
-
     router.post('/product/add', authorizedOptions("fornecedor"), async (req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.addProducts(req, res);
     });
@@ -87,9 +75,16 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
         return await produtoController.updatePurchaces(req, res);
     });
 
-
-    router.post('/message/list', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+    router.get('/message/list/:typeList?', authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await notificationController.listMessages(req, res, "fornecedor");        
+    });
+
+    router.put("/message/mark-read", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await notificationController.markReadMessage(req, res, "fornecedor");
+    });
+
+    router.put("/message/mark-all-read", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await notificationController.markAllReadMessage(req, res, "fornecedor");
     });
 
     router.post("/message/delete", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
