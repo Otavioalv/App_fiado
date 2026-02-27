@@ -294,6 +294,137 @@ class ClienteModel extends UserModel<clienteInterface>{
             client?.release();
         }
     }
+
+
+    public async getPartnerByIdFornecedor2(
+        idFornecedor: number, 
+        typeList: TypesListUser = "all", 
+        filterOpt:queryFilter,
+        idCliente?: number,
+    ): Promise<clienteInterface[]>{
+        let client: PoolClient | undefined;
+        try {
+            client = await connection.connect();
+            
+            const {size, page, search, filter} = filterOpt;
+
+            console.log("[MODEL CLIENTE GET PARTNER] >>>>>");
+            console.log(idFornecedor, idCliente, filterOpt, typeList);
+
+            const sqlFilterList: Record<string, string> = {
+                Nome: "c.nome ASC",
+                Apelido: "c.apelido ASC",
+                Data: "cf.created_at DESC",
+            }
+
+            const orderBy = sqlFilterList[filter] ?? "f.nome ASC";
+
+            const relationshipMap: Record<TypesListUser, string> = {
+                all: "",
+                sent: "(cf.fornecedor_check = TRUE AND cf.cliente_check = FALSE)",
+                received: "(cf.cliente_check = TRUE AND cf.fornecedor_check = FALSE)",
+                accepted: "(cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE)",
+                none: "cf.fk_fornecedor_id IS NULL",
+            };
+
+
+            const limit:number = size; // numero de quantidades a mostrar
+            const offset:number = (page - 1) * limit // Começa a partir do numero 
+
+            const whereCondition: string[] = [];
+            const values: (string|number)[] = [];
+            let paramIndex = 1;
+
+            values.push(idFornecedor);
+
+            const relationshipCondition = relationshipMap[typeList];
+            if(relationshipCondition) {
+                whereCondition.push(relationshipCondition);
+            }
+
+            const searchSql = `%${search}%`;
+            values.push(searchSql);
+            const searchParam = `$${++paramIndex}`;
+
+            whereCondition.push(`
+                (
+                    c.nome ILIKE ${searchParam}
+                    OR unaccent(c.apelido) ILIKE unaccent(${searchParam})
+                )
+            `);
+
+            if(idCliente) {
+                values.push(idCliente);
+                whereCondition.push(`c.id_cliente = $${++paramIndex}`);
+            }
+
+            const whereSql = whereCondition.length 
+                ? `WHERE ${whereCondition.join(" AND ")}`
+                : "";
+
+            const fromJoinSql = `
+                FROM cliente AS c
+                LEFT JOIN cliente_fornecedor AS cf 
+                    ON c.id_cliente = cf.fk_cliente_id
+                AND cf.fk_fornecedor_id = $1
+            `;
+
+            values.push(limit, offset);
+            
+
+            const SQL_LIST:string = `
+                SELECT 
+                    c.id_cliente,
+                    c.nome,
+                    c.apelido,
+                    c.telefone,
+                    cf.created_at,
+                    
+                    COALESCE(cf.cliente_check, FALSE) AS cliente_check,
+                    COALESCE(cf.fornecedor_check, FALSE) AS fornecedor_check,
+
+                    CASE
+                        WHEN cf.cliente_check = TRUE AND cf.fornecedor_check = TRUE THEN 'ACCEPTED'
+                        WHEN cf.fornecedor_check = TRUE THEN 'SENT'
+                        WHEN cf.cliente_check = TRUE THEN 'RECEIVED'
+                        ELSE 'NONE'
+                    END AS relationship_status
+
+                ${fromJoinSql}
+                ${whereSql}
+                ORDER BY ${orderBy}
+                LIMIT $${paramIndex + 1}
+                OFFSET $${paramIndex + 2};
+            `;
+
+            const SQL_TOTAL = `
+                SELECT COUNT(*) AS total
+                ${fromJoinSql}
+                ${whereSql};
+            `;
+
+            console.log(SQL_LIST, idFornecedor, typeList);
+
+            const result:clienteInterface[] = (
+                await client.query<clienteInterface>(SQL_LIST, values)
+            ).rows;  
+
+            const {total} = ((
+                await client.query(SQL_TOTAL, values.slice(0, paramIndex))
+            ).rows)[0] as {total:number}; 
+
+
+            filterOpt.total = Number(total);
+            filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);
+
+            return result;
+        } catch(e) {
+            console.error(e);
+            throw new Error("Erro ao coletar parcerias");
+        } finally {
+            client?.release();
+        }
+    }
 }
 
 export {ClienteModel}

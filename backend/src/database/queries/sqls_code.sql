@@ -107,3 +107,79 @@ CREATE TRIGGER trg_set_fk_cliente_fornecedor
 BEFORE INSERT ON cart_items
 FOR EACH ROW
 EXECUTE FUNCTION set_fk_cliente_fornecedor();
+
+
+CREATE OR REPLACE FUNCTION finalizar_compra(p_cliente_id INT)
+RETURNS VOID AS $$
+DECLARE
+    v_cart_id INT;
+BEGIN
+
+    -- Buscar carrinho do cliente
+    SELECT id_cart INTO v_cart_id
+    FROM cart
+    WHERE fk_id_cliente = p_cliente_id
+    FOR UPDATE;
+
+    IF v_cart_id IS NULL THEN
+        RAISE EXCEPTION 'Carrinho não encontrado';
+    END IF;
+
+    -- Verificar se carrinho está vazio
+    IF NOT EXISTS (
+        SELECT 1 FROM cart_items WHERE fk_cart_id = v_cart_id
+    ) THEN
+        RAISE EXCEPTION 'Carrinho vazio';
+    END IF;
+
+    -- Travar produtos envolvidos
+    PERFORM 1
+    FROM produto p
+    JOIN cart_items ci ON ci.fk_id_produto = p.id_produto
+    WHERE ci.fk_cart_id = v_cart_id
+    FOR UPDATE;
+
+    -- Validar estoque
+    -- IF EXISTS (
+    --     SELECT 1
+    --     FROM cart_items ci
+    --     JOIN produto p ON p.id_produto = ci.fk_id_produto
+    --     WHERE ci.fk_cart_id = v_cart_id
+    --     AND ci.quantidade > p.quantidade
+    -- ) THEN
+    --     RAISE EXCEPTION 'Estoque insuficiente para um ou mais produtos';
+    -- END IF;
+
+    -- Inserir compras SOMENTE com os campos especificados
+    INSERT INTO compra (
+        nome_produto,
+        quantidade,
+        valor_unit,
+        prazo,
+        fk_cliente_id,
+        fk_fornecedor_id
+    )
+    SELECT
+        p.nome,
+        ci.quantidade,
+        p.preco,
+        ci.prazo,
+        p_cliente_id,
+        ci.fk_id_fornecedor
+    FROM cart_items ci
+    JOIN produto p ON p.id_produto = ci.fk_id_produto
+    WHERE ci.fk_cart_id = v_cart_id;
+
+    -- Atualizar estoque em lote
+    -- UPDATE produto p
+    -- SET quantidade = p.quantidade - ci.quantidade
+    -- FROM cart_items ci
+    -- WHERE ci.fk_cart_id = v_cart_id
+    -- AND p.id_produto = ci.fk_id_produto;
+
+    -- -- Limpar carrinho
+    -- DELETE FROM cart_items
+    -- WHERE fk_cart_id = v_cart_id;
+
+END;
+$$ LANGUAGE plpgsql;

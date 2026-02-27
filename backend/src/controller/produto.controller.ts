@@ -50,9 +50,22 @@ class ProdutoController {
 
     public async listProducts(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
-            const {...filterOpt} = req.query as queryFilter;
+            interface QueryToIds {
+                idCliente?: string, 
+                idProduct?: string,
+            }
+
+            const {
+                idCliente,
+                idProduct,
+                ...filterOpt
+            } = req.query as queryFilter & QueryToIds;
+
+            const {typeList} = req.params as {typeList: string | undefined};
             const id_fornecedor:number = await getTokenIdFromRequest(req);
 
+
+            
             if(!filterOpt.search)
                 filterOpt.search = "";
 

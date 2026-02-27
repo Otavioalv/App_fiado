@@ -39,27 +39,27 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
         return await clienteFornecedorController.aceitarParceriaCliente(req, res);
     }); 
 
-    router.post("/partner/list", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await fornecedorController.partnerList(req, res, "all");
+    router.post("/partner/list/:typeList", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+        return await fornecedorController.partnerList(req, res);
     });
 
-    router.post("/partner/list/reseived", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await fornecedorController.partnerList(req, res, "received");
-    });
+    // router.post("/partner/list/reseived", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+    //     return await fornecedorController.partnerList(req, res, "received");
+    // });
 
-    router.post("/partner/list/sent", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await fornecedorController.partnerList(req, res, "sent");
-    }); 
+    // router.post("/partner/list/sent", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+    //     return await fornecedorController.partnerList(req, res, "sent");
+    // }); 
 
-    router.post("/partner/list/accepted", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
-        return await fornecedorController.partnerList(req, res, "accepted");
-    }); 
+    // router.post("/partner/list/accepted", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+    //     return await fornecedorController.partnerList(req, res, "accepted");
+    // }); 
 
     router.post('/product/add', authorizedOptions("fornecedor"), async (req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.addProducts(req, res);
     });
 
-    router.post('/product/list', authorizedOptions("fornecedor"), async (req: FastifyRequest, res: FastifyReply) => {
+    router.post('/product/list/:typeList?', authorizedOptions("fornecedor"), async (req: FastifyRequest, res: FastifyReply) => {
         return await produtoController.listProducts(req, res);
     });
 
