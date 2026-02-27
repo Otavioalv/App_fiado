@@ -148,28 +148,31 @@ class FornecedorController extends UserController{
             const {idCliente, ...filterOpt} = req.query as queryFilter & { idCliente?: string};;
             const {typeList} = (req.params as {typeList: string | null});
             const idFornecedor:number = await getTokenIdFromRequest(req);
-            
+
+
             if(!idFornecedor) {
                 return res.status(400).send(errorResponse(ResponseApi.Partner.LIST_ERROR));
             }
-
-            if(!filterOpt.search)
-                filterOpt.search = "";
-
+            
+            // if(!filterOpt.search)
+            //     filterOpt.search = "";
+            
             filterOpt.filterList = ["Nome", "Apelido", "Data"];
             if(!filterOpt.filter)
                 filterOpt.filter = "Nome";
-
+            
             const TYPES = ["accepted", "all", "none", "received", "sent"] as TypesListUser[];
             const lowTypeList = typeList ? typeList?.toLowerCase() : "all"; 
             // console.log("typeList: ", typeList?.toLowerCase(), lowTypeList);
             if(!TYPES.includes(lowTypeList as TypesListUser)){
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER))
             };
-        
+            
+            // console.log(await verifyQueryOptList(filterOpt), filterOpt);
+            
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
-
+            
             let idClienteForm: number | undefined;
             if(idCliente) {
                 idClienteForm = Number(idCliente);
@@ -177,6 +180,8 @@ class FornecedorController extends UserController{
                     return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
                 }
             }
+
+
 
             const listPartner:clienteInterface[] = await this.clienteModel.getPartnerByIdFornecedor2(idFornecedor, lowTypeList as TypesListUser, filterOpt, idClienteForm);
 

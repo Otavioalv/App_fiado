@@ -6,15 +6,16 @@ export async function verifyQueryOptList(queryOpt: queryFilter): Promise<boolean
                 return false;
             }
 
+            
             const pagination = Number(queryOpt.page);
             const size = Number(queryOpt.size);
             const search = String(queryOpt.search).trim();
             const {filterList, filter} = queryOpt;
-
+            
             
             if(!queryOpt.search)
                 queryOpt.search = "";
-
+            
             
             if(
                 (isNaN(pagination) || isNaN(size)) ||
@@ -25,10 +26,12 @@ export async function verifyQueryOptList(queryOpt: queryFilter): Promise<boolean
             ){
                 return false;
             }
-
+            
             queryOpt.page = Number(queryOpt.page);
             queryOpt.size = Number(queryOpt.size);
 
+
+            // console.log("return TRUE, mnas retorna false");
             return true;
         } catch(e) {
             console.log("Erro ao verificar query para listar fornecedor >>> ", e);

@@ -39,7 +39,7 @@ export const fornecedorRouter = async (router: FastifyInstance, options: Fastify
         return await clienteFornecedorController.aceitarParceriaCliente(req, res);
     }); 
 
-    router.post("/partner/list/:typeList", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
+    router.get("/partner/list/:typeList", authorizedOptions("fornecedor"), async(req: FastifyRequest, res: FastifyReply) => {
         return await fornecedorController.partnerList(req, res);
     });
 

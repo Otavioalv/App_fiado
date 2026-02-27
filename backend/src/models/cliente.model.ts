@@ -308,8 +308,8 @@ class ClienteModel extends UserModel<clienteInterface>{
             
             const {size, page, search, filter} = filterOpt;
 
-            console.log("[MODEL CLIENTE GET PARTNER] >>>>>");
-            console.log(idFornecedor, idCliente, filterOpt, typeList);
+            // console.log("[MODEL CLIENTE GET PARTNER] >>>>>");
+            // console.log(idFornecedor, idCliente, filterOpt, typeList);
 
             const sqlFilterList: Record<string, string> = {
                 Nome: "c.nome ASC",
