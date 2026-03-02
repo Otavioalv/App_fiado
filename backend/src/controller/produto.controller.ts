@@ -51,23 +51,24 @@ class ProdutoController {
     public async listProducts(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             interface QueryToIds {
-                idCliente?: string, 
                 idProduct?: string,
             }
 
             const {
-                idCliente,
                 idProduct,
                 ...filterOpt
             } = req.query as queryFilter & QueryToIds;
-
-            const {typeList} = req.params as {typeList: string | undefined};
+            
             const id_fornecedor:number = await getTokenIdFromRequest(req);
 
 
-            
-            if(!filterOpt.search)
-                filterOpt.search = "";
+            filterOpt.filterList = ["Nome do Produto A-Z", "Menor Preço", "Maior Preço", "Menor Quantidade", "Maior Quantidade"];
+            if(!filterOpt.filter) 
+                filterOpt.filter = "Nome do Produto A-Z";
+
+
+            // console.log("Id Fornecedor: ", id_fornecedor);
+
 
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));

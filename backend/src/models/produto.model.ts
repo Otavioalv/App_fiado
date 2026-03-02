@@ -202,14 +202,24 @@ class ProdutoModel  {
             client?.release();
         }
     }
-    
 
     public async listProducts(id_fornecedor: number, filterOpt:queryFilter): Promise<productInterface[]>{
         let client: PoolClient | undefined;
         try {
             client = await connection.connect();
 
-            const {size, page, search} = filterOpt;
+            const {size, page, search, filter} = filterOpt;
+
+            const sqlFilterList: Record<string, string> = {
+                "Nome do Produto A-Z": "nome ASC",
+                "Menor Preço": "preco ASC",
+                "Maior Preço": "preco DESC", 
+                "Menor Quantidade": "quantidade ASC", 
+                "Maior Quantidade": "quantidade DESC",
+            };
+
+            const orderBy: string = sqlFilterList[filter] ?? "";
+
 
             const sqlSearch: string = `%${search}%`;
             const limit:number = size; // numero de quantidades a mostrar
@@ -221,7 +231,7 @@ class ProdutoModel  {
                 WHERE 
                     fk_id_fornecedor = $1 AND 
                     unaccent(nome) ILIKE unaccent($2)
-                ORDER BY nome ASC
+                ORDER BY ${orderBy}
                 LIMIT $3
                 OFFSET $4;
             `;
@@ -830,7 +840,7 @@ class ProdutoModel  {
             client?.release();
         }
     }
-
+    
 
     public async getShopList2(
         fromUserId: number,
