@@ -67,9 +67,6 @@ class ProdutoController {
                 filterOpt.filter = "Nome do Produto A-Z";
 
 
-            // console.log("Id Fornecedor: ", id_fornecedor);
-
-
             if(!await verifyQueryOptList(filterOpt))
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
 

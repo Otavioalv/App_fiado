@@ -48,8 +48,7 @@ export const clienteRouter = async (router: FastifyInstance, options: FastifyPlu
     router.post("/partner/accept", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteFornecedorController.aceitarParceriaFornecedor(req, res);
     });
-
-    // Criar um no fornecedor
+    
     router.post("/partner/reject", authorizedOptions("cliente"), async(req: FastifyRequest, res: FastifyReply) => {
         return await clienteFornecedorController.rejectPartner(req, res, "cliente");
     });
