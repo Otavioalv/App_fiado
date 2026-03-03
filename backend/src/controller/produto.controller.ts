@@ -634,6 +634,7 @@ class ProdutoController {
             // Verificar dados
             comprasData = await this.compraUpdateValidate(comprasData);
 
+            console.log(comprasData);
             if(comprasData.some(c => !c.id_compra)) {
                 return res.status(400).send(errorResponse(ResponseApi.Purchace.NOT_FOUND));
             }
@@ -764,17 +765,22 @@ class ProdutoController {
 
     private async compraUpdateValidate(dataProd: compraInterface[]): Promise<compraInterface[]>{
         try {
-            const today = new Date();
+            // const today = new Date();
             
 
             const compraSchema = z.object({
                 id_compra: z.number().nonnegative("Insira um valor valido"),
                 quitado: z.boolean(),
                 retirado: z.boolean(),
-                coletado_em: z.coerce.date(),
+                coletado_em: z.preprocess((val) => {
+                    if(val === "") return undefined;
+                    return val;
+                }, z.coerce.date().optional().nullable()),
             });
             const compraArraySchema = z.array(compraSchema);
-            
+
+            console.log(compraArraySchema);
+
             return compraArraySchema.parse(dataProd) as compraInterface[];
         } catch(e) {
             if(e instanceof z.ZodError){
