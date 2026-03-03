@@ -772,6 +772,8 @@ class ProdutoController {
                 id_compra: z.number().nonnegative("Insira um valor valido"),
                 quitado: z.boolean(),
                 retirado: z.boolean(),
+                cancelado: z.boolean(),
+                aceito: z.boolean().optional().nullable(),
                 coletado_em: z.preprocess((val) => {
                     if(val === "") return undefined;
                     return val;

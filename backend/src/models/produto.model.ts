@@ -1157,7 +1157,7 @@ class ProdutoModel  {
         try {
             const valuesList = compras
                 .map((p, i) => 
-                    `($${i*4+1}, $${i*4+2}, $${i*4+3}, $${i*4+4})`
+                    `($${i*6+1}, $${i*6+2}, $${i*6+3}, $${i*6+4}, $${i*6+5}, $${i*6+6})`
                 )
                 .join(", ");
 
@@ -1165,6 +1165,8 @@ class ProdutoModel  {
                 p.id_compra,
                 p.quitado,
                 p.retirado,
+                p.cancelado,
+                p.aceito,
                 p.coletado_em
             ]);
 
@@ -1174,17 +1176,21 @@ class ProdutoModel  {
                 SET 
                     quitado = v.quitado,
                     retirado = v.retirado,
+                    cancelado = v.cancelado,
+                    aceito = v.aceito,
                     coletado_em = v.coletado_em
                 FROM (
                     SELECT
                         CAST(v.id_compra AS INTEGER),
                         CAST(v.quitado AS BOOLEAN),
                         CAST(v.retirado AS BOOLEAN),
+                        CAST(v.cancelado AS BOOLEAN),
+                        CAST(v.aceito AS BOOLEAN),
                         CAST(v.coletado_em AS TIMESTAMP)
                     FROM (
                         VALUES ${valuesList}
-                    ) AS v(id_compra, quitado, retirado, coletado_em)
-                ) AS v(id_compra, quitado, retirado, coletado_em)
+                    ) AS v(id_compra, quitado, retirado, cancelado, aceito, coletado_em)
+                ) AS v(id_compra, quitado, retirado, cancelado, aceito, coletado_em)
                 WHERE 
                     c.id_compra = v.id_compra
                     AND c.fk_fornecedor_id = $${values.length + 1};
