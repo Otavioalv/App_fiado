@@ -203,9 +203,15 @@ class ProdutoModel  {
         }
     }
 
-    public async listProducts(id_fornecedor: number, filterOpt:queryFilter): Promise<productInterface[]>{
+    public async listProducts(
+        id_fornecedor: number, 
+        filterOpt:queryFilter, 
+        idProduct?: number,
+    ): Promise<productInterface[]>{
         let client: PoolClient | undefined;
         try {
+
+            console.log(id_fornecedor, idProduct);
             client = await connection.connect();
 
             const {size, page, search, filter} = filterOpt;
@@ -224,28 +230,42 @@ class ProdutoModel  {
             const sqlSearch: string = `%${search}%`;
             const limit:number = size; // numero de quantidades a mostrar
             const offset:number = (page - 1) * limit // Começa a partir do numero 
+            
+            const whereCondition: string[] = [];
+            const values: (string | number)[] = [];
+            let paramIndex = 1;
+            
+            whereCondition.push(`fk_id_fornecedor = $${paramIndex++} AND unaccent(nome) ILIKE unaccent($${paramIndex++})`)
+            values.push(id_fornecedor, sqlSearch);
+
+            if(idProduct) {
+                values.push(idProduct);
+                whereCondition.push(`id_produto = $${paramIndex++}`);
+            }
+            
+            const whereSql = whereCondition.length ? 
+            `WHERE ${whereCondition.join(" AND ")}` 
+            : "";
+            
 
             const SQL_LIST = `
                 SELECT id_produto, nome, preco, quantidade
                 FROM produto 
-                WHERE 
-                    fk_id_fornecedor = $1 AND 
-                    unaccent(nome) ILIKE unaccent($2)
+                ${whereSql}
                 ORDER BY ${orderBy}
-                LIMIT $3
-                OFFSET $4;
+                LIMIT $${paramIndex++}
+                OFFSET $${paramIndex++};
             `;
 
             const SQL_TOTAL = `
                 SELECT COUNT(*) as total
                 FROM produto 
-                WHERE 
-                    fk_id_fornecedor = $1 AND 
-                    unaccent(nome) ILIKE unaccent($2);
+                ${whereSql}
             `;
             
-            const listProducts = (await client.query(SQL_LIST, [id_fornecedor, sqlSearch, limit, offset])).rows as productInterface[];
-            const {total} = (await client.query(SQL_TOTAL, [id_fornecedor, sqlSearch])).rows[0] as {total: number};
+            const {total} = (await client.query(SQL_TOTAL, values)).rows[0] as {total: number};
+            values.push(limit, offset);
+            const listProducts = (await client.query(SQL_LIST, values)).rows as productInterface[];
 
             filterOpt.total = Number(total);
             filterOpt.totalPages = Math.ceil(filterOpt.total / filterOpt.size);

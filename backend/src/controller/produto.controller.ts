@@ -74,7 +74,15 @@ class ProdutoController {
                return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FORMAT));
             }
 
-            const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor, filterOpt);
+            let productIdNum: number | undefined;
+            if(idProduct) {
+                productIdNum = Number(idProduct);
+                if(Number.isNaN(productIdNum)) { 
+                    return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_FILTER));
+                }
+            }
+
+            const listProducts: productInterface[] = await this.produtoModel.listProducts(id_fornecedor, filterOpt, productIdNum);
 
             return res.status(200).send(successResponse(ResponseApi.Product.LIST_SUCCESS, {list: listProducts, pagination: filterOpt}));
             
