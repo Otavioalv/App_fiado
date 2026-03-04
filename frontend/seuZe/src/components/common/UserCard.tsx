@@ -14,6 +14,7 @@ export interface UserCardProps extends PressableProps {
     idUser: string | number,
     onPressActionFunction?: OnPressActionFunctionType,
     onPressAccepted?: (id: string | number) => void,
+    isClient?: boolean, 
     date?: string,
 };
 
@@ -25,6 +26,7 @@ export function UserCard({
     idUser,
     onPressActionFunction,
     onPressAccepted,
+    isClient = true,
     ...pressableProps
 }: UserCardProps) {
     return (
@@ -48,6 +50,7 @@ export function UserCard({
             <RelationshipActions 
                 type={relationshipType}
                 idUser={idUser}
+                isClient={isClient}
                 onPressAction={onPressActionFunction}
                 onPressAccepted={onPressAccepted}
             />

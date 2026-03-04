@@ -8,14 +8,14 @@ import { formatCurrency, transformDateToUI } from "@/src/utils";
 import { PressableCard } from "../ui/PressableCard";
 import { theme } from "@/src/theme";
 
-export interface ShoppingCardProps extends ProductDescriptionProps, StatusShoppingProps, PressableProps {
+export interface ShoppingCardFornecedorProps extends ProductDescriptionProps, StatusShoppingProps, PressableProps {
     prazo: Date,
     criadoEm: Date,
     quantidade: string | number,
     valorUnit: string | number,
 }
 
-export function ShoppingCard({
+export function ShoppingCardFornecedor({
     marketName,
     nome,
     price,
@@ -27,8 +27,9 @@ export function ShoppingCard({
     criadoEm, 
     quantidade,
     valorUnit,
+    isClient = true,
     ...pressableProps
-}: ShoppingCardProps) {
+}: ShoppingCardFornecedorProps) {
     const prazoText:string = new Date() < prazo ? "No Prazo: " : "Venceu: ";
     
     // console.log(new Date(prazo), prazo);
@@ -48,6 +49,7 @@ export function ShoppingCard({
                 price={price}
                 prodName={prodName}
                 apelido={apelido}
+                isClient={isClient}
             />
             <View>
                 <Text style={styles.infoUnt}>
@@ -83,7 +85,7 @@ export function ShoppingCard({
 }
 
 
-export function ShoppingCardSkeleton() {
+export function ShoppingCardFornecedorSkeleton() {
     const anmOpacity = useAnimationOpacitySkeleton();
 
     return (
@@ -101,8 +103,8 @@ export function ShoppingCardSkeleton() {
     );
 }
 
-export const MemoShoppingCard = memo(ShoppingCard);
-export const MemoShoppingCardSkeleton = memo(ShoppingCardSkeleton);
+export const MemoShoppingCardFornecedor = memo(ShoppingCardFornecedor);
+export const MemoShoppingCardFornecedorSkeleton = memo(ShoppingCardFornecedorSkeleton);
 
 
 const styles = StyleSheet.create({

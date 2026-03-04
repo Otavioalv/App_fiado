@@ -10,9 +10,11 @@ let authToken: string | null = null;
 let logoutAction: () => void;
 let forbiddenAction: () => void;
 
+// alison pollich
+
 export const api = axios.create({
     baseURL,
-    // baseURL: "http://192.168.1.10:8090",
+    // baseURL: "http://192.168.1.7:8090",
     timeout: 20000,
     headers: {"Content-Type": "application/json"}
 });
@@ -38,7 +40,7 @@ api.interceptors.request.use(
             // const fakeError = {
             //     isAxiosError: true,
             //     response: {
-            //         status: 500,
+            //         status: 400,
             //         data: { message: "Simulação de explosão no servidor" }
             //     }
             // };

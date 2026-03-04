@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
         height: 55,
         borderRadius: 1000,
     },
-    
     iconAlert: {
         backgroundColor: theme.colors.lightOrange,
         color: theme.colors.orange,

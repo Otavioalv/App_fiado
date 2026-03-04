@@ -1,18 +1,18 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
 import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
-import { InfoProductBottomSheet } from "@/src/components/common/InfoProductBottomSheet";
-import { MemoProductCard, MemoProductCardSkeleton, ProductCardProps } from "@/src/components/common/ProductCard";
+import { InfoClienteBottomSheet } from "@/src/components/common/InfoClienteBottomSheet";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
+import { MemoUserCard, MemoUserCardSkeleton, UserCardProps } from "@/src/components/common/UserCard";
 import { OnPressActionFunctionType } from "@/src/components/ui/RelationshipActions";
 import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
-import { useCartActions, useProductList, useUpdatePartnerProductStatus } from "@/src/hooks/useClienteQueries";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
-import { CartLocalItem, ProductAndFornecedorData, TypeUserList } from "@/src/types/responseServiceTypes";
+import { useListPartner, useUpdatePartnerFornecedorStatus } from "@/src/hooks/useFornecedorQueries";
+import { useFilterCategoryStore } from "@/src/stores/cliente/clientes.store";
+import { FilterType, TypeUserList } from "@/src/types/responseServiceTypes";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useMemo } from "react";
-import { View } from "react-native";
+import { useCallback, useEffect, useMemo } from "react";
 
 const chipList: ChipDataType<TypeUserList>[] = [
     {
@@ -37,22 +37,25 @@ const chipList: ChipDataType<TypeUserList>[] = [
     }
 ];
 
-export default function Produtos() {
+export default function Cliente() {
+    // const router = useRouter();
 
     const {
         searchQuery,
         filter,
         typingText,
-        handleSearch,
         activeCategory,
         errorType,
+        
         setErrorType,
         setActiveCategory,
         setTypingText,
         setFilter,
+
+        handleSearch, 
     } = useFilterScreen<TypeUserList>("all");
 
-    const filters = useMemo(() => ({
+    const filters = useMemo<FilterType>(() => ({
         search: searchQuery,
         filter: filter,
     }), [searchQuery, filter]);
@@ -67,23 +70,17 @@ export default function Produtos() {
         isRefetching,
         isError,
         error
-    } = useProductList(
+    } = useListPartner(
         filters,
         activeCategory
-    );
+    );  
 
-
-    // const { openSheet } = useGlobalBottomSheet();
     const { openSheet, closeSheet } = useGlobalBottomModalSheet();
 
-    const handleOpenInfoProduct = useCallback((idProduct: number) => {
-        // console.log("Tentando abrir produto:", idProduct);
-
+    const handleOpenInfoCliente = useCallback((idCliente: number | string) => {
         openSheet(
-            <InfoProductBottomSheet 
-                idProduct={idProduct}
-            />, 
-            ["28%"], 
+            <InfoClienteBottomSheet idCliente={idCliente}/>,
+            ['28%'],
             false
         );
     }, [openSheet])
@@ -94,83 +91,61 @@ export default function Produtos() {
             return () => closeSheet();
         }, [closeSheet])
     );
-  
+
+
+    const {consume, requestedCategory} = useFilterCategoryStore();
 
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
 
 
-    const { mutate } = useUpdatePartnerProductStatus(filters, activeCategory);
-    
+    const {mutate} = useUpdatePartnerFornecedorStatus(filters, activeCategory);
+
     const handleAction: OnPressActionFunctionType = useCallback(({ id, newStatus }) => {
         mutate({ id: id, newStatus: newStatus });
     }, [mutate]);
-
-
-    // const {
-    //     cartItems, 
-    //     addItemToCartStore,
-    // } = useShoppingCartStore();
-    
-    // useEffect(() => {
-    //     console.log("Carrinho de compras", JSON.stringify(cartItems, null, "  "));
-    // }, [cartItems]);
-
-    const {
-        addProductToCart,
-    } = useCartActions();
-
-
-    const handleOnPressAccepted = useCallback((product: ProductAndFornecedorData) => {
-        // console.log("Comprar Ação de adicionar ao carrinho: ", JSON.stringify(product, null, "  "));
-        const cartData: CartLocalItem = {
-            id_fornecedor: product.id_fornecedor,
-            id_product: product.id_produto,
-            nome_estabelecimento: product.nomeestabelecimento,
-            nome_fornecedor: product.nome_fornecedor,
-            nome_prod: product.nome_prod,
-            preco: product.preco,
-            quantidade: 1,
-        };
-        addProductToCart(cartData);
-        // addItemToCartStore(cartData);
-    }, [addProductToCart]);
-
-
-    // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
-    // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
-    // ISSO FILTRA USUARIOS POR ID PARA NAO CAUSAR REPETIÇÃO DE USUARIO NA LISTA, E NÃO OCORRER UM ERRO
-    const listProds = useMemo(() => {
+ 
+    const listUsers = useMemo(() => {
         if (!data) return [];
 
-        const map = new Map<string, GenericInfiniteListType<ProductCardProps>>();
+        const map = new Map<string, GenericInfiniteListType<UserCardProps>>();
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
-                const idString = u.id_produto.toString();
+                const idString = u.id_cliente?.toString();
+                const description: string = `${u.apelido ? `${u.apelido}` : ""}`;
 
-                const fornecedorName: string = `${u.nome_fornecedor}${u.apelido ? ` - (${u.apelido})` : ""}`;
+                let dateValue = ""
+                if(u.created_at) {
+                    const dataObj = new Date(u.created_at);
+                    const day = String(dataObj.getDate()).padStart(2, "0");
+                    const month = String(dataObj.getMonth() + 1).padStart(2, "0");
+
+                    dateValue = `${day}/${month}`;
+                }
 
                 map.set(idString, {
-                    prodName: u.nome_prod,
-                    price: u.preco,
-                    marketName: u.nomeestabelecimento,
-                    nome: fornecedorName,
-                    relationshipType: u.relationship_status,
+                    title: u.nome,
+                    description: description,
                     id: idString,
-                    idUser: u.id_fornecedor,
+                    idUser: idString,
+                    relationshipType: u.relationship_status ?? 'NONE',
+                    date: dateValue,
+                    isClient: false,
+                    onPress: () => handleOpenInfoCliente(idString),
                     onPressActionFunction: handleAction,
-                    onPressAccepted: () => handleOnPressAccepted(u),
-                    onPress: () => handleOpenInfoProduct(u.id_produto)
+                    // onPressAccepted: handleOnPressAccepted,
+                    // onPress: () => router.push(`/fornecedores/${u.id_fornecedor}`)
                 });
             });
         });
+
         return Array.from(map.values());
-    }, [data, handleAction, handleOnPressAccepted, handleOpenInfoProduct]);
+    }, [data, handleOpenInfoCliente, handleAction]);
 
     const renderItem = useCallback(
-        ({item}: {item: ProductCardProps}) => (
-            <MemoProductCard
+        ({item}: {item: UserCardProps}) => (
+            <MemoUserCard
                 {...item}
             />
         ),
@@ -178,12 +153,18 @@ export default function Produtos() {
     );
 
     const renderItemSkeleton = useCallback(() => (
-            <View>
-                <MemoProductCardSkeleton/>
-            </View>
+        <MemoUserCardSkeleton/>
     ), []);
 
     useErrorScreenListener(isError, error, setErrorType);
+
+    useEffect(() => {
+        console.log(requestedCategory);
+        if(requestedCategory) {
+            setActiveCategory(requestedCategory);
+            consume();
+        }
+    }, [consume, requestedCategory, setActiveCategory]);
 
     return (
         <ScreenErrorGuard errorType={errorType} onRetry={refetch}>
@@ -198,18 +179,17 @@ export default function Produtos() {
             />
 
             <GenericInfiniteList
-                SkeletonComponent={<MemoProductCardSkeleton/>}
+                SkeletonComponent={<MemoUserCardSkeleton/>}
                 SkeletonList={{
                     data: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
                     keyExtractor: (i) => i,
                     renderItem: renderItemSkeleton,
                     HeaderComponent: <ChipListSkeleton/>
                 }}
-                data={listProds}
+                data={listUsers}
                 renderItem={renderItem}
                 isFetchingNextPage={isFetchingNextPage}
                 isLoading={isLoading}
-                // isLoading={true}
                 isRefetching={isRefetching}
                 keyExtractor={(i) => i.id.toString()}
                 onEndReached={() => {
@@ -219,14 +199,14 @@ export default function Produtos() {
                 }}
                 onRefresh={refetch}
                 HeaderComponent={
-                    <ChipList 
+                    <ChipList
                         chipList={chipList}
                         itemSelected={activeCategory} 
                         setItemSelected={setActiveCategory}
                     />
                 }
-                emptyMessage={"Nenhum produto encontrado"}
+                emptyMessage={"Nenhum usuário encontrado"}
             />
         </ScreenErrorGuard>
-    ); 
+    )
 }

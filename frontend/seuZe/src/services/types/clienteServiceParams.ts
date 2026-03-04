@@ -3,6 +3,7 @@ import { PaginationType, TypeShoppingList } from "@/src/types/responseServiceTyp
 export interface ShoppingListParams {
     pagination: PaginationType, 
     listType: TypeShoppingList,
-    idFornecedor?: string | number,
+    idToUser?: string | number,
     idCompra?: string | number,
 }
+

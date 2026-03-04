@@ -2,27 +2,22 @@ import { useAnimationOpacitySkeleton } from "@/src/hooks/useMyAnimations";
 import { theme } from "@/src/theme";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { TextProductPrice, TextProductPriceSkeleton } from "./TextProductPrice";
+import { ButtonModern, ButtonModernSkeleton } from "./ButtonModern";
 
-export interface ProductDescriptionProps {
+export interface ProductDescriptionFornecedorProps {
     prodName: string,
     price: string | number,
-    nome?: string,
-    marketName?: string,
-    apelido?: string,
-    isClient?: boolean,
+    quantity: number, 
     isLoading?: boolean,
 }
 
-export function ProductDescription({
+export function ProductDescriptionFornecedor({
     prodName,
     price,
-    nome,
-    apelido,
-    marketName, 
-    isClient = true,
-    isLoading = false,
-}: ProductDescriptionProps) {
-    if(isLoading) return <ProductDescriptionSkeleton/>;
+    quantity,
+    isLoading,
+}: ProductDescriptionFornecedorProps) {
+    if(isLoading) return <ProductDescriptionFornecedorSkeleton/>;
 
     return (
         <View style={styles.container}>
@@ -37,49 +32,18 @@ export function ProductDescription({
             </View>
 
 
-            {isClient ? (
-                <View style={[styles.textContainerBase]}>
-                    <Text numberOfLines={1}>
-                        <Text style={styles.subTitleText} numberOfLines={1}>
-                            {"Estabelecimento:  "}
-                        </Text>
-                        <Text style={styles.subTitleValueText} numberOfLines={1}>
-                            {marketName}
-                        </Text>
-                    </Text>
-
-                    <Text numberOfLines={1}>
-                        <Text style={styles.subTitleText} numberOfLines={1}>
-                            {"Resp: "}
-                        </Text>
-                        <Text style={styles.subTitleValueText} numberOfLines={1}>
-                            {nome}
-                            {apelido && ` - (${apelido})`}
-                        </Text>
-                    </Text>
-                </View>
-            ) : (
-                <View style={[styles.textContainerBase]}>
-                    <Text numberOfLines={1}>
-                        <Text style={styles.subTitleText} numberOfLines={1}>
-                            {"Comprador:  "}
-                        </Text>
-                        <Text style={styles.subTitleValueText} numberOfLines={1}>
-                            {nome}
-                            {apelido && ` - (${apelido})`}
-                        </Text>
-                    </Text>
-                </View>
-
-            )}
-
+            <View style={[styles.textContainerBase]}>
+                <Text numberOfLines={1}>
+                    {quantity} unidades
+                </Text>
+            </View>
         </View>
     );
 }
 
 
 
-export function ProductDescriptionSkeleton() {
+export function ProductDescriptionFornecedorSkeleton() {
     const anmOpacity = useAnimationOpacitySkeleton();
     
     return (
@@ -91,7 +55,7 @@ export function ProductDescriptionSkeleton() {
 
             <View style={styleSkeleton.bottomContainer}>
                 <Animated.View style={[anmOpacity, styleSkeleton.textBottom]}/>
-                <Animated.View style={[anmOpacity, styleSkeleton.textBottom]}/>
+                <ButtonModernSkeleton size="M"/>
             </View>
         </View>
     )
@@ -149,6 +113,6 @@ const styleSkeleton = StyleSheet.create({
     textBottom: {
         borderRadius: 1000,
         height: 15,
-        width: 250
+        width: 100
     }
 });

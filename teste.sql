@@ -184,7 +184,7 @@ CROSS JOIN (VALUES
 ) AS p(nome);
 
 
-
+-- cliente
 INSERT INTO cliente_fornecedor (
   cliente_check,
   fornecedor_check,
@@ -202,6 +202,30 @@ FROM (VALUES
   (483), (456), (457), (458), (459), (460), 
   (461), (462), (463), (464), (466), (468), 
   (469), (475), (477), (479), (481), (313)
+) AS f(id);
+
+
+-- fornecedor
+INSERT INTO cliente_fornecedor (
+  cliente_check,
+  fornecedor_check,
+  created_at,
+  fk_fornecedor_id,
+  fk_cliente_id
+)
+SELECT
+  (random() < 0.5) AS cliente_check,
+  (random() < 0.5) AS fornecedor_check,
+  now() - (random() * interval '30 days') AS created_at,
+  311 AS fk_fornecedor_id,
+  f.id AS fk_cliente_id
+FROM (VALUES
+    (316), (317), (318),
+    (319), (320), (321), (322), (323), (324), (325),
+    (326), (327), (328), (329), (330), (331), (332),
+    (333), (334), (335), (336), (337), (338), (339),
+    (340), (341), (342), (343), (344), (345), (346),
+    (347), (348), (349), (350), (351), (352), (353)
 ) AS f(id);
 
 
@@ -262,3 +286,105 @@ CROSS JOIN LATERAL (
 ) r;
 
 select * from produto where fk_id_fornecedor = 313 order by nome ASC;
+
+
+
+CREATE OR REPLACE FUNCTION finalizar_compra(p_cliente_id INT)
+RETURNS VOID AS $$
+DECLARE
+    v_cart_id INT;
+BEGIN
+
+    -- Buscar carrinho do cliente
+    SELECT id_cart INTO v_cart_id
+    FROM cart
+    WHERE fk_id_cliente = p_cliente_id
+    FOR UPDATE;
+
+    IF v_cart_id IS NULL THEN
+        RAISE EXCEPTION 'Carrinho não encontrado';
+    END IF;
+
+    -- Verificar se carrinho está vazio
+    IF NOT EXISTS (
+        SELECT 1 FROM cart_items WHERE fk_cart_id = v_cart_id
+    ) THEN
+        RAISE EXCEPTION 'Carrinho vazio';
+    END IF;
+
+    -- Travar produtos envolvidos
+    PERFORM 1
+    FROM produto p
+    JOIN cart_items ci ON ci.fk_id_produto = p.id_produto
+    WHERE ci.fk_cart_id = v_cart_id
+    FOR UPDATE;
+
+    -- Validar estoque
+    IF EXISTS (
+        SELECT 1
+        FROM cart_items ci
+        JOIN produto p ON p.id_produto = ci.fk_id_produto
+        WHERE ci.fk_cart_id = v_cart_id
+        AND ci.quantidade > p.quantidade
+    ) THEN
+        RAISE EXCEPTION 'Estoque insuficiente para um ou mais produtos';
+    END IF;
+
+    -- Inserir compras (set-based)
+    INSERT INTO compra (
+        nome_produto,
+        quantidade,
+        valor_unit,
+        prazo,
+        fk_cliente_id,
+        fk_fornecedor_id,
+        quitado,
+        retirado,
+        aceito,
+        cancelado,
+        created_at
+    )
+    SELECT
+        p.nome,
+        ci.quantidade,
+        p.preco,
+        ci.prazo,
+        p_cliente_id,
+        ci.fk_id_fornecedor,
+        false,
+        false,
+        false,
+        false,
+        NOW()
+    FROM cart_items ci
+    JOIN produto p ON p.id_produto = ci.fk_id_produto
+    WHERE ci.fk_cart_id = v_cart_id;
+
+    -- Atualizar estoque em lote
+    UPDATE produto p
+    SET quantidade = p.quantidade - ci.quantidade
+    FROM cart_items ci
+    WHERE ci.fk_cart_id = v_cart_id
+    AND p.id_produto = ci.fk_id_produto;
+
+    -- Limpar carrinho
+    DELETE FROM cart_items
+    WHERE fk_cart_id = v_cart_id;
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+UPDATE cliente_fornecedor
+SET 
+  cliente_check = (random() < 0.5),
+  fornecedor_check = (random() < 0.5),
+  created_at = now() - (random() * interval '30 days');
+
+UPDATE mensagens
+SET read_at =
+    CASE 
+        WHEN random() < 0.5 THEN NULL
+        ELSE created_at + (random() * interval '10 days')
+    END;

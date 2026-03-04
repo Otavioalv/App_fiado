@@ -45,7 +45,7 @@ const formFields: FormFieldsType<FornecedorRegisterSchema>[] = [
         placeholder: "Apelido",
     },
     {
-        name: "nomeEstabelecimento",
+        name: "nomeestabelecimento",
         title: "NOME DO ESTABELECIMENTO*",
         placeholder: "Estabelecimento",
     },
@@ -56,7 +56,7 @@ const formFields: FormFieldsType<FornecedorRegisterSchema>[] = [
     },
     [
         {
-            name: "numeroImovel",
+            name: "numeroimovel",
             title: "NUMERO*" ,
             placeholder: "Numero" ,
         },
@@ -109,8 +109,8 @@ export default function Register() {
             cep: "23131232", 
             confirmarSenha: "senhapadrao@12", 
             logradouro: "ssdfadsadas", 
-            nomeEstabelecimento: "senhapadrao@12", 
-            numeroImovel: "sdfas", 
+            nomeestabelecimento: "senhapadrao@12", 
+            numeroimovel: "sdfas", 
             senha: "senhapadrao@12", 
             telefone: "92991492939", 
             uf: "am", 

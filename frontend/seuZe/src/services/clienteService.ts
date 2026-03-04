@@ -72,7 +72,6 @@ export async function update(updtData: BasicFormSchema): Promise<boolean> {
     try {
         const endPoint = defaultEndPoint + "/update";
         
-        // const response = await api.post(endPoint, dataToUser) as responseAxiosInterfaces<{token: string}>;
         await api.post(endPoint, updtData) as responseAxiosInterfaces<null>;
 
         return true;
@@ -104,19 +103,18 @@ export async function productList(
     }
 }
 
-
 export async function shoppingList({
     pagination = {page: 1, size: 10}, 
     listType,
     idCompra,
-    idFornecedor,
+    idToUser,
 }: ShoppingListParams): Promise<ResultsWithPagination<ShoppingData[]>>{
     try{
         const endPoint = defaultEndPoint + "/product/buy/list/" + listType;
         
         const response = await api.get(endPoint, {
             params: {
-                toIdUser: idFornecedor,
+                toIdUser: idToUser,
                 idCompra: idCompra,
                 ...pagination
             }
@@ -238,7 +236,6 @@ export async function rejectPartner(idFornecedor: string | number) {
         throw err;
     }
 } 
-
 
 export async function listMessages({
     listType,

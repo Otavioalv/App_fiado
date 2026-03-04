@@ -5,62 +5,61 @@ import { QuickShortcuts, ShortcutsType } from "@/src/components/common/QuickShor
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SectionContainer } from "@/src/components/common/SectionContainer";
 import { UserHeader } from "@/src/components/common/UserHeader";
-import { useListMessages, useListPartner, useMe, useShoppingList } from "@/src/hooks/useClienteQueries";
 import { mapAppErrorToErrorType } from "@/src/hooks/useErrorScreenListener";
-import { useFilterCategoryStore } from "@/src/stores/cliente/fornecedores.store";
+import { useListMessages, useListPartner, useMe, useShoppingList } from "@/src/hooks/useFornecedorQueries";
+import { useFilterCategoryStore } from "@/src/stores/cliente/clientes.store";
 import { theme } from "@/src/theme";
-import { ErrorTypes} from "@/src/types/responseServiceTypes";
+import { ErrorTypes } from "@/src/types/responseServiceTypes";
 import { transformDateToUI } from "@/src/utils";
-import {Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import { RefreshControl, ScrollView } from "react-native-gesture-handler";
 
 
 export default function Home() {
-    const [refreshing, setRefreshing] = useState<boolean>(false);
-    const [errorType, setErrorType] = useState<ErrorTypes | null>(null);
-    const {request: setCategoryFornecedores} = useFilterCategoryStore();
-    
     const router = useRouter();
     
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [errorType, setErrorType] = useState<ErrorTypes | null>(null);
+    const {request: setCategoryClientes} = useFilterCategoryStore();
+
     const shortcuts: ShortcutsType[] = [
-        {   
-            idSh: "1",
-            title: "Fornecedores", 
-            icon: <Feather name="truck" size={32} color={theme.colors.orange}/>,
-            onPress: () => router.push("/fornecedores")
-
-        }, 
-        {
-            idSh: "7",
-            title: "Carinho", 
-            icon: <Feather name="shopping-cart" size={32} color={theme.colors.orange}/>,
-            onPress: () => router.push("/shopping_cart")
-        },
-        {
-            idSh: "2",
-            title: "Minhas Parcerias", 
-            icon: <Feather name="users" size={32} color={theme.colors.orange}/>,
-            onPress: () => {
-                setCategoryFornecedores("accepted");
-                router.push("/fornecedores");
-            }
-
-        }, 
         {
             idSh: "3",
-            title: "Produtos", 
+            title: "Meus Produtos", 
             icon: <Feather name="package" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/produtos")
         }, 
         {
             idSh: "4",
-            title: "Minhas Compras", 
+            title: "Compras Solicitadas", 
             icon: <Feather name="shopping-bag" size={32} color={theme.colors.orange}/>,
             onPress: () => router.push("/compras")
 
+        },
+        {   
+            idSh: "1",
+            title: "Clientes", 
+            icon: <Feather name="briefcase" size={32} color={theme.colors.orange}/>,
+            onPress: () => router.push("/clientes")
+
         }, 
+        {
+            idSh: "2",
+            title: "Minhas Parcerias", 
+            icon: <Feather name="users" size={32} color={theme.colors.orange}/>,
+            onPress: () => {
+                setCategoryClientes("accepted");
+                router.push("/clientes");
+            }
+        }, 
+        {
+            idSh: "7",
+            title: "Perfil", 
+            icon: <Feather name="user" size={32} color={theme.colors.orange}/>,
+            onPress: () => router.push("/perfil")
+        },
         {
             idSh: "5",
             title: "Notificações", 
@@ -72,7 +71,7 @@ export default function Home() {
     const {
         data: userData,
         isLoading: meLoad,
-        refetch: fetchMe
+        refetch: fetchMe,
     } = useMe();
 
     const {
@@ -81,7 +80,7 @@ export default function Home() {
         refetch: fetchShoppingList
     } = useShoppingList({
         filter: "Mais Recente",
-    }, "all", 10);
+    }, "pending", 10);
 
     const {
         data: lastPartnerSent,
@@ -103,20 +102,19 @@ export default function Home() {
     );
 
     const listPurchased:InfoType[] = useMemo((): InfoType[] => {
-            const list = lastPurchased?.pages?.[0]?.list;
+        const list = lastPurchased?.pages?.[0]?.list;
 
-            // console.log(JSON.stringify(list, null, "  "));
-            
-            if(!list) return [];
+        // console.log(JSON.stringify(list, null, "  "));
+        
+        if(!list) return [];
 
-            const info:InfoType[] = list.map(l => ({
-                id: l.id_compra.toString(),
-                title: l.nome_produto,
-                info: `Criado em ${transformDateToUI(l.created_at || "")}`
-            }));
+        const info:InfoType[] = list.map(l => ({
+            id: l.id_compra.toString(),
+            title: l.nome_produto,
+            info: `Criado em ${transformDateToUI(l.created_at || "")}`
+        }));
 
-            return info
-            // return []
+        return info
 
     }, [lastPurchased]);
 
@@ -133,7 +131,7 @@ export default function Home() {
             }
 
             return {
-                id: l.id_fornecedor.toString(),
+                id: l.id_cliente.toString(),
                 info: dateInfo,
                 title: l.nome
             }
@@ -141,30 +139,28 @@ export default function Home() {
         
         return info;
     }, [lastPartnerSent]);
- 
 
 
-
-    // Carrega os dados
     const loadData = useCallback(async () => {
-        try {
+        try{
             setErrorType(null);
             setRefreshing(true);
-            // Fazer requsições pararem quando uma der erro;
+
             await Promise.all([
-                fetchMe({ throwOnError: true }),
-                fetchShoppingList({ throwOnError: true }),
-                fetchPartnerSent({ throwOnError: true }),
-                fetchMessages({throwOnError: true}),
+                fetchMe({throwOnError: true}),
+                fetchShoppingList({throwOnError: true}),
+                fetchPartnerSent({throwOnError: true}),
+                fetchMessages({throwOnError: true})
             ]);
 
-        } catch(err) {
+        }catch(err) {
             const errorHandled: ErrorTypes = mapAppErrorToErrorType(err);
             setErrorType(errorHandled);
-        }  finally {
-            setRefreshing(false);
+        }finally{
+            setRefreshing(false);   
         }
     }, [fetchMe, fetchShoppingList, fetchPartnerSent, fetchMessages]);
+
     
     return (
         <ScreenErrorGuard errorType={errorType} onRetry={loadData}>
@@ -179,8 +175,8 @@ export default function Home() {
                         progressBackgroundColor={"#FFFFFF"}
                     />
                 }   
-            >   
-                <UserHeader 
+            >
+                <UserHeader
                     nome={userData?.nome || ""} 
                     apelido={userData?.apelido || ""}
                     isLoading={meLoad}
@@ -193,31 +189,29 @@ export default function Home() {
                     </SectionContainer>
 
                     <SectionContainer title="Últimas Atividades">
-                        <LastActivities 
-                            title={"Últimas Compras"} 
+                        <LastActivities
+                            title={"Últimas compras pendentes"}
                             infos={listPurchased} 
-                            // infos={[]} 
                             isLoading={purchasedLoad}
                             emptyStateComponent={
                                 <EmptyState
-                                    title={"Você ainda não fez compras"}
-                                    description={"Suas compras aparecerão aqui quando vocẽ coletar um produto."}
+                                    title={"Não existe nada pendente"}
+                                    description={"Compras pendentes aparecerão quando um cliente solicitar algum produto"}
                                     iconName={"package"}
-                                    primaryAction={{
-                                        label: "Ver Produtos",
-                                        onPress: () => router.push("/produtos")
-                                    }}
-                                    secondaryAction={{
-                                        label: "Explorar Fornecedores",
-                                        onPress: () => router.push("/fornecedores")
-                                    }}
+                                    // primaryAction={{
+                                    //     label: "Ver Produtos",
+                                    //     onPress: () => router.push("/produtos")
+                                    // }}
+                                    // secondaryAction={{
+                                    //     label: "Explorar Fornecedores",
+                                    //     onPress: () => router.push("/fornecedores")
+                                    // }}
                                 />
                             }
                         />
                         <LastActivities 
                             title={"Últimas parcerias pendentes"} 
-                            infos={listPartners} 
-                            // infos={[]} 
+                            infos={listPartners}
                             isLoading={lastPartnerLoad}
                             emptyStateComponent={
                                 <EmptyState
@@ -239,5 +233,5 @@ export default function Home() {
                 </MyScreenContainer>
             </ScrollView>
         </ScreenErrorGuard>
-    );
+    )
 }

@@ -1,17 +1,16 @@
 import { ChipDataType, ChipList, ChipListSkeleton } from "@/src/components/common/ChipList";
 import { GenericInfiniteList, GenericInfiniteListType } from "@/src/components/common/GenericInfiniteList";
-import { InfoShoppingBottomSheet } from "@/src/components/common/InfoShoppingBottomSheet";
 import { ScreenErrorGuard } from "@/src/components/common/ScreenErrorGuard";
 import { SearchInputList } from "@/src/components/common/SearchInputList";
-import { MemoShoppingCard, MemoShoppingCardSkeleton, ShoppingCardProps } from "@/src/components/common/ShoppingCard";
-import { useGlobalBottomModalSheet } from "@/src/context/globalBottomSheetModalContext";
-import { useShoppingList } from "@/src/hooks/useClienteQueries";
+import { MemoShoppingCardFornecedor, MemoShoppingCardFornecedorSkeleton, ShoppingCardFornecedorProps } from "@/src/components/common/ShoppingCardFornecedor";
 import { useErrorScreenListener } from "@/src/hooks/useErrorScreenListener";
 import { useFilterScreen } from "@/src/hooks/useFilterScreen";
+import { useShoppingList } from "@/src/hooks/useFornecedorQueries";
 import { TypeShoppingList } from "@/src/types/responseServiceTypes";
-import { useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
+
 
 const chipList:ChipDataType<TypeShoppingList>[] = [
     {
@@ -48,7 +47,9 @@ const chipList:ChipDataType<TypeShoppingList>[] = [
     }
 ];
 
+
 export default function Compras() {
+    const router = useRouter();
     const {
         searchQuery,
         filter,
@@ -80,50 +81,28 @@ export default function Compras() {
         activeCategory
     );
 
-    const {openSheet, closeSheet} = useGlobalBottomModalSheet();
-
-    const handleOpenInfoShopping = useCallback((idShopping: number) => {
-        console.log("abri bottom sheet");
-
-        openSheet(
-            <InfoShoppingBottomSheet 
-                idShopping={idShopping}
-            />,
-            ["30%"],
-            false
-        );
-    }, [openSheet]);
-
-    // Fecha o bottom sheet ao sair da tela.
-    useFocusEffect(
-        useCallback(() => {
-            return () => closeSheet();
-        }, [closeSheet])
-    );
-
 
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
 
 
-    // REMOVER ISSO, FAZER ADAPTAÇÃO DAS LISTAS NO BACKEND PRA RETORNAR COM "CURSOR", ISSO E SOMENTE BLINDAGEM PARA N REPETIR DADOS
-    // REMOVER ISSO COM USRGENCIA NAS PROXIMAS ATUALIZAÇÕES
-    // ISSO FILTRA USUARIOS POR ID PARA NAO CAUSAR REPETIÇÃO DE USUARIO NA LISTA, E NÃO OCORRER UM ERRO
+    const handleOnPress = useCallback((id: string | number) => {
+        router.push({
+            pathname: `/compras/[id]`,
+            params: {id: id}
+        });
+    }, [router])
+
     const listShopping = useMemo(() => {
         if (!data) return [];
 
-        const map = new Map<string, GenericInfiniteListType<ShoppingCardProps>>();
+        const map = new Map<string, GenericInfiniteListType<ShoppingCardFornecedorProps>>();
 
         data.pages.forEach(page => {
             page.list.forEach(u => {
                 const idString = u.id_compra?.toString() || Math.random().toString();
-                
-                // let dateValue = transformDateToUI(u.prazo);
-                // let createdAtValue = transformDateToUI(u.created_at);
-
                 map.set(idString, {
                     id: idString,
-                    marketName: u.nomeestabelecimento,
                     nome: u.nome_user,
                     price: Number(u.valor_unit) * u.quantidade,
                     prodName: u.nome_produto,
@@ -134,18 +113,18 @@ export default function Compras() {
                     prazo: new Date(u.prazo),
                     apelido: u.apelido_user,
                     criadoEm: new Date(u.created_at),
-                    onPress: () => handleOpenInfoShopping(u.id_compra),
+                    isClient: false,
+                    onPress: () => handleOnPress(idString),
                 });
-                // console.log(map);
             });
         });
 
         return Array.from(map.values());
-    }, [data, handleOpenInfoShopping]);
+    }, [data, handleOnPress]);
 
     const renderItem = useCallback(
-        ({item}: {item: ShoppingCardProps}) => (
-            <MemoShoppingCard
+        ({item}: {item: ShoppingCardFornecedorProps}) => (
+            <MemoShoppingCardFornecedor
                 {...item}
             />
         ),
@@ -154,7 +133,7 @@ export default function Compras() {
 
     const renderItemSkeleton = useCallback(() => (
             <View>
-                <MemoShoppingCardSkeleton/>
+                <MemoShoppingCardFornecedorSkeleton/>
             </View>
     ), []);
 
@@ -169,11 +148,11 @@ export default function Compras() {
                 setInputValue={setTypingText}
                 filterValue={filter.length ? filter : currentFilter}
                 setFilterValue={setFilter}
-                placeholder="Nome, Apelido, Estabelecimento..."
+                placeholder="Nome, Apelido..."
             />
 
             <GenericInfiniteList
-                SkeletonComponent={<MemoShoppingCardSkeleton/>}
+                SkeletonComponent={<MemoShoppingCardFornecedorSkeleton/>}
                 SkeletonList={{
                     data: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
                     keyExtractor: (i) => i,
@@ -193,7 +172,7 @@ export default function Compras() {
                 }}
                 onRefresh={refetch}
                 HeaderComponent={
-                    <ChipList 
+                    <ChipList
                         chipList={chipList}
                         itemSelected={activeCategory} 
                         setItemSelected={setActiveCategory}
@@ -202,5 +181,5 @@ export default function Compras() {
                 emptyMessage={"Nenhuma compra encontrada"}
             />
         </ScreenErrorGuard>
-    ); 
+    )
 }

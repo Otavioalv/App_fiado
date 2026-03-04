@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import validator from "validator";
+import { ProdutoInterface } from '../types/responseServiceTypes';
 
 export const basicFormSchema = z.object({
     nome: z
@@ -53,7 +54,7 @@ export type DefaultRegisterSchema = z.infer<typeof defaultRegisterSchema>;
 
 
 export const fornecedorRegisterSchema = defaultRegisterSchema.safeExtend({
-        nomeEstabelecimento: z
+        nomeestabelecimento: z
                 .string({message: "Campo obrigatório"})
                 .nonempty({message: "Campo obrigatório"})
                 .min(1, "Nome do estabelecimento muito curto"),
@@ -72,7 +73,7 @@ export const fornecedorRegisterSchema = defaultRegisterSchema.safeExtend({
                 .string({message: "Campo obrigatório"})
                 .nonempty({message: "Campo obrigatório"})
                 .regex(/^\d{5}-?\d{3}$/, "CEP inválido"), // Aceita 12345678 ou 12345-678,
-        numeroImovel: z
+        numeroimovel: z
                 .string({message: "Campo obrigatório"})
                 .nonempty({message: "Campo obrigatório"})
                 .regex(/^[A-Za-z0-9\-\/]+$/, "Número inválido"),
@@ -105,3 +106,83 @@ export const loginSchema = z.object({
 })
 
 export type LoginSchema = z.infer<typeof loginSchema>;
+
+
+
+export const fornecedorUpdateSchema = basicFormSchema.safeExtend({
+        nomeestabelecimento: z
+                .string({message: "Campo obrigatório"})
+                .nonempty({message: "Campo obrigatório"})
+                .min(1, "Nome do estabelecimento muito curto"),
+        logradouro: z
+                .string({message: "Campo obrigatório"})
+                .nonempty({message: "Campo obrigatório"})
+                .min(5, "Endereço muito curto"),
+        bairro: z
+                .string({message: "Campo obrigatório"})
+                .nonempty({message: "Campo obrigatório"}),
+        uf: z
+                .string({message: "Campo obrigatório"})
+                .length(2, "UF deve conter 2 caracteres (AM, PA, AC...)")
+                .regex(/^[A-Za-z]{2}$/, "UF deve conter apenas letras"),
+        cep: z
+                .string({message: "Campo obrigatório"})
+                .nonempty({message: "Campo obrigatório"})
+                .regex(/^\d{5}-?\d{3}$/, "CEP inválido"), // Aceita 12345678 ou 12345-678,
+        numeroimovel: z
+                .string({message: "Campo obrigatório"})
+                .nonempty({message: "Campo obrigatório"})
+                .regex(/^[A-Za-z0-9\-\/]+$/, "Número inválido"),
+
+        complemento: z
+                .string()
+                .min(2, "Complemento muito curto")
+                .or(z.literal(""))
+                .optional(),
+});
+
+
+export type FornecedorUpdateSchema = z.infer<typeof fornecedorUpdateSchema>;
+
+export const produtoSimpleFormShema = z.object({
+        id_produto: z
+                .string()
+                .optional(),
+        nome: z
+                .string()
+                .nonempty({message: "Campo obrigatorio"})
+                .min(1, "Nome muito curto"),
+        preco: z
+                .string()
+                .nonempty("Campo obrigatório")
+                .refine((val) => {
+                        const numForm = Number(val)
+                        return !isNaN(numForm) 
+                }, {
+                        message: `Valor deve ser numérico somente com ponto (.). exp: 10.75`,
+                })
+                .refine((val) => /^\d+(\.\d{1,2})?$/.test(val), {
+                        message: "Use no máximo 2 casas decimais",
+                }),
+        quantidade: z
+                .string()
+                .nonempty("Campo obrigatório")
+                .refine((val) => /^\d+$/.test(val), {
+                        message: "Deve ser um número inteiro positivo",
+                })
+                .refine((val) => Number(val) > 0, {
+                        message: "Deve ser maior que 0",
+                }),
+
+});
+
+export type ProdutoSimpleFormShema = z.infer<typeof produtoSimpleFormShema>;
+
+
+export const produtosAddFormSchema = z.object({
+        produtos: z
+                .array(produtoSimpleFormShema)
+                .min(1, "Adicione pelo menos um produto"),
+});
+
+export type ProdutosAddFormType = z.infer<typeof produtosAddFormSchema>;

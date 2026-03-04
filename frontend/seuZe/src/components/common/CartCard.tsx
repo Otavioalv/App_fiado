@@ -43,7 +43,7 @@ export function CartCard({
     const onChange = (event: any, selectedDate?: Date) => {
         setShowPicker(false);
 
-        if (selectedDate) {
+        if(selectedDate) {
             onChangeTerm(selectedDate.toISOString());
         }
     };

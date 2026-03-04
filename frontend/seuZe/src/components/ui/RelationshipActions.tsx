@@ -18,6 +18,7 @@ interface RelationshipActionsProps {
     type: RelationshipStatusType,
     idUser: string | number,
     isLoading?: boolean,
+    isClient?: boolean,
     onPressAction?: OnPressActionFunctionType,
     onPressAccepted?: (id: number | string) => void,
 }
@@ -28,6 +29,7 @@ export function RelationshipActions({
     isLoading,
     onPressAction,
     onPressAccepted,
+    isClient = true,
 }: RelationshipActionsProps) {
 ;
     const handleOptionalButtonProps: OnPressActionFunctionType = onPressAction ? onPressAction : ({id, newStatus}) => {};
@@ -42,12 +44,15 @@ export function RelationshipActions({
             ) : (<>
                 {type === "ACCEPTED" && (
                     <>
-                        <ButtonModern 
-                            placeholder="Fazer Pedido" 
-                            size="M" 
-                            style={{flex: 1}} 
-                            onPress={() => {handleOnPressAccepted(idUser)}}
-                        />
+                        {isClient && (
+                            <ButtonModern 
+                                placeholder="Fazer Pedido" 
+                                size="M" 
+                                style={{flex: 1}} 
+                                onPress={() => {handleOnPressAccepted(idUser)}}
+                            />
+                        )}
+                        
                         <ButtonModern 
                             placeholder="Cancelar" 
                             size="M" 

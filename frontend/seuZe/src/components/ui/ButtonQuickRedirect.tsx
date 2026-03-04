@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
     titleText: {
         fontSize: theme.typography.textSM.fontSize,
         fontWeight: "bold",
-        color: theme.colors.textNeutral900
+        color: theme.colors.textNeutral900,
+        textAlign: "center",
     }
 });

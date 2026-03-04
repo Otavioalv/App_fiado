@@ -80,7 +80,7 @@ export default function Fornecedores() {
     const currentFilterList: string[] | undefined = data?.pages[0].pagination.filterList;
     const currentFilter: string | undefined = data?.pages[0].pagination.filter;
 
-    // Dentro do seu componente de botões
+    
     const { mutate } = useUpdatePartnerClienteStatus(filters, activeCategory);
 
     const handleAction: OnPressActionFunctionType = useCallback(({ id, newStatus }) => {
@@ -138,13 +138,6 @@ export default function Fornecedores() {
         ({item}: {item: UserCardProps}) => (
             <MemoUserCard 
                 {...item}
-                // idUser={item.idUser}
-                // title={item.title} 
-                // description={item.description} 
-                // relationshipType={item.relationshipType}
-                // date={item.date}
-                // onPressActionFunction={item.onPressActionFunction}
-                // onPress={item.onPress}
             />
         ),
         []
@@ -155,7 +148,6 @@ export default function Fornecedores() {
     ), []);
 
     useErrorScreenListener(isError, error, setErrorType);
-
 
     useEffect(() => {
         if(requestedCategory) {

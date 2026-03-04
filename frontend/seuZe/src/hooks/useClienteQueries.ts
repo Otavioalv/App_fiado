@@ -1,6 +1,6 @@
 import { InfiniteData, useMutation, UseMutationOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptPartner, addShoppingCard, buyProducts, deleteNotification, getTotalPriceShop, listMessages, listPartner, listShoppingCard, login, markReadAllNotifications, markReadNotification, me, productList, register, rejectPartner, requestPartner, shoppingList, update } from "../services/clienteService";
-import { ActionRelationShipStatusType, AddShoppingCartParams, CartInfoInterface, CartLocalItem, FilterType, NotificationInterface, PaginationType, PartnerFornecedorType, ProductAndFornecedorData, RelationshipStatusType, ResultsWithPagination, ShoppingData, TypeMessageList, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
+import { ActionRelationShipStatusType, AddShoppingCartParams, CartInfoInterface, CartLocalItem, FilterType, NotificationInterface, PaginationType, PartnerFornecedorType, ProductAndFornecedorData, ResultsWithPagination, ShoppingData, TypeMessageList, TypeShoppingList, TypeUserList} from "../types/responseServiceTypes";
 import { useInfiniteList } from "./useInfiniteList";
 import { BasicFormSchema, DefaultRegisterSchema, LoginSchema } from "../schemas/FormSchemas";
 import { OnPressActionParamsType } from "../components/ui/RelationshipActions";
@@ -73,7 +73,6 @@ export function useProductList(filters: FilterType, listType: TypeUserList) {
         }, 
         initialPageParam: 1
     });
-
 }
 
 export function useProductListFromId(id: string | number, filters: FilterType) {
@@ -140,7 +139,6 @@ export function useListShoppingCard(pagination: PaginationType) {
         initialPageParam: 1
     });
 }
-
 
 
 export function useListMessages(filters: PaginationType, listType: TypeMessageList, size: number = 20) {
@@ -331,7 +329,6 @@ export function useUpdatePartnerClienteStatus(filters: FilterType, listType: Typ
     const queryClient = useQueryClient();
     const queryKey = [key, listType, filters]
 
-
     return useMutation<any, any, OnPressActionParamsType, PartnerMutationContext>({
         mutationFn: async ({id, newStatus}) => {
 
@@ -345,7 +342,7 @@ export function useUpdatePartnerClienteStatus(filters: FilterType, listType: Typ
             };
 
 
-            console.log("teste: ", id, newStatus);
+            // console.log("teste: ", id, newStatus);
             
             // Chamar api
             return await actions[newStatus](id);

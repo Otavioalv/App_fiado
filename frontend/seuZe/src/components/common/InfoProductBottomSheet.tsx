@@ -52,8 +52,6 @@ export function InfoProductBottomSheet({
     }, [addProductToCart, data]);
     
 
-
-
     const isActivate: boolean = data?.relationship_status === "ACCEPTED";
     return (
         <BottomSheetScrollView>

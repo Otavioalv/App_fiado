@@ -52,6 +52,28 @@ export interface ShoppingData {
    payment_status: PaymentStatusType,
 }
 
+export interface ShoppingDataFornecedor {
+   id_compra: number,
+   fk_fornecedor_id: number,
+   quantidade: number,
+   fk_cliente_id: number,
+   quitado: boolean,
+   retirado: boolean,
+   cancelado: boolean,
+   aceito: boolean,
+   prazo: string,
+   created_at: string,
+   valor_unit: string,
+   nome_produto: string,
+   coletado_em: string,
+   nome_user: string,
+   apelido_user: string,
+   telefone_user: string,
+
+   shopping_status: ShoppingStatusType,
+   payment_status: PaymentStatusType,
+}
+
 
 export interface ProductAndFornecedorData{
    id_produto: number,
@@ -160,4 +182,20 @@ export interface AddShoppingCartParams {
    id_fornecedor: number | string,
    quantidade: number,
    prazo: string
+}
+
+export interface ProdutoInterface {
+   id_produto: number,
+   quantidade: number,
+   nome: string,
+   preco: string,
+}
+
+export interface DataUpdateBuyType {
+   id_compra: number,
+	quitado: boolean, 
+	retirado: boolean, 
+   cancelado: boolean,
+	coletado_em?: string,
+	aceito?: boolean,
 }

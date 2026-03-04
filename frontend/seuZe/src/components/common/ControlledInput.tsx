@@ -24,7 +24,7 @@ export function ControlledInput<T extends FieldValues>({
                 <ModernInputForm
                     {...inputProps}
 
-                    value={value} 
+                    value={String(value)} 
                     onChangeText={onChange}
                     errorMessage={error?.message}
                 />
