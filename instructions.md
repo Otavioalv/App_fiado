@@ -1,3 +1,62 @@
+## Requisitos do Servidor
+
+Para executar o backend corretamente, o servidor precisa atender aos seguintes requisitos mínimos.
+
+### Node.js
+
+O backend foi desenvolvido para rodar em **Node.js moderno**.
+
+Versão recomendada utilizada no desenvolvimento:
+
+```
+Node.js v24.4.0
+```
+
+Versões LTS recentes geralmente também funcionam, porém recomenda-se utilizar uma versão atual para evitar incompatibilidades.
+
+### Banco de Dados
+
+O sistema utiliza:
+
+```
+PostgreSQL
+```
+
+É necessário ter um servidor PostgreSQL acessível com permissões para:
+
+* criar tabelas
+* criar índices
+* criar sequences
+* executar scripts SQL
+
+A estrutura completa do banco está no arquivo:
+
+```
+./backend/structure.sql
+```
+
+### Framework do Backend
+
+O servidor da API foi desenvolvido utilizando:
+
+```
+Fastify
+```
+
+Portanto, qualquer ambiente que suporte **Node.js + Fastify** será compatível.
+
+### Requisitos gerais do servidor
+
+O servidor precisa permitir:
+
+* execução de aplicações Node.js
+* conexão externa com PostgreSQL
+* configuração de variáveis de ambiente
+
+
+
+
+
 # Instruções de Instalação e Execução
 
 Este projeto é dividido em duas partes:
