@@ -104,17 +104,17 @@ export default function Register() {
     const {control, handleSubmit} = useForm<FornecedorRegisterSchema>({
         resolver: zodResolver(fornecedorRegisterSchema),
         values: {
-            nome: "valor inicial dois sdaf", 
-            bairro: "sdfa", 
-            cep: "23131232", 
-            confirmarSenha: "senhapadrao@12", 
-            logradouro: "ssdfadsadas", 
-            nomeestabelecimento: "senhapadrao@12", 
-            numeroimovel: "sdfas", 
-            senha: "senhapadrao@12", 
-            telefone: "92991492939", 
-            uf: "am", 
-            apelido: "eopelido", 
+            nome: "", 
+            bairro: "", 
+            cep: "", 
+            confirmarSenha: "", 
+            logradouro: "", 
+            nomeestabelecimento: "", 
+            numeroimovel: "", 
+            senha: "", 
+            telefone: "", 
+            uf: "", 
+            apelido: "", 
             complemento: ""
         }
     })

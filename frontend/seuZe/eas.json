@@ -27,7 +27,7 @@
       
       // edit
       "android": {
-        "buildType": "apk"
+        "buildType": "app-bundle"
       },
 
       "env": {
