@@ -32,11 +32,11 @@ export const socketIO = async (app: FastifyInstance) => {
             
             // console.log(userToSocket, socketToUser);
 
-            console.log("=================================");
-            console.log("userToSocket: ", userToSocket);
-            console.log("socketToUser: ", socketToUser);
-            console.log("room: ", room);
-            console.log("=================================\n");
+            // console.log("=================================");
+            // console.log("userToSocket: ", userToSocket);
+            // console.log("socketToUser: ", socketToUser);
+            // console.log("room: ", room);
+            // console.log("=================================\n");
             
             // realiza somente uma conexao, ele nao duplica nem recria se existe, de forma automatica
             socket.join(room);
@@ -58,11 +58,11 @@ export const socketIO = async (app: FastifyInstance) => {
 
                 socketToUser.delete(socket.id);
 
-                console.log("=================================");
-                console.log("userToSocket: ", userToSocket);
-                console.log("socketToUser: ", socketToUser);
-                console.log("room: ", room);
-                console.log("=================================\n");
+                // console.log("=================================");
+                // console.log("userToSocket: ", userToSocket);
+                // console.log("socketToUser: ", socketToUser);
+                // console.log("room: ", room);
+                // console.log("=================================\n");
             });
         });
     });

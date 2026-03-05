@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         createMessageAlert(result.message, status);
 
 
-        console.log(result, status);
+        // console.log(result, status);
 
         if(status == 200) {
             deleteCookie();

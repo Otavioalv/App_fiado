@@ -53,7 +53,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
                 telefone, 
                 uf
             ];
-            console.log(SQL, VALUES);
+            // console.log(SQL, VALUES);
             
 
             await client.query('BEGIN');
@@ -77,7 +77,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             client = await connection.connect();
 
 
-            console.log(datasUpdate, idFornecedor);
+            // console.log(datasUpdate, idFornecedor);
             const SQL = `
                 UPDATE fornecedor 
                 SET 
@@ -98,7 +98,7 @@ class FornecedorModel extends UserModel<fornecedorInterface>{
             const {nome, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, complemento, bairro} = datasUpdate;
             const values = [nome, apelido, telefone, numeroimovel, logradouro, cep, nomeestabelecimento, uf, complemento, bairro, idFornecedor];
 
-            console.log(SQL, values);
+            // console.log(SQL, values);
 
             await client.query('BEGIN');
             await client.query(SQL, values);

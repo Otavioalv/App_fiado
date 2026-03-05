@@ -277,7 +277,7 @@ class ClienteModel extends UserModel<clienteInterface>{
                     cf.fk_fornecedor_id = $1 ${sqlOpt}
             `;
 
-            console.log(SQL_LIST, id, typeList);
+            // console.log(SQL_LIST, id, typeList);
 
             const result:clienteInterface[] = (await client.query(SQL_LIST, [id, limit, offset])).rows;  
             const {total} = ((await client.query(SQL_TOTAL, [id])).rows)[0] as {total:number}; 
@@ -403,7 +403,7 @@ class ClienteModel extends UserModel<clienteInterface>{
                 ${whereSql};
             `;
 
-            console.log(SQL_LIST, idFornecedor, typeList);
+            // console.log(SQL_LIST, idFornecedor, typeList);
 
             const result:clienteInterface[] = (
                 await client.query<clienteInterface>(SQL_LIST, values)

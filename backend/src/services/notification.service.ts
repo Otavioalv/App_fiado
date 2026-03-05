@@ -32,8 +32,8 @@ export class NotificationService {
             await this.notificationModel.saveNotification(saveData);
 
 
-            console.log("Notificação: ", notification);
-            console.log("===========================\n");
+            // console.log("Notificação: ", notification);
+            // console.log("===========================\n");
 
             this.notifier.toUser(notification);
         }catch(err) {

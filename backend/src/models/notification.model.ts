@@ -22,7 +22,7 @@ export class NotificationModel{
         try {
             client = await connection.connect();
 
-            console.log("Dentro do model: ", dataNot);
+            // console.log("Dentro do model: ", dataNot);
 
             const SQL = `
                 INSERT INTO mensagens (
@@ -159,7 +159,7 @@ export class NotificationModel{
             `;
 
 
-            console.log(SQL);
+            // console.log(SQL);
             const values = [...ids, userType, idUser];
 
             await client.query('BEGIN');
@@ -167,7 +167,7 @@ export class NotificationModel{
             await client.query('COMMIT');
 
 
-            console.log(result);
+            // console.log(result);
 
             return (result.rowCount ?? 0) > 0;
         }catch(err) {

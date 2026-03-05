@@ -19,9 +19,9 @@ class ClienteController extends UserController{
     public async register(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             const datasRegister: clienteInterface = await req.body as clienteInterface; 
-            console.log("ANTES: ", datasRegister)
+            // console.log("ANTES: ", datasRegister)
             const message = await this.validateDatasUser.validateDatasCliente(datasRegister);
-            console.log("DEPOIS: ", datasRegister)
+            // console.log("DEPOIS: ", datasRegister)
 
             if(!datasRegister){
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA))
@@ -49,7 +49,7 @@ class ClienteController extends UserController{
         try {
             const datasLogin: loginInterface = await req.body as loginInterface;
             const message = await this.validateDatasUser.validateLogin(datasLogin);
-            console.log(datasLogin, message);
+            // console.log(datasLogin, message);
             
             if(message.length) {
                 return res.status(400).send(errorResponse(ResponseApi.Validation.INVALID_DATA, message));

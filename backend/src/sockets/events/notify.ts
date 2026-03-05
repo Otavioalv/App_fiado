@@ -5,7 +5,7 @@ import { NotifierBroadcastParams, NotifierToUserParams, Notify, NotifyReturn } f
 export const notify:Notify = (app: FastifyInstance):NotifyReturn => ({
     toUser({toId, event, userType, payload}: NotifierToUserParams) {
         const room = `${userType}:${toId}`;
-        console.log("[TO USER]: room: ", room);
+        // console.log("[TO USER]: room: ", room);
         app.io.to(room).emit(event, payload);
     },
     broadcast({event, payload}: NotifierBroadcastParams) {

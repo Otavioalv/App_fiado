@@ -40,7 +40,7 @@ class ClienteFornecedorController {
             // Procura associações existentes com basse na array de ids de fornecedores, e id do cliente
             const listPartner: clienteFornecedorInterface[] = await this.clienteFornecedorModel.findMultPartner(ids, id_cliente);
 
-            console.log("ids antes if: ", ids);
+            // console.log("ids antes if: ", ids);
             // Verifica se associação ja existe 
             if(listPartner.length > 0) {
                 // verifica quais ids existem no listPartner e os retorna
@@ -48,15 +48,15 @@ class ClienteFornecedorController {
 
                 ids.ids = ids.ids.filter(id => !foundIds.has(id)); 
                 
-                console.log("ids no if: ", ids);
-                console.log("encontrados: ", foundIds);
+                // console.log("ids no if: ", ids);
+                // console.log("encontrados: ", foundIds);
 
                 if(!ids.ids.length) {
                     return res.status(400).send(errorResponse(ResponseApi.Partner.SUPPLIER_ALREADY_REQUESTED))
                 }
             }
 
-            console.log("ids depois if: ", ids);
+            // console.log("ids depois if: ", ids);
 
             await this.clienteFornecedorModel.associarComFornecedor(ids, id_cliente);
 

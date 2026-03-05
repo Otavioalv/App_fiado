@@ -565,7 +565,7 @@ class ProdutoController {
             const clientesUk = [...new Set(existentes.map(e => e.id_cliente))];            
 
             for(const cliente of clientesUk) {
-                console.log(cliente);
+                // console.log(cliente);
                 const data:NotificationInput = {
                     toId: cliente!.toString(),
                     created_at: new Date(),
@@ -598,7 +598,7 @@ class ProdutoController {
             const idsData = req.body as number[];
             const idUser = await getTokenIdFromRequest(req);
 
-            console.log(idsData, idUser);
+            // console.log(idsData, idUser);
 
             // Verificação dos dados
             if(
@@ -632,7 +632,7 @@ class ProdutoController {
             let comprasData = req.body as compraInterface[]; // id_produto/quitado/retirado/coletado_em
             const idUser = await getTokenIdFromRequest(req); 
 
-            console.log(comprasData, idUser);
+            // console.log(comprasData, idUser);
 
             // Verificar tipo
             if(!comprasData.length || !Array.isArray(comprasData)) {
@@ -642,7 +642,7 @@ class ProdutoController {
             // Verificar dados
             comprasData = await this.compraUpdateValidate(comprasData);
 
-            console.log(comprasData);
+            // console.log(comprasData);
             if(comprasData.some(c => !c.id_compra)) {
                 return res.status(400).send(errorResponse(ResponseApi.Purchace.NOT_FOUND));
             }
@@ -789,7 +789,7 @@ class ProdutoController {
             });
             const compraArraySchema = z.array(compraSchema);
 
-            console.log(compraArraySchema);
+            // console.log(compraArraySchema);
 
             return compraArraySchema.parse(dataProd) as compraInterface[];
         } catch(e) {
