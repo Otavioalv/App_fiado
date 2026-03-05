@@ -54,7 +54,11 @@ export default function LoginForm({ title }:LoginFormProps) {
 
 
     const {control, handleSubmit} = useForm<LoginSchema>({
-        resolver: zodResolver(loginSchema)
+        resolver: zodResolver(loginSchema),
+        values:{
+            nome: "",
+            senha: "",
+        }
     });
 
     // Login cliente

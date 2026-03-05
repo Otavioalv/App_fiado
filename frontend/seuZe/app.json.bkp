@@ -1,16 +1,16 @@
 {
   "expo": {
     "name": "Seu zé",
-    "slug": "seuZe",
+    "slug": "seuze",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/my_icon.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "seuze",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.seuzeapp"
+      "bundleIdentifier": "com.seuZeApp"
     },
     "splash": {
       "backgroundColor": "#FFFFFF"
@@ -18,7 +18,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/my_icon_droid.png"
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -43,7 +45,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/my_icon.png",
+          "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#FFFFFF",

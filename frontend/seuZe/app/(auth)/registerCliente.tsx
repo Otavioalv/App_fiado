@@ -62,13 +62,13 @@ export default function Register() {
 
     const {control, handleSubmit} = useForm<DefaultRegisterSchema>({
         resolver: zodResolver(defaultRegisterSchema),
-        // values: {
-        //     confirmarSenha: "senha@padrao12",
-        //     nome: "nome sidsdfajfs",
-        //     senha: "senha@padrao12",
-        //     telefone: "92991827373",
-        //     apelido: "apeliso dijfdsoija"
-        // }
+        values: {
+            confirmarSenha: "",
+            nome: "",
+            senha: "",
+            telefone: "",
+            apelido: ""
+        }
     });
 
     const onSubmit = async (data: DefaultRegisterSchema) => {

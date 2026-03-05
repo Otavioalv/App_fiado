@@ -134,7 +134,7 @@ export default function AddProduct() {
                                     key={`produtos.${index}.nome` + index} // Garantir q nao se repita
                                     name={`produtos.${index}.nome`}
                                     title={"Nome do Produto"}
-                                    placeholder={"Ex: Farinha de tapioca"}
+                                    placeholder={"Farinha de tapioca"}
                                 />
 
                                 <View style={styles.twoSectionForm}>
@@ -144,7 +144,7 @@ export default function AddProduct() {
                                             key={`produtos.${index}.preco` + index}
                                             name={`produtos.${index}.preco`}
                                             title={"Preço (R$)"}
-                                            placeholder={"Ex: Farinha de tapioca"}
+                                            placeholder={"5.75"}
                                             keyboardType="phone-pad"
                                         />
                                     </View>
@@ -154,8 +154,8 @@ export default function AddProduct() {
                                             control={control}
                                             key={`produtos.${index}.quantidade` + index}
                                             name={`produtos.${index}.quantidade`}
-                                            title={"Quantidade"}
-                                            placeholder={"Ex: Farinha de tapioca"}
+                                            title={"Unidade"}
+                                            placeholder={"50"}
                                             keyboardType="phone-pad"
                                         />
                                     </View>

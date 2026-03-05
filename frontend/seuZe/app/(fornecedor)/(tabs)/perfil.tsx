@@ -214,8 +214,8 @@ export default function Perfil() {
             onRetry={fetchMe}
         >
             <ProfileHeader
-                nome={`${userData?.nomeestabelecimento}`}
-                apelido={`${userData?.nome}${userData?.apelido ? `: (${userData.apelido})` : ``}`}
+                nome={`${userData?.nomeestabelecimento || ""}`}
+                apelido={`${userData?.nome || ""}${userData?.apelido ? `: (${userData.apelido})` : ``}`}
             />
 
             <GenericForm

@@ -6,7 +6,7 @@ import { Tabs } from "expo-router";
 export default function TabsLayoutForn() {
     return(
         <Tabs
-            initialRouteName="produtos" 
+            initialRouteName="home" 
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: theme.colors.orange,
