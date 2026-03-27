@@ -1,163 +1,161 @@
-﻿# AppFiado
-Esta API fornece gerenciamento de clientes, fornecedores, produtos e compras, integrada a um sistema simples de fiado.
-A aplicação é construída em Node.js + Fastify + TypeScript, organizada em camadas independentes para garantir clareza, manutenção e escalabilidade.
-Nessa aplicação, fornecedores adicionam seus produtos, e somente clientes parceiros podem solicitar comprar esses produtos e optar por pagar depois.
+﻿# SeuZé (AppFiado) — Backend
 
-## Stack
+API para gestão de vendas a prazo (fiado), com controle de acesso baseado em relacionamento entre usuários (clientes e fornecedores).
+
+O sistema permite que fornecedores gerenciem seus próprios produtos e clientes, enquanto clientes podem visualizar e comprar apenas de fornecedores com os quais possuem parceria ativa.
+
+---
+
+## 🚀 Principais Características
+
+- Arquitetura organizada em camadas (controller, services, models)
+- Sistema multi-tenant (dados isolados por fornecedor)
+- Controle de acesso baseado em relacionamento (cliente ↔ fornecedor)
+- Validação de regras de negócio no backend (segurança)
+- APIs REST com suporte a filtros e consultas dinâmicas
+- Comunicação em tempo real com WebSocket (mensagens)
+
+---
+
+## 🧠 Regras de Negócio
+
+- Um cliente **só pode comprar** de fornecedores com parceria aceita
+- Fornecedores gerenciam **seus próprios produtos e clientes**
+- Parcerias possuem estados:
+  - enviada
+  - recebida
+  - aceita
+- Compras precisam ser **aceitas ou recusadas pelo fornecedor**
+- Regras são validadas tanto no frontend quanto no backend
+
+---
+
+## 🛠️ Stack
+
 - Node.js
 - Fastify
-- PostgreSQL
 - TypeScript
+- PostgreSQL
+- Socket.io
 
-## Estrutura
-```
+---
+
+## 📂 Estrutura do Projeto
+
 src/
- ├── app.ts
- ├── common
- ├── config
- ├── controller
- ├── database
- ├── models
- ├── public
- ├── routers
- ├── router.ts
- ├── server.bkp.ts
- ├── server.ts
- ├── services
- ├── shared
- │   ├── consts
- │   ├── interfaces
- │   ├── utils
- │   └── validators
- └── sockets
+├── app.ts
+├── controller/ # Camada de entrada (HTTP)
+├── services/ # Regras de negócio
+├── models/ # Representação de dados
+├── database/ # Conexão e queries
+├── routers/ # Definição de rotas
+├── sockets/ # Comunicação em tempo real
+├── shared/
+│ ├── utils
+│ ├── validators
+│ └── interfaces
+└── config/
+
+
+---
+
+## ▶️ Como executar
+
+```bash
+npm install
+npm run dev
 ```
-## Rodar
-npm install  
-npm start
+## 🌐 Servidor padrão
+http://localhost:8090
 
 
-## Módulos Principais
-### 1. Usuários (Cliente/Fornecedor)
-* **Criar usuário**
-* **Login**
-* **Atualizar Dados** Obs: Não implementeado ainda
+---
 
-### 2. Fornecedor
-**Rota principal:** ```/fornecedor```
-**Exemplo de uso:** ```127.0.0.1:8090/fornecedor/register```
+## 🔐 Autenticação
 
-* **Criar conta de Fornecedor**
-    * Tipo: **POST**
-    * end-point: ```/register```
-* **Login**
-    * Tipo: **POST**
-    * end-point: ```/login```
-* **Listar Clientes**
-    * Tipo: **POST**
-    * end-point: ```/list-clientes```
-* **Listar Dados do usuario**
-    * Tipo: **POST**
-    * end-point: ```/me```
-* **Solicitar parceria com Cliente**
-    * Tipo: **POST**
-    * end-point: ```/partner```
-* **Aceitar parceria com Cliente**
-    * Tipo: **POST**
-    * end-point: ```/partner/accept```
-* **Listar Todos os tipos de parceria**
-    * Tipo: **POST**
-    * end-point: ```/partner/list```
-* **Listar somente parcerias recebidas de Clientes**
-    * Tipo: **POST**
-    * end-point: ```/partner/list/reseived```
-* **Listar somente parcerias enviadas paras Clientes**
-    * Tipo: **POST**
-    * end-point: ```/partner/list/sent```
-* **Listar somente parcerias aceitas dos Clientes** 
-    * Tipo: **POST**
-    * end-point: ```/partner/list/accepted```
-* **Adicionar um produto a lista**
-    * Tipo: **POST**
-    * end-point: ```/product/add```
-* **Listar produtos**
-    * Tipo: **POST**
-    * end-point: ```/product/list```
-* **Atualizar Produto**
-    * Tipo: **POST**
-    * end-point: ```/product/update```
-* **Deletar Produto**
-    * Tipo: **POST**
-    * end-point: ```/product/delete```
-* **Lista Compras com filtros, ou apartir de id de Cliente**
-    * Tipo: **POST**
-    * end-point: ```/product/buy/list/:toUser?```
-* **Aceita compra(s)**
-    * Tipo: **POST**
-    * end-point: ```/product/accept```
-* **Recusa compra(s)**
-    * Tipo: **POST**
-    * end-point: ```/product/refuse```
-* **Atualiza status da(s) compra(s)**
-    * Tipo: **POST**
-    * end-point: ```/product/purchace/update```
-* **Lista Menssagens**
-    * Tipo: **POST**
-    * end-point: ```/message/list```
-* **Deleta Menssagens**
-    * Tipo: **POST**
-    * end-point: ```/message/delete```
+- Baseada em JWT  
+- Necessária para a maioria das rotas  
+- Controle de permissões baseado no tipo de usuário (cliente/fornecedor)  
+
+---
+
+## 📦 Principais Módulos
+
+### 👤 Usuários
+
+- Registro (cliente ou fornecedor)  
+- Login  
+- Consulta de dados do usuário  
+
+---
+
+### 🏪 Fornecedor (`/fornecedor`)
+
+Responsável por gerenciar produtos, clientes e vendas.
+
+**Funcionalidades:**
+- Gerenciar produtos (CRUD)  
+- Gerenciar parcerias com clientes  
+- Aprovar ou recusar compras  
+- Listar compras com filtros  
+- Comunicação via mensagens  
+
+---
+
+### 🛒 Cliente (`/cliente`)
+
+Responsável por visualizar fornecedores e realizar compras.
+
+**Funcionalidades:**
+- Buscar fornecedores  
+- Solicitar parcerias  
+- Listar produtos de fornecedores parceiros  
+- Realizar compras  
+- Cancelar compras  
+- Comunicação via mensagens  
+
+---
+
+## 🔄 Fluxo Principal
+
+1. Cliente e fornecedor criam contas  
+2. Um deles solicita parceria  
+3. O outro aceita  
+4. Cliente pode visualizar produtos  
+5. Cliente realiza compra  
+6. Fornecedor aprova ou recusa  
+
+---
+
+## 📡 Comunicação em Tempo Real
+
+- Implementação com Socket.io  
+- Utilizado para sistema de mensagens entre usuários  
+
+---
+
+## 📌 Observações
+
+- Projeto focado em regras de negócio reais (não apenas CRUD)  
+- Estrutura preparada para escalabilidade  
+- Separação clara de responsabilidades (camadas)  
+
+---
+
+## 📱 Frontend
+
+O frontend está localizado em:
 
 
+frontend/seuZe
 
-### 2. Cliente
-**Rota principal:** ```/cliente```
-**Exemplo de uso:** ```127.0.0.1:8090/cliente/register```
 
-* **Criar conta de Cliente**
-    * Tipo: **POST**
-    * end-point: ```/register```
-* **Login**
-    * Tipo: **POST**
-    * end-point: ```/login```
-* **Listar Fornecedores**
-    * Tipo: **POST**
-    * end-point: ```/list-fornecdores```
-* **Listar Dados do usuario**
-    * Tipo: **POST**
-    * end-point: ```/me```
-* **Solicitar parceria com Forneceedor**
-    * Tipo: **POST**
-    * end-point: ```/partner```
-* **Aceitar parceria com Fornecedor**
-    * Tipo: **POST**
-    * end-point: ```/partner/accept```
-* **Listar Todos os tipos de parceria**
-    * Tipo: **POST**
-    * end-point: ```/partner/list```
-* **Listar somente parcerias recebidas de Fornecedor**
-    * Tipo: **POST**
-    * end-point: ```/partner/list/reseived```
-* **Listar somente parcerias enviadas paras Fornecedor**
-    * Tipo: **POST**
-    * end-point: ```/partner/list/sent```
-* **Listar somente parcerias aceitas dos Fornecedor** 
-    * Tipo: **POST**
-    * end-point: ```/partner/list/accepted```
-* **Comprar Produto**
-    * Tipo: **POST**
-    * end-point: ```/product/buy```
-* **Listar Produto de um Fornecedor parceiro**
-    * Tipo **POST**
-    * end-point: ```/product/list/:idFornecedor```
-* **Lista Compras com filtros, ou apartir de id de Fornecedor**
-    * Tipo: **POST**
-    * end-point: ```/product/buy/list/:toUser?```
-* **Cancela compra(s)**
-    * Tipo: **POST**
-    * end-point: ```/product/cancel```
-* **Lista Menssagens**
-    * Tipo: **POST**
-    * end-point: ```/message/list```
-* **Deleta Menssagens**
-    * Tipo: **POST**
-    * end-point: ```/message/delete```
+**Desenvolvido com:**
+- React Native (Expo)  
+- Integração completa com esta API  
+
+---
+
+## 📎 Objetivo do Projeto
+
+Construir uma solução prática para gestão de vendas a prazo entre pequenos fornecedores e clientes, com controle de acesso, organização de dados e automação de processos.
