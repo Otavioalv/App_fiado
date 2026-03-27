@@ -42,6 +42,7 @@ O sistema permite que fornecedores gerenciem seus próprios produtos e clientes,
 
 ## 📂 Estrutura do Projeto
 
+```bash
 src/
 ├── app.ts
 ├── controller/ # Camada de entrada (HTTP)
@@ -55,7 +56,7 @@ src/
 │ ├── validators
 │ └── interfaces
 └── config/
-
+``` 
 
 ---
 
