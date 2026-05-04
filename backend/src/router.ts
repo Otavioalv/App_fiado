@@ -1,8 +1,9 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 
 import { fornecedorRouter } from "./routers/fornecedor.router";
-import { clienteRouter } from "./routers/cliente.router";
+// import { clienteRouter } from "./routers/cliente.router";
 import { userRouter } from "./routers/user.router";
+import { customerRouter } from "./features/customer/customer.routes";
 
 export async function routers(fastify: FastifyInstance, options: FastifyPluginOptions) {
     
@@ -16,6 +17,8 @@ export async function routers(fastify: FastifyInstance, options: FastifyPluginOp
 
 
     fastify.register(fornecedorRouter, {prefix: "/fornecedor"});
-    fastify.register(clienteRouter, {prefix: "/cliente"});
+    // fastify.register(clienteRouter, {prefix: "/cliente"});
+    
+    fastify.register(customerRouter, {prefix: "/cliente"});
     fastify.register(userRouter, {prefix: "/user"});
 }
